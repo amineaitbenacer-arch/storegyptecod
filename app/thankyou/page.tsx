@@ -126,15 +126,28 @@ export default function ThankYouPage() {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let raf = 0;
     let lastBurst = 0;
-    const end = Date.now() + 2200;
-    const colors = ['#FFD700', '#10B981', '#3B82F6'];
+    const end = Date.now() + 8000;
+    const colors = ['#FFD700', '#F59E0B', '#10B981', '#34D399', '#3B82F6', '#F472B6'];
+    const confettiBase = {
+      colors,
+      ticks: 420,
+      gravity: 0.65,
+      decay: 0.91,
+      scalar: 1.15,
+      disableForReducedMotion: true as const,
+    };
 
     if (!reduceMotion) {
+      // Big opening burst so celebration stays visible longer
+      confetti({ ...confettiBase, particleCount: 90, spread: 70, origin: { y: 0.55 } });
+      confetti({ ...confettiBase, particleCount: 40, angle: 60, spread: 60, origin: { x: 0, y: 0.65 } });
+      confetti({ ...confettiBase, particleCount: 40, angle: 120, spread: 60, origin: { x: 1, y: 0.65 } });
+
       const frame = (now: number) => {
-        if (now - lastBurst >= 140) {
+        if (now - lastBurst >= 220) {
           lastBurst = now;
-          confetti({ particleCount: 3, angle: 60, spread: 50, origin: { x: 0 }, colors, ticks: 160, disableForReducedMotion: true });
-          confetti({ particleCount: 3, angle: 120, spread: 50, origin: { x: 1 }, colors, ticks: 160, disableForReducedMotion: true });
+          confetti({ ...confettiBase, particleCount: 8, angle: 60, spread: 55, origin: { x: 0, y: 0.6 } });
+          confetti({ ...confettiBase, particleCount: 8, angle: 120, spread: 55, origin: { x: 1, y: 0.6 } });
         }
         if (Date.now() < end) raf = requestAnimationFrame(frame);
       };
@@ -143,7 +156,7 @@ export default function ThankYouPage() {
 
     const calmTimer = window.setTimeout(() => {
       root?.classList.add('ty-calm');
-    }, 3500);
+    }, 9000);
 
     const price = Number(next.price);
     const orderId = next.id.replace('#', '');
@@ -196,10 +209,14 @@ export default function ThankYouPage() {
   const verify = () => {
     setVerified(true);
     confetti({
-      particleCount: 45,
-      spread: 65,
-      origin: { y: 0.8 },
-      ticks: 160,
+      particleCount: 80,
+      spread: 75,
+      origin: { y: 0.75 },
+      ticks: 420,
+      gravity: 0.65,
+      decay: 0.91,
+      scalar: 1.15,
+      colors: ['#FFD700', '#F59E0B', '#10B981', '#3B82F6', '#F472B6'],
       disableForReducedMotion: true,
     });
   };
