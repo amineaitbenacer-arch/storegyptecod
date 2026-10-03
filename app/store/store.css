@@ -378,15 +378,20 @@
 .store-mark {
   width: 42px;
   height: 42px;
-  border-radius: 14px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
-  font-family: var(--font-display), Amiri, serif;
-  font-size: 1.45rem;
-  font-weight: 700;
-  color: #102a2b;
-  background: linear-gradient(145deg, #f3e2a8, #c48a1a);
-  box-shadow: 0 8px 18px rgba(196, 138, 26, 0.28);
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+  flex-shrink: 0;
+}
+
+.store-mark img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  display: block;
 }
 
 .store-nav-title {
@@ -2488,9 +2493,29 @@ html {
 }
 
 .store-atlas .store-mark {
-  background: linear-gradient(145deg, #fde68a, #d97706);
-  color: #102a2b;
-  font-size: 1.05rem;
+  background: #000;
+}
+
+.store-drawer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.store-drawer-brand img {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #000;
+  flex-shrink: 0;
+}
+
+.store-drawer-brand > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .atlas-stories {

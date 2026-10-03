@@ -46,6 +46,15 @@
   unicode-bidi: isolate;
 }
 
+#ac-ty .ty-brand img {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #000;
+  display: block;
+}
+
 #ac-ty .ty-wrap {
   max-width: 650px;
   margin: 0 auto;

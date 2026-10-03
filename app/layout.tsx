@@ -19,9 +19,16 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
-  title: 'المتجر الرسمي | منتجات مختارة — الدفع عند الاستلام',
+  title: 'Dune Market | منتجات مختارة — الدفع عند الاستلام',
   description: 'متجر عربي راقٍ: توصيل لجميع المدن والدفع عند الاستلام.',
-  metadataBase: new URL('http://localhost:3000'),
+  metadataBase: new URL('https://www.dunemarket.site'),
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/images/logo.png', type: 'image/png', sizes: '1024x1024' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

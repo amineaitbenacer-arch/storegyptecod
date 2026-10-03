@@ -117,8 +117,8 @@ function ProductCard({
 }
 
 const COMPANY = {
-  name: 'AntiChoc Protect',
-  legal: 'المتجر الرسمي',
+  name: 'Dune Market',
+  legal: 'ONLINE STORE',
   tag: 'حماية المنزل · ثقة الأسرة',
 };
 
@@ -553,7 +553,7 @@ export default function StoreHome() {
           <div className="store-nav-center">
             <div className="store-brand-lockup">
               <span className="store-mark" aria-hidden>
-                <i className="fa-solid fa-shield-halved" />
+                <Image src="/images/logo.png" alt="" width={42} height={42} priority />
               </span>
               <div>
                 <strong className="store-nav-title" dir="ltr">
@@ -848,10 +848,10 @@ export default function StoreHome() {
           <div className="store-footer-panel">
             <div className="store-footer-brand" dir="ltr">
               <span className="store-mark" aria-hidden>
-                <i className="fa-solid fa-shield-halved" />
+                <Image src="/images/logo.png" alt="" width={42} height={42} />
               </span>
               <div>
-                <strong>{COMPANY.name}®</strong>
+                <strong>{COMPANY.name}</strong>
                 <span>{COMPANY.legal}</span>
               </div>
             </div>
@@ -899,9 +899,12 @@ export default function StoreHome() {
         aria-label="معلومات المتجر"
       >
         <div className="store-drawer-head">
-          <div>
-            <strong dir="ltr">{COMPANY.name}®</strong>
-            <span>معلومات تهمك قبل الطلب</span>
+          <div className="store-drawer-brand">
+            <Image src="/images/logo.png" alt="" width={36} height={36} />
+            <div>
+              <strong dir="ltr">{COMPANY.name}</strong>
+              <span>معلومات تهمك قبل الطلب</span>
+            </div>
           </div>
           <button type="button" className="store-drawer-close" aria-label="إغلاق" onClick={() => setMenuOpen(false)}>
             <i className="fa-solid fa-xmark" aria-hidden />
