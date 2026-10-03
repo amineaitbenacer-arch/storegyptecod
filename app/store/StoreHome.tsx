@@ -553,7 +553,7 @@ export default function StoreHome() {
           <div className="store-nav-center">
             <div className="store-brand-lockup">
               <span className="store-mark" aria-hidden>
-                <Image src="/images/logo.png" alt="" width={42} height={42} priority />
+                <Image src="/images/logo-mark.png" alt="" width={42} height={42} priority />
               </span>
               <div>
                 <strong className="store-nav-title" dir="ltr">
@@ -848,7 +848,7 @@ export default function StoreHome() {
           <div className="store-footer-panel">
             <div className="store-footer-brand" dir="ltr">
               <span className="store-mark" aria-hidden>
-                <Image src="/images/logo.png" alt="" width={42} height={42} />
+                <Image src="/images/logo-mark.png" alt="" width={42} height={42} />
               </span>
               <div>
                 <strong>{COMPANY.name}</strong>
@@ -900,7 +900,7 @@ export default function StoreHome() {
       >
         <div className="store-drawer-head">
           <div className="store-drawer-brand">
-            <Image src="/images/logo.png" alt="" width={36} height={36} />
+            <Image src="/images/logo-mark.png" alt="" width={36} height={36} />
             <div>
               <strong dir="ltr">{COMPANY.name}</strong>
               <span>معلومات تهمك قبل الطلب</span>

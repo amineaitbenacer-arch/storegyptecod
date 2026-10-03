@@ -378,12 +378,12 @@
 .store-mark {
   width: 42px;
   height: 42px;
-  border-radius: 12px;
+  border-radius: 0;
   display: grid;
   place-items: center;
-  overflow: hidden;
-  background: #000;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
   flex-shrink: 0;
 }
 
@@ -2493,7 +2493,7 @@ html {
 }
 
 .store-atlas .store-mark {
-  background: #000;
+  background: transparent;
 }
 
 .store-drawer-brand {
@@ -2506,9 +2506,9 @@ html {
 .store-drawer-brand img {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
+  border-radius: 0;
   object-fit: contain;
-  background: #000;
+  background: transparent;
   flex-shrink: 0;
 }
 

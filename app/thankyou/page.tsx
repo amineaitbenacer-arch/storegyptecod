@@ -208,7 +208,7 @@ export default function ThankYouPage() {
     <div id="ac-ty">
       <nav className="ty-nav">
         <Link href="/" className="ty-brand" dir="ltr">
-          <img src="/images/logo.png" alt="Dune Market" width={28} height={28} />
+          <img src="/images/logo-mark.png" alt="Dune Market" width={28} height={28} />
           <span>Dune Market</span>
         </Link>
       </nav>
