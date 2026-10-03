@@ -4,12 +4,12 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { getProductPage } from '../../../lib/productPages';
-import ProductShell from '../antichoc/ProductShell';
+import ProductView from './ProductView';
 import '../../antichoc-base.css';
 import '../../antichoc-white.css';
 import '../antichoc/antichoc-page.css';
+import './product-view.css';
 
-/** نفس صفحة AntiChoc الكاملة لكل المنتجات الأربعة */
 export default function ProductPage() {
   const params = useParams();
   const id = String(params.id || '');
@@ -28,5 +28,5 @@ export default function ProductPage() {
     );
   }
 
-  return <ProductShell key={product.id} />;
+  return <ProductView key={product.id} product={product} />;
 }

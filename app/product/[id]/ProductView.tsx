@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import type { OfferPack, ProductPageConfig } from '../../../lib/productPages';
-import { CITIES } from '../../../lib/cities';
 import { formatSar } from '../../../lib/money';
 import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../../lib/last-order';
@@ -19,6 +18,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
   const [offer, setOffer] = useState<OfferPack>(() => pickOffer(product));
   const [imgIdx, setImgIdx] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetOffersOpen, setSheetOffersOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [reviewPhase, setReviewPhase] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -33,7 +33,6 @@ export default function ProductView({ product }: { product: ProductPageConfig })
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('');
-  const [address, setAddress] = useState('');
   const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -48,8 +47,13 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
   useEffect(() => {
     document.body.style.overflow = sheetOpen ? 'hidden' : '';
+    if (!sheetOpen) {
+      document.getElementById('antichoc-root')?.classList.remove('checkout-open');
+      setSheetOffersOpen(false);
+    }
     return () => {
       document.body.style.overflow = '';
+      document.getElementById('antichoc-root')?.classList.remove('checkout-open');
     };
   }, [sheetOpen]);
 
@@ -65,6 +69,11 @@ export default function ProductView({ product }: { product: ProductPageConfig })
     setOffer(next);
   }
 
+  function chooseFromSheet(next: OfferPack) {
+    setOffer(next);
+    setSheetOffersOpen(false);
+  }
+
   function openSheet() {
     trackStoreEvent('addtocart', {
       productId: product.id,
@@ -72,7 +81,9 @@ export default function ProductView({ product }: { product: ProductPageConfig })
       contentName: offer.name,
     });
     setFormError('');
+    setSheetOffersOpen(false);
     setSheetOpen(true);
+    document.getElementById('antichoc-root')?.classList.add('checkout-open');
   }
 
   function goToOffers() {
@@ -86,18 +97,19 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
   async function submit() {
     const clean = normalizePhone(phone);
-    if (!name.trim() || !city || !address.trim()) {
-      setFormError('كمّل الاسم والمدينة والعنوان.');
+    if (!name.trim() || !city.trim()) {
+      setFormError('عافاك كمل جميع المعلومات (الاسم، الهاتف والمدينة).');
       return;
     }
     if (!isValidOrderPhone(clean)) {
-      setFormError('رقم الجوال يجب أن يكون 10 أرقام.');
+      setFormError('⚠️ تأكد من رقم الهاتف (يجب أن يحتوي على 10 أرقام على الأقل)');
       return;
     }
     setFormError('');
     setLoading(true);
     const orderId = `pl-${Date.now().toString(36)}`;
     const payable = orderTotalWithShipping(offer.price);
+    const cityTrim = city.trim();
     trackStoreEvent('checkout', {
       productId: product.id,
       value: payable,
@@ -107,8 +119,8 @@ export default function ProductView({ product }: { product: ProductPageConfig })
       orderId,
       name: name.trim(),
       phone: clean,
-      city,
-      address: address.trim(),
+      city: cityTrim,
+      address: cityTrim,
       offer: offer.name,
       offerName: `${product.brand} — ${offer.name}`,
       price: payable,
@@ -166,77 +178,264 @@ export default function ProductView({ product }: { product: ProductPageConfig })
     </div>
   );
 
+  const activeTag = offer.badge || (offer.popular ? 'الأكثر طلبًا' : 'العرض الأساسي');
+  const showAov = offer.id !== product.offers[0]?.id;
+  const aovMsg = offer.popular
+    ? `مبروك! تم اختيار العرض الأكثر طلبًا وتفعيل الخصم — وفّرت ${formatSar(save)}.`
+    : `أقوى توفير. وفّرت ${formatSar(save)} وحصلت على أفضل قيمة.`;
+  const phoneInvalid = Boolean(formError && formError.includes('الهاتف'));
+
   const sheet = (
-    <div className={`sheet-bg${sheetOpen ? ' open' : ''}`} onClick={() => setSheetOpen(false)}>
-      <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="استكمال الطلب">
+    <div
+      className={`sheet-bg${sheetOpen ? ' open' : ''}`}
+      id="sheetBg"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) setSheetOpen(false);
+      }}
+    >
+      <div className="sheet" id="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="استكمال الطلب">
         <div className="sheet-handle" />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <h2 className="sheet-title" style={{ margin: 0 }}>
-            استكمال الطلب
-          </h2>
-          <button type="button" className="close-btn" onClick={() => setSheetOpen(false)} aria-label="إغلاق">
-            ×
-          </button>
-        </div>
 
-        <div className="order-preview">
-          <img src={product.catalogImage || heroSrc} alt="" width={48} height={48} />
-          <div>
-            <div className="op-name">{offer.name}</div>
-            <div className="op-price">{formatSar(offer.price)}</div>
-          </div>
-        </div>
-
-        {offers}
-
-        <form
-          className="pv-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void submit();
-          }}
-        >
-          <input className="form-inp" placeholder="الاسم الكامل" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
-          <input
-            className="form-inp"
-            placeholder="رقم الجوال (05XXXXXXXX)"
-            inputMode="numeric"
-            autoComplete="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-          />
-          <select className="form-inp" value={city} onChange={(e) => setCity(e.target.value)}>
-            <option value="">المدينة</option>
-            {CITIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-          <input className="form-inp" placeholder="العنوان بالتفصيل" autoComplete="street-address" value={address} onChange={(e) => setAddress(e.target.value)} />
-
-          {formError && <p className="pv-form-error">{formError}</p>}
-
-          <div className="total-box checkout-sum">
-            <div className="checkout-sum-row">
-              <span>المنتج</span>
-              <b>{formatSar(offer.price)}</b>
-            </div>
-            <div className="checkout-sum-row">
-              <span>التوصيل</span>
-              <b>{formatSar(SHIPPING_FEE_SAR)}</b>
-            </div>
-            <div className="checkout-sum-total">
-              <span>المجموع عند الاستلام</span>
-              <strong>{formatSar(total)}</strong>
-            </div>
+        <div id="formState">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <h2 className="sheet-title" style={{ margin: 0, fontSize: '1.15rem' }}>
+              🚀 استكمال الطلب
+            </h2>
+            <button type="button" className="close-btn" onClick={() => setSheetOpen(false)} aria-label="إغلاق">
+              &times;
+            </button>
           </div>
 
-          <button type="submit" className="offer-cta-main" disabled={loading}>
-            {loading ? 'جاري تسجيل الطلب...' : `أكّد الطلب — ${formatSar(total)}`}
-          </button>
-          <div className="privacy">الدفع عند الاستلام بعد ما تشوف السلعة</div>
-        </form>
+          <div
+            className={`sheet-selected-offer-card${sheetOffersOpen ? ' active' : ''}`}
+            id="sheet-offer-trigger"
+            title="انقر لتغيير العرض أو الترقية"
+            role="button"
+            tabIndex={0}
+            onClick={() => setSheetOffersOpen((v) => !v)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setSheetOffersOpen((v) => !v);
+              }
+            }}
+          >
+            <div className="sheet-offer-live-badge">
+              <span className="sheet-live-dot" /> 🎁 انقر لتغيير العرض أو اختيار باقة أكبر
+            </div>
+            <div className="sheet-offer-card-top">
+              <img
+                src={product.catalogImage || heroSrc}
+                id="sheet-preview-img"
+                alt={product.heroTitle}
+                className="sheet-card-thumb"
+                loading="lazy"
+              />
+              <div className="sheet-offer-card-info">
+                <div className="sheet-active-tag" id="sheet-active-badge">
+                  {activeTag}
+                </div>
+                <div className="sheet-active-title" id="sheet-bundle-name">
+                  {offer.name}
+                </div>
+                <div className="sheet-active-sub" id="sheet-bundle-sub">
+                  {offer.sub} • توصيل {formatSar(SHIPPING_FEE_SAR)} 🚚
+                </div>
+              </div>
+              <div className="sheet-active-pricing">
+                <div className="sheet-active-price" id="sheet-preview-price">
+                  {formatSar(offer.price)}
+                </div>
+                <div className="sheet-active-old" id="sheet-preview-old-price">
+                  {formatSar(offer.oldPrice)}
+                </div>
+              </div>
+            </div>
+            <div className="sheet-change-cta-bar">
+              <span className="sheet-change-text">
+                <i className="fa-solid fa-arrows-rotate fa-spin-pulse" aria-hidden="true" />{' '}
+                <strong>اضغط هنا لتبديل العرض أو ترقية طلبك</strong>
+              </span>
+              <span className="sheet-chevron-badge">
+                <i className="fa-solid fa-chevron-down" id="sheet-chevron-arrow" aria-hidden="true" />
+              </span>
+            </div>
+          </div>
+
+          <div className={`sheet-offers-drawer${sheetOffersOpen ? ' open' : ''}`} id="sheet-offers-drawer">
+            <div className="sod-header">
+              <span className="sod-title">
+                <i className="fa-solid fa-layer-group" aria-hidden="true" /> اختر الباقة المناسبة لمنزلك:
+              </span>
+              <span className="sod-pill">وفر أكثر مع الباقات الأكبر ⚡️</span>
+            </div>
+            <div className="sod-grid">
+              {product.offers.map((o, idx) => {
+                const selected = offer.id === o.id;
+                const offerSave = o.oldPrice - o.price;
+                const isLast = idx === product.offers.length - 1;
+                const badgeClass = o.popular ? 'gold' : isLast ? 'green' : '';
+                const badgeText = o.popular
+                  ? `⭐ ${o.badge || 'الأكثر طلباً في المملكة'}`
+                  : isLast
+                    ? `🔥 ${o.badge || 'أفضل قيمة'}`
+                    : o.badge;
+                const saveClass = o.popular ? 'save-green' : isLast ? 'save-gold' : '';
+                const priceClass = o.popular ? 'highlight' : isLast ? 'super-green' : '';
+                return (
+                  <div
+                    key={o.id}
+                    className={`sod-card${selected ? ' selected' : ''}`}
+                    id={`sod-card-${o.id}`}
+                    data-pack={o.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => chooseFromSheet(o)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        chooseFromSheet(o);
+                      }
+                    }}
+                  >
+                    {badgeText && <div className={`sod-badge ${badgeClass}`.trim()}>{badgeText}</div>}
+                    <div className="sod-radio">
+                      <i className="fa-solid fa-check" aria-hidden="true" />
+                    </div>
+                    <div className="sod-body">
+                      <div className="sod-title-row">
+                        <span className="sod-name">{o.name}</span>
+                      </div>
+                      <div className="sod-desc">{o.sub}</div>
+                      {offerSave > 0 && (
+                        <div className={`sod-save-tag ${saveClass}`.trim()}>
+                          {o.popular
+                            ? `وفرت ${formatSar(offerSave)} + توصيل ${formatSar(SHIPPING_FEE_SAR)}`
+                            : isLast
+                              ? `وفرت ${formatSar(offerSave)} كاش اليوم!`
+                              : `توفير ${formatSar(offerSave)} اليوم`}
+                        </div>
+                      )}
+                    </div>
+                    <div className="sod-prices">
+                      <span className="sod-old">{formatSar(o.oldPrice)}</span>
+                      <span className={`sod-new ${priceClass}`.trim()}>{formatSar(o.price)}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div
+            id="sheet-aov-congrats"
+            className="sheet-aov-congrats"
+            style={{ display: showAov ? 'flex' : 'none' }}
+          >
+            <i className="fa-solid fa-gift" aria-hidden="true" />{' '}
+            <span id="sheet-aov-msg">{aovMsg}</span>
+          </div>
+
+          <div className="trust-cadre-mini">
+            <div className="tc-mini-item">
+              <span className="tc-mini-icon">🚚</span>
+              <div className="tc-mini-text">
+                <strong>توصيل {formatSar(SHIPPING_FEE_SAR)}</strong>
+                <span>جميع مدن المملكة 🇲🇦</span>
+              </div>
+            </div>
+            <div className="tc-mini-item">
+              <span className="tc-mini-icon">🤝</span>
+              <div className="tc-mini-text">
+                <strong>المعاينة قبل الدفع</strong>
+                <span>تفحص المنتج قبل الأداء 📦</span>
+              </div>
+            </div>
+          </div>
+
+          <form
+            id="express-order-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void submit();
+            }}
+          >
+            <input
+              type="text"
+              id="inp-name"
+              className="form-inp"
+              placeholder="👤 الاسم الكامل"
+              required
+              autoComplete="name"
+              enterKeyHint="next"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <input
+              type="tel"
+              id="inp-phone"
+              className="form-inp"
+              placeholder="📱 رقم الجوال (05XXXXXXXX)"
+              required
+              autoComplete="tel"
+              inputMode="tel"
+              enterKeyHint="next"
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value.replace(/\D/g, '').slice(0, 10));
+                if (formError) setFormError('');
+              }}
+              style={phoneInvalid ? { border: '2px solid #ef4444' } : undefined}
+            />
+            <p
+              id="phone-error"
+              style={{
+                display: phoneInvalid ? 'block' : 'none',
+                color: '#ef4444',
+                fontSize: '0.8rem',
+                fontWeight: 'bold',
+                marginTop: '-8px',
+                marginBottom: '12px',
+                marginRight: '5px',
+              }}
+            >
+              ⚠️ تأكد من رقم الهاتف (يجب أن يحتوي على 10 أرقام على الأقل)
+            </p>
+            <input
+              type="text"
+              id="inp-city"
+              className="form-inp"
+              placeholder="📍 المدينة"
+              required
+              autoComplete="address-level2"
+              enterKeyHint="done"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            />
+
+            {formError && !phoneInvalid && <p className="pv-form-error">{formError}</p>}
+
+            <div className="total-box checkout-sum">
+              <div className="checkout-sum-row">
+                <span>مجموع المنتجات</span>
+                <b id="sheet-subtotal-price">{formatSar(offer.price)}</b>
+              </div>
+              <div className="checkout-sum-row">
+                <span>التوصيل</span>
+                <b id="sheet-shipping-price">{formatSar(SHIPPING_FEE_SAR)}</b>
+              </div>
+              <div className="checkout-sum-total">
+                <span>المجموع عند الاستلام:</span>
+                <strong id="sheet-total-price">{formatSar(total)}</strong>
+              </div>
+            </div>
+
+            <button type="submit" className="submit-btn pulse-btn" disabled={loading}>
+              {loading ? 'جاري تسجيل الطلب... ⏳' : '🛒 اطلب الآن'}
+            </button>
+            <div className="privacy">🔒 معلوماتك آمنة ومضمونة 100%</div>
+          </form>
+        </div>
       </div>
     </div>
   );
@@ -309,20 +508,61 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
           <div className="hero-dark-bar">{product.heroSubtitle}</div>
 
+          <div className="pv-social-proof" aria-label="تقييم المنتج 4.7 من 5">
+            <div className="pv-sp-top">
+              <div className="pv-sp-score-block">
+                <strong className="pv-sp-score">
+                  <span className="latin-nums">4.7</span>
+                  <small>/5</small>
+                </strong>
+                <div className="pv-sp-stars" aria-hidden="true">
+                  <span className="on">★</span>
+                  <span className="on">★</span>
+                  <span className="on">★</span>
+                  <span className="on">★</span>
+                  <span className="half">★</span>
+                </div>
+                <div className="pv-sp-meter" aria-hidden="true">
+                  <span style={{ width: '94%' }} />
+                </div>
+              </div>
+              <div className="pv-sp-meta">
+                <div className="pv-sp-faces" aria-hidden="true">
+                  <span>أ</span>
+                  <span>س</span>
+                  <span>ن</span>
+                  <span>م</span>
+                </div>
+                <div className="pv-sp-copy">
+                  <strong>+2,840 تقييم حقيقي</strong>
+                  <em>94% يقولون: يستاهل السعر</em>
+                </div>
+              </div>
+            </div>
+            <div className="pv-sp-chips">
+              <span className="pv-sp-chip live">
+                <i className="pv-sp-dot" aria-hidden="true" />
+                17 يطلبونه الآن
+              </span>
+              <span className="pv-sp-chip">جودة مضمونة</span>
+              <span className="pv-sp-chip">اختيار الأمهات</span>
+              <span className="pv-sp-chip">هدية تبهِر</span>
+            </div>
+          </div>
+
           <div className="hero-title-area">
             <div className="hero-title-badge">{product.badge}</div>
             <h1 className="prod-name-new">{product.heroTitle}</h1>
           </div>
 
-          <div className="price-block">
-            <div className="price-header-row">
-              <div className="price-new-large">
+          <div className="pv-price-compact">
+            <div className="pv-price-main">
+              <span className="pv-price-now">
                 <span className="latin-nums">{offer.price}</span> <small>ريال</small>
-              </div>
-              <div className="price-old-sub">{formatSar(offer.oldPrice)}</div>
-              <div className="price-save-mini">توفير {formatSar(save)}</div>
+              </span>
+              <span className="pv-price-was">{formatSar(offer.oldPrice)}</span>
             </div>
-            <div className="price-save-badge">وفّرت {formatSar(save)} اليوم — عرض محدود</div>
+            <div className="pv-price-save">وفّرت {formatSar(save)} اليوم — عرض محدود</div>
           </div>
 
           <div className="hero-offers-wrapper" id="product-offers">
@@ -359,22 +599,6 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               ))}
             </div>
           </div>
-
-          {product.featureStrip && product.featureStrip.length > 0 && (
-            <div className="pv-feature-strip">
-              {product.featureStrip.map((f) => (
-                <div key={f.title} className="pv-feature-chip">
-                  <span className="pv-feature-ico" aria-hidden="true">
-                    {f.icon}
-                  </span>
-                  <div>
-                    <strong>{f.title}</strong>
-                    <p>{f.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 
@@ -389,19 +613,27 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
             {product.storyBeats.map((beat, i) => (
               <div key={beat.imageTitle || beat.image} className="pv-beat">
-                <div className="pv-beat-frames">
-                  {beat.frames.map((frame) => (
-                    <div key={frame.title} className="pv-frame-card">
-                      {frame.icon && (
-                        <span className="pv-frame-ico" aria-hidden="true">
-                          {frame.icon}
-                        </span>
-                      )}
-                      <h3>{frame.title}</h3>
-                      <p>{frame.text}</p>
-                    </div>
-                  ))}
+                <div className="pv-info-cadre">
+                  <div className="pv-info-cadre-badge">
+                    تفاصيل {i + 1} / {product.storyBeats!.length}
+                  </div>
+                  <div className="pv-info-list">
+                    {beat.frames.map((frame) => (
+                      <div key={frame.title} className="pv-info-row">
+                        {frame.icon && (
+                          <span className="pv-info-ico" aria-hidden="true">
+                            {frame.icon}
+                          </span>
+                        )}
+                        <div className="pv-info-body">
+                          <strong>{frame.title}</strong>
+                          <p>{frame.text}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
                 <figure className="pv-beat-photo">
                   {beat.imageBadge && <span className="pv-story-badge">{beat.imageBadge}</span>}
                   <div className="pv-square">
@@ -415,12 +647,74 @@ export default function ProductView({ product }: { product: ProductPageConfig })
                   )}
                   <span className="pv-beat-num">{i + 1} / {product.storyBeats!.length}</span>
                 </figure>
+
+                {beat.bridge && (
+                  <div className="pv-info-cadre pv-bridge-cadre">
+                    {beat.bridge.badge && (
+                      <div className="pv-info-cadre-badge">{beat.bridge.badge}</div>
+                    )}
+                    <h3 className="pv-bridge-title">{beat.bridge.title}</h3>
+                    <p className="pv-bridge-text">{beat.bridge.text}</p>
+                    {beat.bridge.bullets && beat.bridge.bullets.length > 0 && (
+                      <ul className="pv-bridge-bullets">
+                        {beat.bridge.bullets.map((b) => (
+                          <li key={b}>
+                            <i className="fa-solid fa-circle-check" aria-hidden="true" />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
+
+            {product.featureStrip && product.featureStrip.length > 0 && (
+              <div className="pv-info-cadre">
+                <div className="pv-info-cadre-badge">مميزات سريعة</div>
+                <div className="pv-info-list">
+                  {product.featureStrip.map((f) => (
+                    <div key={f.title} className="pv-info-row">
+                      <span className="pv-info-ico" aria-hidden="true">
+                        {f.icon}
+                      </span>
+                      <div className="pv-info-body">
+                        <strong>{f.title}</strong>
+                        <p>{f.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <button type="button" className="offer-cta-main" onClick={openSheet} style={{ marginTop: '0.5rem' }}>
               {product.ctaLabel} — {formatSar(offer.price)}
             </button>
+          </div>
+        </section>
+      )}
+
+      {!product.storyBeats?.length && product.featureStrip && product.featureStrip.length > 0 && (
+        <section className="pv-story-section">
+          <div className="container">
+            <div className="pv-info-cadre">
+              <div className="pv-info-cadre-badge">مميزات سريعة</div>
+              <div className="pv-info-list">
+                {product.featureStrip.map((f) => (
+                  <div key={f.title} className="pv-info-row">
+                    <span className="pv-info-ico" aria-hidden="true">
+                      {f.icon}
+                    </span>
+                    <div className="pv-info-body">
+                      <strong>{f.title}</strong>
+                      <p>{f.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
       )}
@@ -521,20 +815,28 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
       <section className="guarantee-section">
         <div className="container">
-          <div className="gold-guarantee-box premium-gold-animated">
-            <div className="guarantee-badge">الضمان الذهبي</div>
-            <h3>{product.guaranteeTitle}</h3>
-            <p>{product.guaranteeText}</p>
-            {product.guaranteePoints && product.guaranteePoints.length > 0 && (
-              <ul className="pv-guarantee-list">
-                {product.guaranteePoints.map((point) => (
-                  <li key={point}>
-                    <i className="fa-solid fa-circle-check" aria-hidden="true" /> {point}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <div className="guarantee-footer-tag">سياسة استرجاع واضحة — رضاك قبل أي ريال</div>
+          <div className="premium-gold-animated">
+            <div className="gold-guarantee-box">
+              <div className="guarantee-badge">🏆 الضمان الذهبي 100%</div>
+              <div className="guarantee-icon" aria-hidden="true">
+                <i className="fa-solid fa-medal" />
+              </div>
+              <h3>{product.guaranteeTitle}</h3>
+              <p>{product.guaranteeText}</p>
+              {product.guaranteePoints && product.guaranteePoints.length > 0 && (
+                <ul className="pv-guarantee-list">
+                  {product.guaranteePoints.map((point) => (
+                    <li key={point}>
+                      <i className="fa-solid fa-circle-check" aria-hidden="true" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="guarantee-footer-tag">
+                <i className="fa-solid fa-handshake" aria-hidden="true" /> نتحمل نحن المخاطرة — رضاك قبل أي ريال ❤️
+              </div>
+            </div>
           </div>
         </div>
       </section>
