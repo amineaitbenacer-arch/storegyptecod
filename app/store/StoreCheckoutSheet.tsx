@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { formatSar } from '../../lib/money';
+import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../lib/shipping';
 import './store-checkout-sheet.css';
 
 export type CheckoutCartItem = {
@@ -50,6 +51,7 @@ export default function StoreCheckoutSheet({
   const pieces = items.reduce((n, i) => n + i.qty, 0);
   const leadOld =
     lead?.oldPrice && lead.oldPrice > lead.price ? lead.oldPrice * lead.qty : undefined;
+  const grandTotal = orderTotalWithShipping(total);
 
   useEffect(() => {
     if (!open) return;
@@ -152,10 +154,10 @@ export default function StoreCheckoutSheet({
               <div className="store-ac-offer-name">
                 {items.length === 1 ? `${lead.name} × ${lead.qty}` : `${pieces} قطعة في طلبك`}
               </div>
-              <div className="store-ac-offer-sub">الدفع عند الاستلام · توصيل مجاني 🚚</div>
+              <div className="store-ac-offer-sub">الدفع عند الاستلام · توصيل {formatSar(SHIPPING_FEE_SAR)} 🚚</div>
             </div>
             <div className="store-ac-offer-pricing">
-              <div className="store-ac-offer-price">{formatSar(total)}</div>
+              <div className="store-ac-offer-price">{formatSar(grandTotal)}</div>
               {leadOld ? <div className="store-ac-offer-old">{formatSar(leadOld)}</div> : null}
             </div>
           </div>
@@ -183,7 +185,7 @@ export default function StoreCheckoutSheet({
           <div className="store-ac-trust-item">
             <span aria-hidden>🚚</span>
             <div>
-              <strong>توصيل مجاني 100%</strong>
+              <strong>توصيل {formatSar(SHIPPING_FEE_SAR)}</strong>
               <em>لجميع مدن المملكة 🇸🇦</em>
             </div>
           </div>
@@ -242,9 +244,19 @@ export default function StoreCheckoutSheet({
             required
           />
 
-          <div className="store-ac-total">
-            <span>المجموع عند الاستلام:</span>
-            <strong>{formatSar(total)}</strong>
+          <div className="store-ac-sum">
+            <div className="store-ac-sum-row">
+              <span>مجموع المنتجات</span>
+              <b>{formatSar(total)}</b>
+            </div>
+            <div className="store-ac-sum-row">
+              <span>التوصيل</span>
+              <b>{formatSar(SHIPPING_FEE_SAR)}</b>
+            </div>
+            <div className="store-ac-total">
+              <span>المجموع عند الاستلام:</span>
+              <strong>{formatSar(grandTotal)}</strong>
+            </div>
           </div>
 
           <button type="submit" className="store-ac-submit pulse" disabled={submitting}>

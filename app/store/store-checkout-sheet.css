@@ -325,6 +325,28 @@
   margin: -0.35rem 0 0.65rem;
 }
 
+.store-ac-sum {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.store-ac-sum-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0.55rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.store-ac-sum-row b {
+  color: #fff;
+  font-weight: 800;
+}
+
 .store-ac-total {
   display: flex;
   justify-content: space-between;
@@ -333,7 +355,7 @@
   border: 1px solid rgba(255, 215, 0, 0.3);
   border-radius: 12px;
   padding: 0.7rem 0.9rem;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0;
 }
 
 .store-ac-total span {

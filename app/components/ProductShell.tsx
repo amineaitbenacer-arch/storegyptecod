@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import AntichocMarkup from './AntichocMarkup';
 import { formatSar } from '../../lib/money';
+import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
@@ -123,7 +124,9 @@ export default function ProductShell() {
       setText('sheet-active-badge', tag);
       setText('sheet-preview-price', formatSar(price));
       setText('sheet-preview-old-price', formatSar(oldPrice));
-      setText('sheet-total-price', formatSar(price));
+      setText('sheet-subtotal-price', formatSar(price));
+      setText('sheet-shipping-price', formatSar(SHIPPING_FEE_SAR));
+      setText('sheet-total-price', formatSar(orderTotalWithShipping(price)));
 
       const stickyNew = $('.buy-bar .bar-new');
       if (stickyNew) stickyNew.innerHTML = formatSar(price);
@@ -183,9 +186,10 @@ export default function ProductShell() {
         submitBtn.innerHTML = 'جاري تسجيل الطلب... ⏳';
       }
       const productId = window.location.pathname.match(/^\/product\/([^/?#]+)/)?.[1] || 'produit-1';
+      const payableTotal = orderTotalWithShipping(currentBundle.price);
       trackStoreEvent('checkout', {
         productId,
-        value: currentBundle.price,
+        value: payableTotal,
         contentName: currentBundle.name,
       });
 
@@ -202,7 +206,9 @@ export default function ProductShell() {
         offer: currentBundle.name,
         offerName: currentBundle.name,
         pieces,
-        price: currentBundle.price,
+        subtotal: currentBundle.price,
+        shippingFee: SHIPPING_FEE_SAR,
+        price: payableTotal,
         packId: currentBundle.id,
         timestamp: new Date().toISOString(),
         ...trackingFields(),
@@ -214,7 +220,7 @@ export default function ProductShell() {
         const finalOrder = { ...orderData, orderId, serverOrderId: saved.orderId };
         trackStoreEvent('purchase', {
           productId,
-          value: currentBundle.price,
+          value: payableTotal,
           contentName: currentBundle.name,
           orderId,
           numItems: pieces,

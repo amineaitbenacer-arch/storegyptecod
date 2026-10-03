@@ -1663,6 +1663,30 @@ img {
   border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 12px;
   padding: 0.65rem 0.9rem; margin-bottom: 0.85rem;
 }
+.total-box.checkout-sum {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+  padding: 0.75rem 0.9rem;
+}
+.checkout-sum-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+}
+.checkout-sum-row b { color: #fff; font-weight: 800; }
+.checkout-sum-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.15rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(255, 215, 0, 0.25);
+}
 .total-box span { font-size: 0.88rem; color: #FFF; font-weight: 700; }
 .total-box strong { font-size: 1.3rem; font-weight: 900; color: var(--gold); }
 

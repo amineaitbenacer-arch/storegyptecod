@@ -608,6 +608,19 @@ body:has(.sheet-bg.open) .buy-bar,
   color: #F59E0B !important;
 }
 
+.total-box.checkout-sum {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.4rem;
+}
+
+.checkout-sum-row b,
+#sheet-subtotal-price,
+#sheet-shipping-price {
+  color: #F8FAFC !important;
+}
+
 .sheet .form-inp {
   background: #131A26 !important;
   color: #F8FAFC !important;

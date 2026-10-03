@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
 import { formatSar } from '../../lib/money';
+import { SHIPPING_FEE_SAR } from '../../lib/shipping';
 import { readLastOrder, saveLastOrder } from '../../lib/last-order';
 import { trackPixelPurchaseWhenReady } from '../../lib/pixels';
 import { flushTrackingQueue, trackStoreEvent } from '../../lib/tracking';
@@ -316,6 +317,10 @@ export default function ThankYouPage() {
               <span className="ty-label"><i className="fa-solid fa-gift" aria-hidden /> العرض المختار</span>
               <span className="ty-value ty-gold">{order.offer}</span>
             </div>
+            <div className="ty-row">
+              <span className="ty-label"><i className="fa-solid fa-truck-fast" aria-hidden /> التوصيل</span>
+              <span className="ty-value">{formatSar(SHIPPING_FEE_SAR)}</span>
+            </div>
             <div className="ty-row ty-row-total">
               <span className="ty-label"><i className="fa-solid fa-coins" aria-hidden /> المبلغ الإجمالي</span>
               <span className="ty-value ty-green">
@@ -325,7 +330,7 @@ export default function ThankYouPage() {
           </div>
           <div className="ty-free">
             <i className="fa-solid fa-truck-fast" aria-hidden />
-            التوصيل مجاني بالكامل
+            التوصيل {formatSar(SHIPPING_FEE_SAR)} — مشمول في المبلغ الإجمالي
           </div>
         </div>
 

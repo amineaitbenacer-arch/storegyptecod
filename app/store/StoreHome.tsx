@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PRODUCTS, type StoreProduct } from '../../lib/products';
 import { formatSar } from '../../lib/money';
+import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
@@ -453,7 +454,7 @@ export default function StoreHome() {
     }
     trackStoreEvent('checkout', {
       productId: cart[0]?.id || 'cart',
-      value: cartTotal,
+      value: orderTotalWithShipping(cartTotal),
       contentName: cart.map((i) => i.name).join(' + '),
     });
     setCartStep('checkout');
@@ -478,6 +479,7 @@ export default function StoreHome() {
         : cart.map((i) => `${i.name} × ${i.qty}`).join(' · ');
     const orderId = `st-${Date.now().toString(36)}`;
     const productId = cart[0]?.id || 'cart';
+    const payableTotal = orderTotalWithShipping(cartTotal);
     const orderData = {
       orderId,
       name: name.trim(),
@@ -486,7 +488,9 @@ export default function StoreHome() {
       address: city.trim(),
       offer: offerLabel,
       offerName: offerLabel,
-      price: cartTotal,
+      subtotal: cartTotal,
+      shippingFee: SHIPPING_FEE_SAR,
+      price: payableTotal,
       pieces: cartCount,
       packId: 0,
       items: cart.map((i) => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
@@ -505,7 +509,7 @@ export default function StoreHome() {
 
       trackStoreEvent('purchase', {
         productId,
-        value: cartTotal,
+        value: payableTotal,
         contentName: offerLabel,
         orderId,
         numItems: cartCount,
