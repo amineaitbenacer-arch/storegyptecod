@@ -517,19 +517,16 @@
   gap: 0.7rem;
 }
 
-.store-duo-grid.is-single {
-  grid-template-columns: minmax(0, 1fr);
+.duo-card-slot {
+  min-height: 1px;
+  pointer-events: none;
+  visibility: hidden;
 }
 
 @media (min-width: 760px) {
   .store-duo-grid {
     gap: 1.35rem;
     align-items: stretch;
-  }
-
-  .store-duo-grid.is-single {
-    grid-template-columns: minmax(280px, 520px);
-    justify-content: center;
   }
 }
 

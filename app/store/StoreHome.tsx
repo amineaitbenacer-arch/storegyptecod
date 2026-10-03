@@ -708,6 +708,8 @@ export default function StoreHome() {
             <div className="store-empty">لا توجد منتجات مطابقة لبحثك</div>
           ) : (
             <div className="store-duo-grid">
+              {/* خانة فاضية مكان المنتج المخفي — تبقي الكلب في مكانه */}
+              {filtered.length === 1 ? <div className="duo-card-slot" aria-hidden="true" /> : null}
               {filtered.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} onAdd={addToCart} />
               ))}

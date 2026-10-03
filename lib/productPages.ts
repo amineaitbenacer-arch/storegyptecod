@@ -301,7 +301,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     type: 'أمان منزلي',
     badge: 'الأكثر مبيعاً',
     badgeColor: '#D97706',
-    listed: true,
+    listed: false,
     marquee: 'توصيل آمن إلى جميع مدن المملكة | الدفع عند الاستلام',
     warning: 'الكهرباء في أثناء الاستحمام لا تمنح فرصة ثانية. احمِ أطفالك وعائلتك اليوم.',
     heroTitle: 'عازل السخان المائي الأصلي المزدوج من AntiChoc',
@@ -358,24 +358,22 @@ export function getProductPage(id: string) {
   return PRODUCT_PAGES.find((p) => p.id === id);
 }
 
-export const PRODUCTS = PRODUCT_PAGES.filter((p) => p.listed !== false)
-  .map((p) => ({
-    id: p.id,
-    name: p.heroTitle,
-    type: p.type,
-    emoji: p.emoji,
-    price: p.offers.find((o) => o.popular)?.price ?? p.offers[0].price,
-    oldPrice: p.offers.find((o) => o.popular)?.oldPrice ?? p.offers[0].oldPrice,
-    image: p.catalogImage,
-    badge: p.badge,
-    badgeColor: p.badgeColor,
-    shortDesc: p.shortDesc,
-    category: ['all'],
-    tags: [p.brand, p.type],
-    href: p.id === 'produit-1' ? '/product/antichoc' : `/product/${p.id}`,
-    featured: true,
-  }))
-  .sort((a, b) => (a.id === 'produit-1' ? -1 : b.id === 'produit-1' ? 1 : 0));
+export const PRODUCTS = PRODUCT_PAGES.filter((p) => p.listed === true).map((p) => ({
+  id: p.id,
+  name: p.heroTitle,
+  type: p.type,
+  emoji: p.emoji,
+  price: p.offers.find((o) => o.popular)?.price ?? p.offers[0].price,
+  oldPrice: p.offers.find((o) => o.popular)?.oldPrice ?? p.offers[0].oldPrice,
+  image: p.catalogImage,
+  badge: p.badge,
+  badgeColor: p.badgeColor,
+  shortDesc: p.shortDesc,
+  category: ['all'],
+  tags: [p.brand, p.type],
+  href: p.id === 'produit-1' ? '/product/antichoc' : `/product/${p.id}`,
+  featured: true,
+}));
 
 export const FILTERS = [{ id: 'all', label: 'الكل' }];
 
