@@ -11,7 +11,7 @@ import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../../li
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../../lib/tracking';
 
 function pickOffer(product: ProductPageConfig) {
-  return product.offers.find((o) => o.popular) || product.offers[0];
+  return product.offers[0];
 }
 
 export default function ProductView({ product }: { product: ProductPageConfig }) {
@@ -506,6 +506,27 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             ))}
           </div>
 
+          <div className="hero-offers-wrapper" id="product-offers">
+            <div className="hero-offers-header">
+              <span className="hero-offers-label">اختر العرض</span>
+              <span className="hero-offers-sub-badge">الدفع عند الاستلام</span>
+            </div>
+            {offers}
+          </div>
+
+          <div className="cta-block-wrap">
+            <button type="button" className="offer-cta-main" onClick={openSheet}>
+              {product.ctaLabel} — {formatSar(offer.price)}
+            </button>
+            <div className="cta-reassurance">
+              <span>ضمان ذهبي</span>
+              <span className="dot">•</span>
+              <span>معاينة قبل الدفع</span>
+              <span className="dot">•</span>
+              <span>الدفع عند الاستلام</span>
+            </div>
+          </div>
+
           <div className="hero-dark-bar">{product.heroSubtitle}</div>
 
           <div className="pv-social-proof" aria-label="تقييم المنتج 4.7 من 5">
@@ -563,27 +584,6 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               <span className="pv-price-was">{formatSar(offer.oldPrice)}</span>
             </div>
             <div className="pv-price-save">وفّرت {formatSar(save)} اليوم — عرض محدود</div>
-          </div>
-
-          <div className="hero-offers-wrapper" id="product-offers">
-            <div className="hero-offers-header">
-              <span className="hero-offers-label">اختر العرض</span>
-              <span className="hero-offers-sub-badge">الدفع عند الاستلام</span>
-            </div>
-            {offers}
-          </div>
-
-          <div className="cta-block-wrap">
-            <button type="button" className="offer-cta-main" onClick={openSheet}>
-              {product.ctaLabel} — {formatSar(offer.price)}
-            </button>
-            <div className="cta-reassurance">
-              <span>ضمان ذهبي</span>
-              <span className="dot">•</span>
-              <span>معاينة قبل الدفع</span>
-              <span className="dot">•</span>
-              <span>الدفع عند الاستلام</span>
-            </div>
           </div>
 
           <div className="trust-cadre-container">
