@@ -16,9 +16,15 @@ import './return-policy.css';
 type Props = {
   variant?: 'full' | 'compact';
   showTitle?: boolean;
+  /** إخفاء واتساب/النموذج (مثلاً صفحة الشكر) */
+  showContact?: boolean;
 };
 
-export default function ReturnPolicyPanel({ variant = 'full', showTitle = true }: Props) {
+export default function ReturnPolicyPanel({
+  variant = 'full',
+  showTitle = true,
+  showContact = true,
+}: Props) {
   const [copied, setCopied] = useState<'phone' | 'form' | null>(null);
 
   async function copyText(text: string, kind: 'phone' | 'form') {
@@ -107,51 +113,53 @@ export default function ReturnPolicyPanel({ variant = 'full', showTitle = true }
           <li>منتج خاطئ؟ الشحن على المتجر</li>
           <li>إرجاع لرغبة الزبون أو استبدال: رسوم شحن 25 ريال</li>
           <li>يجب أن يكون المنتج بحالته الأصلية مع الملحقات والتغليف</li>
-          <li>الطلب عبر واتساب بعد تعبئة النموذج — رد خلال 48 ساعة</li>
+          <li>دعم سريع خلال 48 ساعة لأي استفسار</li>
         </ul>
       )}
 
-      <div className="rp-wa">
-        <div className="rp-wa-top">
-          <strong>
-            <i className="fa-brands fa-whatsapp" aria-hidden /> لطلب الاسترجاع / الاستبدال
-          </strong>
-          <span>عبّئ النموذج ثم راسلنا — نرد خلال 48 ساعة</span>
-        </div>
+      {showContact ? (
+        <div className="rp-wa">
+          <div className="rp-wa-top">
+            <strong>
+              <i className="fa-brands fa-whatsapp" aria-hidden /> لطلب الاسترجاع / الاستبدال
+            </strong>
+            <span>عبّئ النموذج ثم راسلنا — نرد خلال 48 ساعة</span>
+          </div>
 
-        <div className="rp-phone-row">
-          <div className="rp-phone-card" dir="ltr">
-            <i className="fa-solid fa-phone" aria-hidden />
-            <a href={RETURN_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-              {RETURN_WHATSAPP}
+          <div className="rp-phone-row">
+            <div className="rp-phone-card" dir="ltr">
+              <i className="fa-solid fa-phone" aria-hidden />
+              <a href={RETURN_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                {RETURN_WHATSAPP}
+              </a>
+            </div>
+            <button
+              type="button"
+              className="rp-copy-btn"
+              onClick={() => copyText(RETURN_WHATSAPP, 'phone')}
+              aria-label="نسخ رقم الواتساب"
+              title="نسخ الرقم"
+            >
+              <i className={`fa-solid ${copied === 'phone' ? 'fa-check' : 'fa-copy'}`} aria-hidden />
+              {copied === 'phone' ? 'تم النسخ' : 'نسخ'}
+            </button>
+          </div>
+
+          <pre className="rp-form" dir="rtl">
+            {RETURN_FORM_TEMPLATE}
+          </pre>
+          <div className="rp-form-actions">
+            <button type="button" className="rp-copy-btn soft" onClick={() => copyText(RETURN_FORM_TEMPLATE, 'form')}>
+              <i className={`fa-solid ${copied === 'form' ? 'fa-check' : 'fa-copy'}`} aria-hidden />
+              {copied === 'form' ? 'تم نسخ النموذج' : 'نسخ النموذج'}
+            </button>
+            <a className="rp-wa-link" href={RETURN_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+              <i className="fa-brands fa-whatsapp" aria-hidden />
+              فتح واتساب
             </a>
           </div>
-          <button
-            type="button"
-            className="rp-copy-btn"
-            onClick={() => copyText(RETURN_WHATSAPP, 'phone')}
-            aria-label="نسخ رقم الواتساب"
-            title="نسخ الرقم"
-          >
-            <i className={`fa-solid ${copied === 'phone' ? 'fa-check' : 'fa-copy'}`} aria-hidden />
-            {copied === 'phone' ? 'تم النسخ' : 'نسخ'}
-          </button>
         </div>
-
-        <pre className="rp-form" dir="rtl">
-          {RETURN_FORM_TEMPLATE}
-        </pre>
-        <div className="rp-form-actions">
-          <button type="button" className="rp-copy-btn soft" onClick={() => copyText(RETURN_FORM_TEMPLATE, 'form')}>
-            <i className={`fa-solid ${copied === 'form' ? 'fa-check' : 'fa-copy'}`} aria-hidden />
-            {copied === 'form' ? 'تم نسخ النموذج' : 'نسخ النموذج'}
-          </button>
-          <a className="rp-wa-link" href={RETURN_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-            <i className="fa-brands fa-whatsapp" aria-hidden />
-            فتح واتساب
-          </a>
-        </div>
-      </div>
+      ) : null}
     </div>
   );
 }

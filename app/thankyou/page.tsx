@@ -8,7 +8,7 @@ import { SHIPPING_FEE_SAR } from '../../lib/shipping';
 import { readLastOrder, saveLastOrder } from '../../lib/last-order';
 import { trackPixelPurchaseWhenReady } from '../../lib/pixels';
 import { flushTrackingQueue, trackStoreEvent } from '../../lib/tracking';
-import ReturnPolicyPanel from '../components/ReturnPolicyPanel';
+import { RETURN_POLICY_FAQS } from '../../lib/return-policy';
 import './thankyou.css';
 
 type OrderView = {
@@ -49,12 +49,8 @@ const FAQS = [
   { q: 'هل يقلل الجهاز من قوة تدفّق الماء؟', a: 'لا. صُمّم المجرى الحلزوني ليمرّ الماء بسلاسة وبالقوة نفسها، دون أي تأثير على ضغط المياه.' },
   { q: 'هل يصدأ الجهاز مع الوقت أو يتأثر بالحرارة؟', a: 'لا. الجهاز مصنوع من البولي بروبيلين عالي الكثافة وسنون نحاسية صلبة، مقاوم للصدأ والتآكل ويتحمّل الحرارة العالية لسنوات.' },
   {
-    q: 'هل يوجد ضمان واسترجاع؟',
-    a: 'نعم. الضمان الذهبي يشمل استرجاع خلال 3 أيام واستبدال خلال 7 أيام من الاستلام. لطلب الإرجاع عبّئ النموذج وراسلنا على واتساب +966566306804 — نرد خلال 48 ساعة.',
-  },
-  {
-    q: 'كيف أطلب الاسترجاع أو الاستبدال؟',
-    a: 'انسخ نموذج الطلب (الاسم، رقم الطلب، المنتج، عدد القطع، السبب) ثم راسلنا على واتساب. لن نرد على رسالة ناقصة البيانات. استرداد المبلغ من يومين إلى 14 يوم عمل بعد وصول الشحنة للمتجر.',
+    q: 'هل يوجد ضمان على الطلب؟',
+    a: 'نعم. الضمان الذهبي يحميك: استرجاع خلال 3 أيام واستبدال خلال 7 أيام من الاستلام، مع معاينة المنتج قبل الدفع.',
   },
 ];
 
@@ -93,6 +89,7 @@ export default function ThankYouPage() {
   const [verified, setVerified] = useState(false);
   const [page, setPage] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openPolicyFaq, setOpenPolicyFaq] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'شكراً على طلبك | المتجر الرسمي';
@@ -407,50 +404,67 @@ export default function ThankYouPage() {
           </span>
         </Link>
 
-        <section className="ty-gold-guarantee" aria-label="الضمان الذهبي وسياسة الاسترجاع">
+        <section className="ty-gold-guarantee" aria-label="الضمان الذهبي">
           <div className="ty-gg-top">
             <div className="ty-gg-seal" aria-hidden>
               <span className="ty-gg-seal-ring" />
               <i className="fa-solid fa-medal" />
             </div>
             <div className="ty-gg-titles">
-              <p className="ty-gg-kicker">طلبك محمي — بلا مخاطرة</p>
-              <h2>الضمان الذهبي وسياسة الاسترجاع</h2>
+              <p className="ty-gg-kicker">طلبك محمي — اشترِ بثقة</p>
+              <h2>الضمان الذهبي</h2>
               <p className="ty-gg-lead">
-                اطمئن: استرجاع خلال 3 أيام واستبدال خلال 7 أيام من الاستلام. سياسة واضحة مكتوبة، وواتساب جاهز لأي طلب
-                إرجاع — نرد خلال 48 ساعة.
+                اطمئن تمامًا: معاينة قبل الدفع، واسترجاع خلال 3 أيام أو استبدال خلال 7 أيام إن احتجت — حقّك محفوظ.
               </p>
             </div>
           </div>
           <div className="ty-gg-grid">
             <article className="ty-gg-card">
               <div className="ty-gg-icon" aria-hidden>
+                <i className="fa-solid fa-box-open" />
+              </div>
+              <h3>معاينة قبل الدفع</h3>
+              <p>افحص طلبك عند الباب، ثم ادفع فقط بعد أن تطمئن للمنتج.</p>
+            </article>
+            <article className="ty-gg-card">
+              <div className="ty-gg-icon" aria-hidden>
                 <i className="fa-solid fa-calendar-check" />
               </div>
               <h3>استرجاع 3 أيام</h3>
-              <p>من تاريخ استلام المنتج. حقّك محفوظ وموثّق في سياسة المتجر.</p>
+              <p>حقّك محفوظ من تاريخ الاستلام وفق سياسة المتجر.</p>
             </article>
             <article className="ty-gg-card">
               <div className="ty-gg-icon" aria-hidden>
-                <i className="fa-solid fa-right-left" />
+                <i className="fa-solid fa-shield-halved" />
               </div>
-              <h3>استبدال 7 أيام</h3>
-              <p>بدّل المنتج خلال أسبوع وفق البنود — بدون تعقيد.</p>
-            </article>
-            <article className="ty-gg-card">
-              <div className="ty-gg-icon" aria-hidden>
-                <i className="fa-brands fa-whatsapp" />
-              </div>
-              <h3>واتساب + نموذج</h3>
-              <p>انسخ الرقم والنموذج بالأسفل، راسلنا، ونرد خلال 48 ساعة.</p>
+              <h3>شراء بلا مخاطرة</h3>
+              <p>ضمان ذهبي واضح على كل منتجات المتجر لراحة بالك.</p>
             </article>
           </div>
           <div className="ty-gg-ribbon">
             <i className="fa-solid fa-certificate" aria-hidden />
-            <span>لم يعجبك؟ أرجعه خلال 3 أيام أو استبدله خلال 7 أيام — الضمان يسري على كل منتجات المتجر</span>
+            <span>اشترِ بثقة — الضمان الذهبي يسري على كل منتجات المتجر</span>
           </div>
-          <div className="ty-policy-wrap">
-            <ReturnPolicyPanel variant="full" />
+
+          <h3 className="ty-policy-faq-title">أسئلة شائعة حول الضمان والسياسة</h3>
+          <div className="ty-policy-faqs">
+            {RETURN_POLICY_FAQS.map((faq, i) => {
+              const key = `policy-${i}`;
+              const open = openPolicyFaq === key;
+              return (
+                <div key={faq.q} className={`ty-faq${open ? ' open' : ''}`}>
+                  <button
+                    type="button"
+                    className="ty-faq-btn"
+                    onClick={() => setOpenPolicyFaq(open ? null : key)}
+                  >
+                    {faq.q}
+                    <i className="fa-solid fa-chevron-down" />
+                  </button>
+                  <div className="ty-faq-body">{faq.a}</div>
+                </div>
+              );
+            })}
           </div>
         </section>
 

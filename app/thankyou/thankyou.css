@@ -921,15 +921,28 @@
   color: #92400e;
 }
 
-#ac-ty .ty-policy-wrap {
+#ac-ty .ty-policy-faq-title {
   position: relative;
   z-index: 1;
-  margin-top: 1.25rem;
-  padding: 1.1rem;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.97);
-  border: 1.5px solid rgba(245, 158, 11, 0.35);
-  box-shadow: 0 14px 32px rgba(120, 53, 15, 0.12);
+  margin: 1.35rem 0 0.85rem;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #78350f !important;
+  text-align: center;
+}
+
+#ac-ty .ty-policy-faqs {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+#ac-ty .ty-policy-faqs .ty-faq {
+  margin: 0;
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(245, 158, 11, 0.28);
 }
 
 @keyframes tyGgPulse {

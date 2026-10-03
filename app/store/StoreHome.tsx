@@ -847,7 +847,7 @@ export default function StoreHome() {
             </article>
           </div>
           <div className="store-gold-policy">
-            <ReturnPolicyPanel variant="compact" showTitle={false} />
+            <ReturnPolicyPanel variant="compact" showTitle={false} showContact={false} />
             <a href="#policy" className="store-gold-policy-link">
               اقرأ السياسة كاملة
               <i className="fa-solid fa-arrow-left" aria-hidden />
