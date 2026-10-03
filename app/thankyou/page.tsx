@@ -5,6 +5,7 @@ import Link from 'next/link';
 import confetti from 'canvas-confetti';
 import { formatSar } from '../../lib/money';
 import { trackPixelPurchaseWhenReady } from '../../lib/pixels';
+import { flushTrackingQueue, trackStoreEvent } from '../../lib/tracking';
 import './thankyou.css';
 
 type OrderView = {
@@ -113,6 +114,20 @@ export default function ThankYouPage() {
 
     const price = Number(next.price);
     const orderId = next.id.replace('#', '');
+    try {
+      const raw = localStorage.getItem('ac_last_order') || localStorage.getItem('lastOrder');
+      const data = raw ? JSON.parse(raw) : {};
+      trackStoreEvent('purchase', {
+        productId: String(data.productId || ''),
+        value: Number.isFinite(price) ? price : undefined,
+        contentName: String(data.offerName || data.offer || next.offer || ''),
+        orderId: orderId && orderId !== '----' ? orderId : data.orderId,
+        numItems: Number(data.pieces) || 1,
+      });
+      flushTrackingQueue();
+    } catch {
+      /* ignore */
+    }
     const fire = () => {
       trackPixelPurchaseWhenReady({
         value: Number.isFinite(price) ? price : 249,

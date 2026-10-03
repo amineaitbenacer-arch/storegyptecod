@@ -38,3 +38,4 @@ next-env.d.ts
 /_ref_story
 orders.json
 analytics.json
+.neon

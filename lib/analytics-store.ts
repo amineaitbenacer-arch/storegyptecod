@@ -11,6 +11,7 @@ export type TrackType =
   | 'product'
   | 'addtocart'
   | 'checkout'
+  | 'purchase'
   | 'scroll25'
   | 'scroll50'
   | 'scroll75'
@@ -22,6 +23,7 @@ export type StoredEvent = {
   source: AdSource;
   path: string;
   productId: string;
+  orderId?: string;
   ts: string;
   loadMs: number;
 };
@@ -32,6 +34,7 @@ const TYPES = new Set<TrackType>([
   'product',
   'addtocart',
   'checkout',
+  'purchase',
   'scroll25',
   'scroll50',
   'scroll75',
@@ -62,14 +65,20 @@ export function appendEvent(event: StoredEvent) {
       const events = await readEvents();
       const ts = Date.parse(event.ts);
       const scrollType = String(event.type).startsWith('scroll');
-      const duplicate = events.some(
-        (item) =>
-          item.visitorId === event.visitorId &&
-          item.type === event.type &&
+      const purchaseType = event.type === 'purchase';
+      const duplicate = events.some((item) => {
+        if (item.visitorId !== event.visitorId || item.type !== event.type) return false;
+        if (purchaseType) {
+          const a = String(item.orderId || '');
+          const b = String(event.orderId || '');
+          return a && b ? a === b : Math.abs(Date.parse(item.ts) - ts) < 8000;
+        }
+        return (
           item.path === event.path &&
           String(item.productId || '') === String(event.productId || '') &&
-          (scrollType || Math.abs(Date.parse(item.ts) - ts) < 4000),
-      );
+          (scrollType || Math.abs(Date.parse(item.ts) - ts) < 4000)
+        );
+      });
       if (duplicate) return;
       events.push(event);
       const trimmed = events.length > 25000 ? events.slice(-25000) : events;
@@ -98,6 +107,9 @@ export function normalizeIncoming(body: Record<string, unknown>): StoredEvent | 
     .slice(0, 80);
   const ts = String(body.ts || new Date().toISOString());
   const loadMs = Number(body.loadMs) || 0;
+  const orderId = String(body.orderId || '')
+    .replace(/[^\w.-]/g, '')
+    .slice(0, 80);
   if (!/^[a-zA-Z0-9-]{8,80}$/.test(visitorId)) return null;
   if (!TYPES.has(type)) return null;
   if (Number.isNaN(Date.parse(ts))) return null;
@@ -122,6 +134,7 @@ export function normalizeIncoming(body: Record<string, unknown>): StoredEvent | 
     source,
     path,
     productId,
+    orderId: orderId || undefined,
     ts: new Date(ts).toISOString(),
     loadMs: loadMs > 0 && loadMs < 120000 ? Math.round(loadMs) : 0,
   };

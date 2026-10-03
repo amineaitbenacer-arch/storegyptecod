@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import AntichocMarkup from './AntichocMarkup';
 import { formatSar, formatSarHtml } from '../../../lib/money';
-import { trackingFields, trackStoreEvent } from '../../../lib/tracking';
+import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../../lib/tracking';
 
 type Bundle = { id: number; name: string; price: number };
 
@@ -231,6 +231,7 @@ export default function ProductShell() {
 
       const fullLocation = address && address !== city ? `${city} - ${address}` : city;
       const orderId = Math.floor(1000 + Math.random() * 9000);
+      const pieces = currentBundle.id === 1 ? 2 : currentBundle.id === 2 ? 4 : 6;
       const orderData = {
         orderId,
         name,
@@ -239,12 +240,21 @@ export default function ProductShell() {
         address: fullLocation,
         offer: currentBundle.name,
         offerName: currentBundle.name,
-        pieces: currentBundle.id === 1 ? 2 : currentBundle.id === 2 ? 4 : 6,
+        pieces,
         price: currentBundle.price,
         packId: currentBundle.id,
         ...trackingFields(),
         productId,
       };
+
+      trackStoreEvent('purchase', {
+        productId,
+        value: currentBundle.price,
+        contentName: currentBundle.name,
+        orderId,
+        numItems: pieces,
+      });
+      flushTrackingQueue();
 
       localStorage.setItem('ac_last_order', JSON.stringify(orderData));
       localStorage.setItem('lastOrder', JSON.stringify(orderData));

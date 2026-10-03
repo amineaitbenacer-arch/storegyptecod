@@ -142,12 +142,20 @@
         .src-direct::before { background: #94A3B8; }
         .src-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
         .src-head > div:nth-child(2) { min-width: 0; flex: 1; overflow: hidden; }
-        .src-logo { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: 0 0 42px; }
-        .src-logo svg { width: 24px; height: 24px; display: block; }
-        .src-logo-meta { background: #0866FF; }
-        .src-logo-tiktok { background: #010101; }
-        .src-logo-snap { background: #FFFC00; }
-        .src-logo-direct { background: #1e293b; border: 1px solid rgba(148,163,184,.35); }
+        .src-logo {
+            width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; flex: 0 0 48px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 18px rgba(0,0,0,.28);
+        }
+        .src-logo svg { width: 26px; height: 26px; display: block; }
+        .src-logo-meta { background: linear-gradient(145deg, #0866FF, #0546b5); }
+        .src-logo-tiktok { background: #000; border: 1px solid rgba(254,44,85,.45); box-shadow: 0 0 0 1px rgba(37,244,238,.2), 0 8px 18px rgba(0,0,0,.35); }
+        .src-logo-snap { background: #FFFC00; box-shadow: 0 0 16px rgba(255,252,0,.25), 0 8px 18px rgba(0,0,0,.25); }
+        .src-logo-direct { background: linear-gradient(145deg, #334155, #1e293b); border: 1px solid rgba(148,163,184,.4); }
+        .px-brand-logo {
+            width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; flex: 0 0 44px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 6px 14px rgba(0,0,0,.25);
+        }
+        .px-brand-logo svg { width: 24px; height: 24px; display: block; }
         .src-name { font-size: 17px; font-weight: 900; color: #fff; line-height: 1; }
         .src-kicker { margin-top: 4px; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .src-kicker-meta { color: #60a5fa; }
@@ -197,8 +205,8 @@
         .src-snap .src-sec { color: #FFFC00; background: rgba(255,252,0,.1); border-color: rgba(255,252,0,.28); }
         .src-direct .src-sec { color: #e2e8f0; background: rgba(148,163,184,.12); border-color: rgba(148,163,184,.28); }
         .src-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 999px; font-size: 12px; font-weight: 900; border: 1px solid transparent; }
-        .src-pill .src-logo { width: 22px; height: 22px; border-radius: 7px; flex-basis: 22px; }
-        .src-pill .src-logo svg { width: 13px; height: 13px; }
+        .src-pill .src-logo { width: 24px; height: 24px; border-radius: 7px; flex-basis: 24px; box-shadow: none; }
+        .src-pill .src-logo svg { width: 14px; height: 14px; }
         .src-pill-meta { background: rgba(8,102,255,.16); color: #93c5fd; border-color: rgba(8,102,255,.4); }
         .src-pill-tiktok { background: rgba(254,44,85,.12); color: #fda4af; border-color: rgba(37,244,238,.35); }
         .src-pill-snap { background: rgba(255,252,0,.12); color: #FFFC00; border-color: rgba(255,252,0,.4); }
@@ -343,9 +351,9 @@
                 </button>
                 <!-- Tab 3: Protected Pixels -->
                 <button id="tab-settings-btn" onclick="switchAdminTab('settings')" class="px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all text-gray-300 hover:text-white hover:bg-gray-800/80">
-                    <i class="fa-brands fa-snapchat text-yellow-300 text-lg"></i> Snapchat Pixels
-                    <span class="bg-yellow-400/15 text-yellow-300 text-[11px] px-2.5 py-0.5 rounded-full font-black border border-yellow-400/40 flex items-center gap-1">
-                        <i class="fa-solid fa-lock text-[9px]"></i> Secured
+                    <i class="fa-solid fa-puzzle-piece text-yellow-400 text-lg"></i> Pixels
+                    <span class="bg-red-500/20 text-red-300 text-[11px] px-2.5 py-0.5 rounded-full font-black border border-red-500/30 flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[9px]"></i> 3 Platforms
                     </span>
                 </button>
                 <button id="tab-sources-btn" onclick="switchAdminTab('sources')" class="px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all text-gray-300 hover:text-white hover:bg-gray-800/80">
@@ -558,130 +566,129 @@
             </div>
         </div>
 
-        <!-- 🔐 VIEW 3: SNAPCHAT PIXELS -->
+        <!-- 🔐 VIEW 3: PIXELS — META / TIKTOK / SNAPCHAT -->
         <div id="settings-view" style="display: none;">
-            <div id="pixel-lock-screen" class="glass-card p-8 md:p-12 max-w-lg mx-auto text-center border-2 border-yellow-400/40 shadow-[0_0_50px_rgba(255,252,0,0.12)]">
-                <div class="w-20 h-20 bg-[#FFFC00] rounded-3xl flex items-center justify-center text-black text-3xl mx-auto mb-6 shadow-[0_0_30px_rgba(255,252,0,0.35)]">
-                    <i class="fa-brands fa-snapchat"></i>
+            <div id="pixel-lock-screen" class="glass-card p-8 md:p-12 max-w-lg mx-auto text-center border-2 border-yellow-500/30 shadow-[0_0_50px_rgba(255,215,0,0.1)]">
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <span class="px-brand-logo" style="background:linear-gradient(145deg,#0866FF,#0546b5)" id="lock-logo-meta"></span>
+                    <span class="px-brand-logo" style="background:#000;border:1px solid rgba(254,44,85,.45)" id="lock-logo-tiktok"></span>
+                    <span class="px-brand-logo" style="background:#FFFC00" id="lock-logo-snap"></span>
                 </div>
-                <h3 class="text-2xl font-black text-white glow-text mb-2">Snapchat Pixels 🔐</h3>
-                <p class="text-sm text-gray-400 mb-6 font-semibold">أدخل الباسورد باش تشوف وتعدّل Snap Pixel IDs و CAPI Tokens.</p>
+                <h3 class="text-2xl font-black text-white glow-text mb-2">Pixels · 3 Platforms 🔐</h3>
+                <p class="text-sm text-gray-400 mb-6 font-semibold">Meta · TikTok · Snapchat — أدخل الباسورد باش تعدّل الـ Pixel IDs.</p>
                 <form onsubmit="unlockPixelSettings(event)" class="space-y-4">
                     <div class="relative">
                         <i class="fa-solid fa-key absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="password" id="pixel-passcode" placeholder="Enter Passcode..." class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-yellow-400 transition-all text-center font-black en-font shadow-inner text-lg" required>
+                        <input type="password" id="pixel-passcode" placeholder="Enter Passcode..." class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-yellow-500 transition-all text-center font-black en-font shadow-inner text-lg" required>
                     </div>
                     <button type="submit" class="w-full btn-gold py-3.5 rounded-xl font-black text-base flex items-center justify-center gap-2 shadow-lg">
-                        <i class="fa-solid fa-lock-open"></i> Unlock Snapchat Pixels
+                        <i class="fa-solid fa-lock-open"></i> Unlock All Pixels
                     </button>
                     <p id="pixel-lock-error" class="text-red-400 text-xs font-bold hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20">❌ Incorrect Passcode!</p>
                 </form>
             </div>
 
-            <div id="pixel-unlocked-panel" style="display: none;" class="glass-card p-6 md:p-8 border-2 border-yellow-400/30">
-                <div class="flex flex-wrap items-center justify-between mb-8 pb-4 border-b border-yellow-400/20 gap-4">
+            <div id="pixel-unlocked-panel" style="display: none;" class="glass-card p-6 md:p-8">
+                <div class="flex flex-wrap items-center justify-between mb-8 pb-4 border-b border-gray-700/50 gap-4">
                     <div>
                         <h2 class="text-2xl md:text-3xl font-black text-white glow-text flex items-center gap-3">
-                            <span class="w-11 h-11 rounded-xl bg-[#FFFC00] text-black flex items-center justify-center text-xl"><i class="fa-brands fa-snapchat"></i></span>
-                            Snapchat Pixels
+                            <i class="fa-solid fa-puzzle-piece text-yellow-500"></i> Pixels · 3 Platforms
                         </h2>
-                        <p class="text-sm text-gray-400 mt-1 font-semibold">حط Pixel ID → Save → كيتفعّل فالموقع أوتوماتيك (PageView · ViewContent · AddToCart · Checkout · Purchase)</p>
+                        <p class="text-sm text-gray-400 mt-1 font-semibold">حط Pixel ID لأي منصة → Save → كيتفعّل فالموقع أوتوماتيك (PageView · ViewContent · AddToCart · Checkout · Purchase)</p>
                     </div>
                     <button onclick="lockPixelSettings()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-xl text-xs font-bold border border-gray-700 flex items-center gap-2 transition">
-                        <i class="fa-solid fa-lock text-yellow-400"></i> Lock Settings
+                        <i class="fa-solid fa-lock text-yellow-500"></i> Lock Settings
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="p-6 rounded-2xl border-2 border-[#FFFC00]/55 bg-[rgba(255,252,0,0.06)] relative overflow-hidden shadow-[0_0_28px_rgba(255,252,0,0.08)]">
-                        <div class="absolute top-0 inset-x-0 h-1 bg-[#FFFC00]"></div>
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-11 h-11 rounded-xl bg-[#FFFC00] flex items-center justify-center text-black text-xl">
-                                <i class="fa-brands fa-snapchat"></i>
-                            </div>
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+                    <!-- META -->
+                    <div class="p-6 rounded-2xl border-2 border-[#0866FF]/55 bg-[rgba(8,102,255,0.07)] relative overflow-hidden shadow-[0_0_28px_rgba(8,102,255,0.12)]">
+                        <div class="absolute top-0 inset-x-0 h-1 bg-[#0866FF]"></div>
+                        <div class="flex items-center gap-3 mb-5">
+                            <span class="px-brand-logo" style="background:linear-gradient(145deg,#0866FF,#0546b5)" data-brand-logo="meta"></span>
                             <div>
-                                <h3 class="text-xl font-black text-white">Snapchat Main Pixel</h3>
-                                <p class="text-[11px] font-bold text-yellow-300/80 uppercase tracking-wider">Primary · PAGE_VIEW + PURCHASE</p>
+                                <h3 class="text-xl font-black text-white">Meta</h3>
+                                <p class="text-[11px] font-bold text-blue-300 uppercase tracking-wider">Facebook · Instagram</p>
                             </div>
                         </div>
-                        <div class="space-y-4 relative z-10">
+                        <div class="space-y-4">
                             <div>
-                                <label class="block text-xs font-bold text-yellow-200/70 mb-1">Pixel ID</label>
-                                <input type="text" id="snapchat_pixel" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" class="w-full bg-gray-950 border-2 border-yellow-400/35 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
+                                <label class="block text-xs font-bold text-blue-200/70 mb-1">Main Pixel ID</label>
+                                <input type="text" id="fb_pixel_1" placeholder="e.g. 1234567890" class="w-full bg-gray-950 border-2 border-blue-500/35 text-white rounded-lg px-4 py-3 focus:border-[#0866FF] outline-none en-font shadow-inner">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-yellow-200/70 mb-1">CAPI Token</label>
-                                <input type="password" id="snapchat_token" placeholder="e.g. eyJhbG..." class="w-full bg-gray-950 border-2 border-yellow-400/35 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
+                                <label class="block text-xs font-bold text-blue-200/70 mb-1">Main CAPI Token</label>
+                                <input type="password" id="fb_token_1" placeholder="EAAOUictp..." class="w-full bg-gray-950 border-2 border-blue-500/35 text-white rounded-lg px-4 py-3 focus:border-[#0866FF] outline-none en-font shadow-inner">
+                            </div>
+                            <div class="pt-2 border-t border-blue-500/20">
+                                <label class="block text-xs font-bold text-blue-200/50 mb-1">Backup Pixel ID (optional)</label>
+                                <input type="text" id="fb_pixel_2" placeholder="e.g. 0987654321" class="w-full bg-gray-950 border-2 border-blue-500/20 text-white rounded-lg px-4 py-2.5 focus:border-[#0866FF] outline-none en-font shadow-inner text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-blue-200/50 mb-1">Backup CAPI Token</label>
+                                <input type="password" id="fb_token_2" placeholder="EAAOUictp..." class="w-full bg-gray-950 border-2 border-blue-500/20 text-white rounded-lg px-4 py-2.5 focus:border-[#0866FF] outline-none en-font shadow-inner text-sm">
                             </div>
                         </div>
                     </div>
 
-                    <div class="p-6 rounded-2xl border-2 border-yellow-400/35 bg-[rgba(255,252,0,0.04)] relative overflow-hidden">
-                        <div class="absolute top-0 inset-x-0 h-1 bg-yellow-400/70"></div>
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-11 h-11 rounded-xl bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center text-yellow-300 text-xl">
-                                <i class="fa-brands fa-snapchat"></i>
-                            </div>
+                    <!-- TIKTOK -->
+                    <div class="p-6 rounded-2xl border-2 border-[#FE2C55]/50 bg-[rgba(254,44,85,0.07)] relative overflow-hidden shadow-[0_0_28px_rgba(254,44,85,0.1)]">
+                        <div class="absolute top-0 inset-x-0 h-1" style="background:linear-gradient(90deg,#25F4EE,#fff 45%,#FE2C55)"></div>
+                        <div class="flex items-center gap-3 mb-5">
+                            <span class="px-brand-logo" style="background:#000;border:1px solid rgba(254,44,85,.45)" data-brand-logo="tiktok"></span>
                             <div>
-                                <h3 class="text-xl font-black text-white">Snapchat Backup Pixel</h3>
-                                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Optional · نفس الأحداث</p>
+                                <h3 class="text-xl font-black text-white">TikTok</h3>
+                                <p class="text-[11px] font-bold text-pink-300 uppercase tracking-wider">TikTok Ads Pixel</p>
                             </div>
                         </div>
-                        <div class="space-y-4 relative z-10">
+                        <div class="space-y-4">
                             <div>
-                                <label class="block text-xs font-bold text-yellow-200/70 mb-1">Pixel ID</label>
-                                <input type="text" id="snapchat_pixel_2" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" class="w-full bg-gray-950 border-2 border-yellow-400/25 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
+                                <label class="block text-xs font-bold text-pink-200/70 mb-1">Pixel ID</label>
+                                <input type="text" id="tiktok_pixel" placeholder="e.g. CXXXXXX" class="w-full bg-gray-950 border-2 border-pink-500/35 text-white rounded-lg px-4 py-3 focus:border-[#FE2C55] outline-none en-font shadow-inner">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-yellow-200/70 mb-1">CAPI Token</label>
-                                <input type="password" id="snapchat_token_2" placeholder="e.g. eyJhbG..." class="w-full bg-gray-950 border-2 border-yellow-400/25 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
+                                <label class="block text-xs font-bold text-pink-200/70 mb-1">Events API Token</label>
+                                <input type="password" id="tiktok_token" placeholder="e.g. 5d12345..." class="w-full bg-gray-950 border-2 border-pink-500/35 text-white rounded-lg px-4 py-3 focus:border-[#FE2C55] outline-none en-font shadow-inner">
+                            </div>
+                            <p class="text-[11px] text-gray-500 font-semibold leading-relaxed">كيتفعّل PageView · ViewContent · AddToCart · InitiateCheckout · CompletePayment</p>
+                        </div>
+                    </div>
+
+                    <!-- SNAPCHAT -->
+                    <div class="p-6 rounded-2xl border-2 border-[#FFFC00]/55 bg-[rgba(255,252,0,0.06)] relative overflow-hidden shadow-[0_0_28px_rgba(255,252,0,0.1)]">
+                        <div class="absolute top-0 inset-x-0 h-1 bg-[#FFFC00]"></div>
+                        <div class="flex items-center gap-3 mb-5">
+                            <span class="px-brand-logo" style="background:#FFFC00" data-brand-logo="snapchat"></span>
+                            <div>
+                                <h3 class="text-xl font-black text-white">Snapchat</h3>
+                                <p class="text-[11px] font-bold text-yellow-300 uppercase tracking-wider">Snap Pixel</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-yellow-200/70 mb-1">Main Pixel ID</label>
+                                <input type="text" id="snapchat_pixel" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" class="w-full bg-gray-950 border-2 border-yellow-400/35 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-yellow-200/70 mb-1">Main CAPI Token</label>
+                                <input type="password" id="snapchat_token" placeholder="e.g. eyJhbG..." class="w-full bg-gray-950 border-2 border-yellow-400/35 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
+                            </div>
+                            <div class="pt-2 border-t border-yellow-400/20">
+                                <label class="block text-xs font-bold text-yellow-200/50 mb-1">Backup Pixel ID (optional)</label>
+                                <input type="text" id="snapchat_pixel_2" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" class="w-full bg-gray-950 border-2 border-yellow-400/20 text-white rounded-lg px-4 py-2.5 focus:border-[#FFFC00] outline-none en-font shadow-inner text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-yellow-200/50 mb-1">Backup CAPI Token</label>
+                                <input type="password" id="snapchat_token_2" placeholder="e.g. eyJhbG..." class="w-full bg-gray-950 border-2 border-yellow-400/20 text-white rounded-lg px-4 py-2.5 focus:border-[#FFFC00] outline-none en-font shadow-inner text-sm">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <details class="mb-8 group">
-                    <summary class="cursor-pointer list-none flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-white/10 bg-white/[0.03] text-sm font-bold text-gray-300 hover:bg-white/[0.05]">
-                        <span><i class="fa-solid fa-layer-group text-gray-500 mr-2"></i> Meta / TikTok (اختياري)</span>
-                        <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition"></i>
-                    </summary>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
-                        <div class="glass-card p-5 border-t-2 border-blue-500 bg-gray-900/50">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30"><i class="fa-brands fa-facebook"></i></div>
-                                <h3 class="text-base font-bold text-white">Facebook Main</h3>
-                            </div>
-                            <div class="space-y-3">
-                                <input type="text" id="fb_pixel_1" placeholder="Pixel ID" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-blue-500 outline-none en-font text-sm">
-                                <input type="password" id="fb_token_1" placeholder="CAPI Token" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-blue-500 outline-none en-font text-sm">
-                            </div>
-                        </div>
-                        <div class="glass-card p-5 border-t-2 border-indigo-500 bg-gray-900/50">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-9 h-9 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30"><i class="fa-brands fa-facebook"></i></div>
-                                <h3 class="text-base font-bold text-white">Facebook Backup</h3>
-                            </div>
-                            <div class="space-y-3">
-                                <input type="text" id="fb_pixel_2" placeholder="Pixel ID" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-indigo-500 outline-none en-font text-sm">
-                                <input type="password" id="fb_token_2" placeholder="CAPI Token" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-indigo-500 outline-none en-font text-sm">
-                            </div>
-                        </div>
-                        <div class="glass-card p-5 border-t-2 border-pink-500 bg-gray-900/50 md:col-span-2">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-9 h-9 rounded-lg bg-pink-600/20 flex items-center justify-center text-pink-400 border border-pink-500/30"><i class="fa-brands fa-tiktok"></i></div>
-                                <h3 class="text-base font-bold text-white">TikTok Pixel</h3>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <input type="text" id="tiktok_pixel" placeholder="Pixel ID" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-pink-500 outline-none en-font text-sm">
-                                <input type="password" id="tiktok_token" placeholder="Events API Token" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-pink-500 outline-none en-font text-sm">
-                            </div>
-                        </div>
-                    </div>
-                </details>
-
-                <div class="pt-6 border-t border-yellow-400/20 flex flex-wrap items-center justify-between gap-4">
-                    <button onclick="saveAllSettings()" class="bg-[#FFFC00] hover:bg-yellow-300 text-black px-8 py-3.5 rounded-xl font-black flex items-center justify-center gap-2.5 shadow-[0_4px_20px_rgba(255,252,0,0.28)] transition-all text-base">
-                        <i class="fa-solid fa-save text-lg"></i> Save Snapchat Pixels
+                <div class="pt-6 border-t border-gray-700/50 flex flex-wrap items-center justify-between gap-4">
+                    <button onclick="saveAllSettings()" class="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-8 py-3.5 rounded-xl font-black flex items-center justify-center gap-2.5 shadow-[0_4px_20px_rgba(255,215,0,0.3)] transition-all text-base">
+                        <i class="fa-solid fa-save text-lg"></i> Save All Platforms
                     </button>
                     <p id="settings-status" class="text-green-400 font-bold hidden flex items-center gap-2"><i class="fa-solid fa-circle-check text-xl"></i> تم الحفظ بنجاح!</p>
                 </div>
@@ -883,26 +890,31 @@
                 if (data.success) {
                     allOrders = data.orders || [];
                     
-                    // Normalize corrupted Arabic text from old database records
+                    // Normalize statuses + preserve real offer labels (store cart / product pages)
                     allOrders.forEach(o => {
                         o.created_at = o.created_at || o.timestamp || new Date().toISOString();
-                        if (!o.offer_name) o.offer_name = o.offer || '';
+                        if (!o.offer_name) o.offer_name = o.offer || o.offerName || '';
                         const statusMap = { pending: 'Nouveau', confirmed: 'Confirmé', cancelled: 'Annulé', shipped: 'Pas de réponse', delivered: 'Confirmé' };
                         if (statusMap[o.status]) o.status = statusMap[o.status];
                         if (!o.status) o.status = 'Nouveau';
-                        if (o.offer_name) {
-                            const n = o.offer_name.toLowerCase();
-                            if (n.includes('4') || n.includes('??? 4') || n.includes('4 pcs')) {
-                                o.offer_name = 'باك 4 قطع (حمامين أو منزلين) 🏆';
-                            } else if (n.includes('2') || n.includes('طقم 2') || n.includes('2 pcs') || n.includes('حمام واحد')) {
-                                o.offer_name = 'طقم 2 قطع (شوفو واحد) 🛡️';
-                            } else if (n.includes('6') || n.includes('3 حمامات') || n.includes('6 pcs')) {
-                                o.offer_name = 'باك 6 قطع (3 حمامات) 🏡';
-                            } else if (n.includes('?')) {
-                                o.offer_name = 'باك 4 قطع (حمامين أو منزلين) 🏆'; // Fallback for fully corrupted names
-                            }
-                        } else {
-                            o.offer_name = 'باك 4 قطع (حمامين أو منزلين) 🏆';
+
+                        // Remap ONLY legacy corrupted AntiChoc pack labels — never rewrite store/cart product names
+                        const pid = String(o.productId || '');
+                        const n = String(o.offer_name || '');
+                        const looksLegacyCorrupted = n.includes('?') || n.includes('???');
+                        const isAntiChocPackFlow =
+                            !pid ||
+                            pid === 'produit-1' ||
+                            pid === 'antichoc' ||
+                            /طقم|باك|قطع|pcs|pack/i.test(n);
+
+                        if (looksLegacyCorrupted && isAntiChocPackFlow) {
+                            if (/\b6\b|3 حمام/.test(n)) o.offer_name = 'باك 6 قطع (3 حمامات) 🏡';
+                            else if (/\b4\b|حمامين|منزلين/.test(n)) o.offer_name = 'باك 4 قطع (حمامين أو منزلين) 🏆';
+                            else if (/\b2\b|سخان واحد|حمام واحد/.test(n)) o.offer_name = 'طقم 2 قطع (سخان واحد) 🛡️';
+                            else o.offer_name = n.replace(/\?+/g, '').trim() || 'طلب متجر';
+                        } else if (!o.offer_name) {
+                            o.offer_name = 'طلب متجر';
                         }
                     });
 
@@ -1090,12 +1102,30 @@
             const raw = (Number(count) / total) * 100;
             return Math.min(100, Math.max(0, raw)).toFixed(1);
         }
+        /* Real brand marks — Meta ∞ · TikTok note · Snapchat ghost · Direct */
         const SOURCE_LOGOS = {
-            meta: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M14.5 4H16v4h-1.2c-.7 0-1.1.4-1.1 1.1V11H16l-.4 3h-2v6h-3v-6H8.5v-3H10V8.7C10 6.2 11.5 4 14.5 4z"/></svg>',
-            tiktok: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#25F4EE" d="M14 4h2.2a5 5 0 0 0 3.6 3.2v2.2A7.2 7.2 0 0 1 16 8.2V15a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v2.3A2.7 2.7 0 1 0 13.2 15V4z"/><path fill="#FE2C55" d="M15.2 4h2.2a5 5 0 0 0 3.6 3.2v2.2A7.2 7.2 0 0 1 17.2 8.2V15a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v2.3a2.7 2.7 0 1 0 1.3 2.4V4z"/><path fill="#fff" d="M14.6 4h2.2a5 5 0 0 0 3.6 3.2v2.2A7.2 7.2 0 0 1 16.6 8.2V15a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v2.3a2.7 2.7 0 1 0 1.3 2.4V4z"/></svg>',
-            snapchat: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M12 3.2c2.6 0 4.4 2 4.4 4.8 0 1.5.3 2.4 1 3.1.4.4.8.5 1.3.6.3 0 .5.3.4.6-.4 1.2-1.6 1.6-2.6 1.8-.2 0-.4.2-.4.5 0 .8.7 1.4 1.5 1.8.3.1.3.5 0 .7-1.2.6-2.3.4-3.1.2-.3-.1-.6.1-.7.4-.4 1.3-1.5 2.1-2.8 2.1s-2.4-.8-2.8-2.1c-.1-.3-.4-.5-.7-.4-.8.2-1.9.4-3.1-.2-.3-.2-.3-.6 0-.7.8-.4 1.5-1 1.5-1.8 0-.3-.2-.5-.4-.5-1-.2-2.2-.6-2.6-1.8-.1-.3.1-.6.4-.6.5-.1.9-.2 1.3-.6.7-.7 1-1.6 1-3.1 0-2.8 1.8-4.8 4.4-4.8z"/></svg>',
-            direct: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#e2e8f0" d="M14 4h6v6h-2V7.4l-7.3 7.3-1.4-1.4L16.6 6H14V4zM6 6h5v2H8v8h8v-3h2v5H6V6z"/></svg>'
+            meta: `<svg viewBox="0 0 36 24" aria-hidden="true"><path fill="#fff" d="M24.7 3.4c-2.6 0-4.9 1.8-6.5 4.5C16.6 5.2 14.3 3.4 11.7 3.4 8 3.4 5 7.2 5 12.3S8 21.2 11.7 21.2c2.6 0 4.9-1.8 6.5-4.5 1.6 2.7 3.9 4.5 6.5 4.5 3.7 0 6.7-3.8 6.7-8.9S28.4 3.4 24.7 3.4zm-13 14.7c-2.2 0-3.9-2.6-3.9-5.8s1.7-5.8 3.9-5.8 4 2.4 5.2 5.8c-1.2 3.4-3 5.8-5.2 5.8zm13 0c-2.2 0-4-2.4-5.2-5.8 1.2-3.4 3-5.8 5.2-5.8 2.2 0 3.9 2.6 3.9 5.8s-1.7 5.8-3.9 5.8z"/></svg>`,
+            tiktok: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#25F4EE" d="M16.6 5.8A4.6 4.6 0 0 1 14.1 3h-2.3v11.6a2.2 2.2 0 1 1-1.5-2.1V10a4.6 4.6 0 1 0 3.8 4.5V9.3a6.8 6.8 0 0 0 4 1.3V8.2a4.6 4.6 0 0 1-1.5-2.4z"/><path fill="#FE2C55" d="M17.3 6.5A4.6 4.6 0 0 1 14.8 3.7h-2.3v11.6a2.2 2.2 0 1 1-1.5-2.1V10.7a4.6 4.6 0 1 0 3.8 4.5v-5.2a6.8 6.8 0 0 0 4 1.3V9a4.6 4.6 0 0 1-1.5-2.5z" opacity=".85"/><path fill="#fff" d="M16.2 5.5A4.6 4.6 0 0 1 13.7 2.7H11.4v11.6a2.2 2.2 0 1 1-1.5-2.1V9.7a4.6 4.6 0 1 0 3.8 4.5V9a6.8 6.8 0 0 0 4 1.3V7.9a4.6 4.6 0 0 1-1.5-2.4z"/></svg>`,
+            snapchat: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M12.02 2.1c-2.9 0-5.05 2.15-5.05 4.95 0 1.42.27 2.5.93 3.4.28.38.49.7.49 1 0 .26-.21.42-.55.54-.89.31-2.2.78-2.2 2.03 0 .79.46 1.41 1.22 1.85.15.09.2.2.15.34-.2.59-.74 1.3-1.95 1.48-.2.03-.33.16-.33.35 0 .49.84 1.03 2.14 1.03.69 0 1.3-.12 1.85-.3.24-.08.41-.04.54.14.41.57 1.45 1.37 3.37 1.37s2.96-.8 3.37-1.37c.13-.18.3-.22.54-.14.55.18 1.16.3 1.85.3 1.3 0 2.14-.54 2.14-1.03 0-.19-.13-.32-.33-.35-1.21-.18-1.75-.89-1.95-1.48-.05-.14 0-.25.15-.34.76-.44 1.22-1.06 1.22-1.85 0-1.25-1.31-1.72-2.2-2.03-.34-.12-.55-.28-.55-.54 0-.3.21-.62.49-1 .66-.9.93-1.98.93-3.4 0-2.8-2.15-4.95-5.05-4.95z"/></svg>`,
+            direct: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#e2e8f0" d="M12 2a10 10 0 1 0 10 10A10.01 10.01 0 0 0 12 2zm7.4 9h-3.1a15.3 15.3 0 0 0-1.3-5.2A8.05 8.05 0 0 1 19.4 11zM12 4c.9 0 2.4 1.8 3.1 5H8.9C9.6 5.8 11.1 4 12 4zM4.6 13h3.1c.2 1.9.7 3.7 1.3 5.2A8.05 8.05 0 0 1 4.6 13zm3.1-2H4.6a8.05 8.05 0 0 1 4.4-5.2A15.3 15.3 0 0 0 7.7 11zm1.2 2h6.2c-.2 1.9-.8 3.8-1.6 5.2-.5.2-1 .3-1.5.3s-1-.1-1.5-.3c-.8-1.4-1.4-3.3-1.6-5.2zm6.2-2H8.9c.2-1.9.8-3.8 1.6-5.2.5-.2 1-.3 1.5-.3s1 .1 1.5.3c.8 1.4 1.4 3.3 1.6 5.2zm.7 7.2c.6-1.5 1.1-3.3 1.3-5.2h3.1a8.05 8.05 0 0 1-4.4 5.2z"/></svg>`
         };
+
+        function injectBrandLogos() {
+            document.querySelectorAll('[data-brand-logo]').forEach((el) => {
+                const key = el.getAttribute('data-brand-logo');
+                if (SOURCE_LOGOS[key]) el.innerHTML = SOURCE_LOGOS[key];
+            });
+            const lockMap = { 'lock-logo-meta': 'meta', 'lock-logo-tiktok': 'tiktok', 'lock-logo-snap': 'snapchat' };
+            Object.keys(lockMap).forEach((id) => {
+                const el = document.getElementById(id);
+                if (el && SOURCE_LOGOS[lockMap[id]]) el.innerHTML = SOURCE_LOGOS[lockMap[id]];
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', injectBrandLogos);
+        } else {
+            injectBrandLogos();
+        }
         function sourceBadge(source) {
             const map = {
                 meta: ['Meta', 'src-pill-meta', 'meta'],
@@ -1136,7 +1166,9 @@
                 const product = uniqueVisitors(mine, 'product');
                 const carts = uniqueVisitors(mine, 'addtocart');
                 const checkouts = uniqueVisitors(mine, 'checkout');
+                const purchases = uniqueVisitors(mine, 'purchase');
                 const orders = scopedOrders.filter(order => order.source === src.id).length;
+                const salesCount = Math.max(orders, purchases);
                 const depth = productDepthBuckets(mine);
                 return `<div class="src-card src-${src.tone}">
                     <div class="src-head">
@@ -1165,12 +1197,14 @@
                         <div class="src-sec">Sales</div>
                         ${srcRow('Add to cart', carts, visitors)}
                         ${srcRow('Checkout', checkouts, visitors)}
-                        ${srcRow('Orders', orders, visitors)}
+                        ${srcRow('Purchase', purchases, visitors)}
+                        ${srcRow('Orders', salesCount, visitors)}
                     </div>
                 </div>`;
             }).join('');
             const allDepth = productDepthBuckets(events);
             const productVisitors = uniqueVisitors(events, 'product');
+            const purchaseVisitors = uniqueVisitors(events, 'purchase');
             const steps = [
                 ['Visitors', allVisitorsCount, allVisitorsCount],
                 ['Landing page', uniqueVisitors(events, 'lp'), allVisitorsCount],
@@ -1181,7 +1215,8 @@
                 ['Read 100%', allDepth.d100, productVisitors],
                 ['Add to cart', uniqueVisitors(events, 'addtocart'), allVisitorsCount],
                 ['Checkout', uniqueVisitors(events, 'checkout'), allVisitorsCount],
-                ['Orders', scopedOrders.length, allVisitorsCount]
+                ['Purchase', purchaseVisitors, allVisitorsCount],
+                ['Orders', Math.max(scopedOrders.length, purchaseVisitors), allVisitorsCount]
             ];
             funnel.innerHTML = steps.map(([label, count, base]) => {
                 const pct = shareOfVisitors(count, base);

@@ -9,6 +9,14 @@ export default function TrackVisit() {
 
   useEffect(() => {
     flushTrackingQueue();
+    const onHide = () => flushTrackingQueue();
+    window.addEventListener('pagehide', onHide);
+    window.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') flushTrackingQueue();
+    });
+    return () => {
+      window.removeEventListener('pagehide', onHide);
+    };
   }, []);
 
   useEffect(() => {

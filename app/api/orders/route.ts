@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { sourceFromClick } from '../../../lib/tracking';
+import { appendEvent } from '../../../lib/analytics-store';
+import { isAdSource, sourceFromClick } from '../../../lib/tracking';
 
 const ORDERS_FILE = path.join(process.cwd(), 'orders.json');
 
@@ -22,7 +23,25 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { name, phone, city, address, offer, offerName, pieces, price, timestamp, fbclid, ttclid, sccid, utm_source, productId } = body;
+    const {
+      name,
+      phone,
+      city,
+      address,
+      offer,
+      offerName,
+      pieces,
+      price,
+      timestamp,
+      fbclid,
+      ttclid,
+      sccid,
+      utm_source,
+      productId,
+      visitorId,
+      orderId: clientOrderId,
+      source: bodySource,
+    } = body;
     const offerLabel = offer || offerName;
 
     if (!name || !phone || !city || !offerLabel) {
@@ -33,6 +52,19 @@ export async function POST(request: NextRequest) {
     if (!/^\d{10}$/.test(phone)) {
       return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
     }
+
+    const clickSource = sourceFromClick({
+      fbclid: fbclid || undefined,
+      ttclid: ttclid || undefined,
+      sccid: sccid || undefined,
+      utm_source: utm_source || undefined,
+    });
+    const source =
+      clickSource !== 'direct'
+        ? clickSource
+        : isAdSource(bodySource)
+          ? bodySource
+          : 'direct';
 
     const order = {
       id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
@@ -46,22 +78,38 @@ export async function POST(request: NextRequest) {
       timestamp: timestamp || new Date().toISOString(),
       status: 'Nouveau',
       note: '',
-      source: sourceFromClick({
-        fbclid: fbclid || undefined,
-        ttclid: ttclid || undefined,
-        sccid: sccid || undefined,
-        utm_source: utm_source || undefined,
-      }),
+      source,
       fbclid: fbclid || '',
       ttclid: ttclid || '',
       sccid: sccid || '',
       utm_source: utm_source || '',
       productId: String(productId || '').replace(/[^\w.-]/g, '').slice(0, 80),
+      clientOrderId: String(clientOrderId || '').replace(/[^\w.-]/g, '').slice(0, 80),
+      visitorId: String(visitorId || '').replace(/[^\w-]/g, '').slice(0, 80),
     };
 
     const orders = await getOrders();
     orders.push(order);
     await saveOrders(orders);
+
+    // Keep statistics in sync even if client analytics beacon is lost
+    const vid = String(order.visitorId || '');
+    if (/^[a-zA-Z0-9-]{8,80}$/.test(vid)) {
+      try {
+        await appendEvent({
+          visitorId: vid,
+          type: 'purchase',
+          source,
+          path: '/thankyou',
+          productId: order.productId || '',
+          orderId: String(order.clientOrderId || order.id),
+          ts: order.timestamp,
+          loadMs: 0,
+        });
+      } catch {
+        /* never fail the order */
+      }
+    }
 
     return NextResponse.json({ success: true, orderId: order.id }, { status: 201 });
   } catch {

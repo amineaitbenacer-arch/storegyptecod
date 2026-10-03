@@ -1,23 +1,39 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { PRODUCTS, type StoreProduct } from '../../lib/products';
 import { formatSar } from '../../lib/money';
-import { trackStoreEvent } from '../../lib/tracking';
+import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
+import StoreCheckoutSheet from './StoreCheckoutSheet';
 import './store.css';
 
 const CART_KEY = 'store_cart_v1';
 
-type CartItem = { id: string; name: string; price: number; qty: number };
+type CartItem = { id: string; name: string; price: number; qty: number; image: string };
+
+function enrichItem(raw: Partial<CartItem>): CartItem | null {
+  if (!raw?.id) return null;
+  const catalog = PRODUCTS.find((p) => p.id === raw.id);
+  return {
+    id: raw.id,
+    name: raw.name || catalog?.name || 'منتج',
+    price: Number(raw.price) || catalog?.price || 0,
+    qty: Math.max(1, Number(raw.qty) || 1),
+    image: raw.image || catalog?.image || '/images/hero_anti_choc_product_1789640183592.png',
+  };
+}
 
 function readCart(): CartItem[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(CART_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(enrichItem).filter((i): i is CartItem => !!i);
   } catch {
     return [];
   }
@@ -47,7 +63,7 @@ function ProductCard({
             src={product.image}
             alt={product.name}
             fill
-            sizes="(max-width:760px) 100vw, 50vw"
+            sizes="(max-width:760px) 50vw, 50vw"
             style={{ objectFit: 'cover' }}
             priority={index < 2}
           />
@@ -79,15 +95,18 @@ function ProductCard({
 
         <div className="duo-actions">
           <Link href={product.href} className="duo-cta duo-cta-order">
-            اضغط للطلب
+            <span className="duo-cta-long">اضغط للطلب</span>
+            <span className="duo-cta-short">اطلب</span>
             <i className="fa-solid fa-arrow-left" aria-hidden />
           </Link>
           <button
             type="button"
             className="duo-cta duo-cta-cart"
             onClick={() => onAdd(product)}
+            aria-label="أضف إلى السلة"
           >
-            أضف إلى السلة
+            <span className="duo-cta-long">أضف إلى السلة</span>
+            <span className="duo-cta-short">سلة</span>
             <i className="fa-solid fa-cart-plus" aria-hidden />
           </button>
         </div>
@@ -172,24 +191,143 @@ const SOCIAL_PROOF = [
   { av: '👨‍👧', name: 'سعيد — الرياض', text: 'الطلب وصل بسرعة، والمعاينة قبل الدفع أعطتني ثقة كاملة.' },
   { av: '👩‍👦', name: 'نادية — جدة', text: 'تعامل راقٍ وتأكيد واضح على الهاتف. أنصح بالشراء من هنا.' },
   { av: '🛠️', name: 'يوسف — الدمام', text: 'المنتج مطابق للصور، والتوصيل منظم بدون تأخير.' },
+  { av: '👩‍💼', name: 'خديجة — الخبر', text: 'اشتريت أكثر من مرة. الجودة ثابتة والدفع عند الاستلام يريح البال.' },
+  { av: '🧔', name: 'ياسين — مكة', text: 'خدمة ممتازة من التأكيد حتى باب المنزل. تجربة شراء آمنة.' },
+  { av: '👩‍🏫', name: 'مريم — المدينة', text: 'طلبت بثقة بسبب المعاينة قبل الدفع. المنتج كما وُصف تمامًا.' },
+];
+
+const TRUST_PILLS = [
+  { icon: 'fa-truck-fast', color: '#ea580c', bg: '#fff7ed', text: 'توصيل آمن وسريع لجميع المدن' },
+  { icon: 'fa-hand-holding-dollar', color: '#2563eb', bg: '#eff6ff', text: 'الدفع عند الاستلام فقط' },
+  { icon: 'fa-medal', color: '#ca8a04', bg: '#fffbeb', text: 'ضمان ذهبي — إن لم يعجبك أرجعه' },
+  { icon: 'fa-headset', color: '#0f766e', bg: '#f0fdfa', text: 'تأكيد هاتفي ودعم قبل وبعد الطلب' },
+  { icon: 'fa-shield-halved', color: '#b45309', bg: '#fff7ed', text: 'منتجات مختارة لحماية المنزل' },
+  { icon: 'fa-box-open', color: '#059669', bg: '#ecfdf5', text: 'معاينة المنتج قبل الدفع' },
+];
+
+type StoryItem = {
+  id: string;
+  label: string;
+  ring: string;
+  image?: string;
+  icon?: string;
+  title: string;
+  text: string;
+};
+
+const STORIES: StoryItem[] = [
+  {
+    id: 's1',
+    label: 'الأكثر مبيعًا',
+    ring: '#d97706',
+    image: '/images/hero_anti_choc_product_1789640183592.png',
+    title: 'عازل AntiChoc Protect',
+    text: 'حماية حقيقية من تسرب الكهرباء في السخان — الأكثر طلبًا في المتجر.',
+  },
+  {
+    id: 's2',
+    label: 'ضمان ذهبي',
+    ring: '#ca8a04',
+    icon: 'fa-medal',
+    title: 'الضمان الذهبي',
+    text: 'إن لم يعجبك المنتج يمكنك إرجاعه وفق السياسة. شراء بلا مخاطرة.',
+  },
+  {
+    id: 's3',
+    label: 'عند الاستلام',
+    ring: '#2563eb',
+    icon: 'fa-hand-holding-dollar',
+    title: 'ادفع بعد المعاينة',
+    text: 'لا تدفع أي ريال قبل أن تفحص طلبك أمام المندوب عند باب المنزل.',
+  },
+  {
+    id: 's4',
+    label: 'توصيل سريع',
+    ring: '#ea580c',
+    icon: 'fa-truck-fast',
+    title: 'إلى باب بيتك',
+    text: 'توصيل مجاني خلال 24–72 ساعة حسب المدينة — لجميع أنحاء المملكة.',
+  },
+  {
+    id: 's5',
+    label: 'اختيارنا',
+    ring: '#0f766e',
+    image: '/images/new_box.jpg',
+    title: 'منتجات مختارة',
+    text: 'كل منتج في المتجر مختار بعناية لسهولة الطلب وثقة الأسرة.',
+  },
 ];
 
 export default function StoreHome() {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cartStep, setCartStep] = useState<'items' | 'checkout'>('items');
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [toast, setToast] = useState('');
   const [openPolicy, setOpenPolicy] = useState<string | null>('payment');
+  const [openDrawerFaq, setOpenDrawerFaq] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [city, setCity] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [cartBump, setCartBump] = useState(0);
+  const [cartShake, setCartShake] = useState(false);
+  const [cartPop, setCartPop] = useState<{ delta: number; total: number } | null>(null);
+  const [storyIndex, setStoryIndex] = useState<number | null>(null);
+  const [seenStories, setSeenStories] = useState<Record<string, boolean>>({});
+  const [mounted, setMounted] = useState(false);
+  const [navCartHidden, setNavCartHidden] = useState(false);
+
+  const cartCount = useMemo(() => cart.reduce((n, i) => n + i.qty, 0), [cart]);
+  const cartTotal = useMemo(() => cart.reduce((n, i) => n + i.price * i.qty, 0), [cart]);
+  const activeStory = storyIndex != null ? STORIES[storyIndex] : null;
+  const showCartTicket = mounted && !cartOpen && navCartHidden;
+
+  function syncCart(items: CartItem[]) {
+    writeCart(items);
+    setCart(items);
+  }
+
+  function showCartChange(delta: number, total: number) {
+    if (delta === 0) return;
+    setCartBump((n) => n + 1);
+    setCartShake(true);
+    setCartPop({ delta, total });
+  }
 
   useEffect(() => {
-    const items = readCart();
-    setCartCount(items.reduce((n, i) => n + i.qty, 0));
+    setMounted(true);
+    syncCart(readCart());
   }, []);
 
   useEffect(() => {
-    if (!menuOpen) return;
+    const navCart = document.querySelector('.store-cart-btn');
+    if (!navCart) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setNavCartHidden(!entry.isIntersecting),
+      { threshold: 0.15, rootMargin: '-8px 0px 0px 0px' }
+    );
+    io.observe(navCart);
+    return () => io.disconnect();
+  }, [mounted]);
+
+  useEffect(() => {
+    const anyOpen = menuOpen || cartOpen || storyIndex != null;
+    if (!anyOpen) {
+      document.body.style.overflow = '';
+      return;
+    }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMenuOpen(false);
+      if (e.key !== 'Escape') return;
+      if (storyIndex != null) setStoryIndex(null);
+      else if (cartStep === 'checkout') setCartStep('items');
+      else if (cartOpen) {
+        setCartOpen(false);
+        setCartStep('items');
+      } else setMenuOpen(false);
     };
     document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', onKey);
@@ -197,13 +335,25 @@ export default function StoreHome() {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', onKey);
     };
-  }, [menuOpen]);
+  }, [menuOpen, cartOpen, cartStep, storyIndex]);
 
   useEffect(() => {
     if (!toast) return;
     const t = window.setTimeout(() => setToast(''), 2200);
     return () => window.clearTimeout(t);
   }, [toast]);
+
+  useEffect(() => {
+    if (!cartPop) return;
+    const t = window.setTimeout(() => setCartPop(null), 1400);
+    return () => window.clearTimeout(t);
+  }, [cartPop, cartBump]);
+
+  useEffect(() => {
+    if (!cartShake) return;
+    const t = window.setTimeout(() => setCartShake(false), 450);
+    return () => window.clearTimeout(t);
+  }, [cartShake, cartBump]);
 
   useEffect(() => {
     const applyHash = () => {
@@ -214,6 +364,17 @@ export default function StoreHome() {
     window.addEventListener('hashchange', applyHash);
     return () => window.removeEventListener('hashchange', applyHash);
   }, []);
+
+  useEffect(() => {
+    if (storyIndex == null) return;
+    const story = STORIES[storyIndex];
+    setSeenStories((prev) => ({ ...prev, [story.id]: true }));
+    const t = window.setTimeout(() => {
+      if (storyIndex < STORIES.length - 1) setStoryIndex(storyIndex + 1);
+      else setStoryIndex(null);
+    }, 4500);
+    return () => window.clearTimeout(t);
+  }, [storyIndex]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -230,10 +391,20 @@ export default function StoreHome() {
     const items = readCart();
     const existing = items.find((i) => i.id === product.id);
     if (existing) existing.qty += 1;
-    else items.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
-    writeCart(items);
-    setCartCount(items.reduce((n, i) => n + i.qty, 0));
-    setToast(`تمت إضافة «${product.name}» إلى السلة`);
+    else
+      items.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        qty: 1,
+        image: product.image,
+      });
+    const total = items.reduce((n, i) => n + i.qty, 0);
+    syncCart(items);
+    showCartChange(1, total);
+    setToast(`تمت الإضافة — لديك ${total} في السلة`);
+    setMenuOpen(false);
+    setCartStep('items');
     trackStoreEvent('addtocart', {
       productId: product.id,
       value: product.price,
@@ -241,14 +412,125 @@ export default function StoreHome() {
     });
   }
 
+  function setQty(id: string, next: number) {
+    const prev = readCart();
+    const before = prev.reduce((n, i) => n + i.qty, 0);
+    const items = prev
+      .map((i) => (i.id === id ? { ...i, qty: next } : i))
+      .filter((i) => i.qty > 0);
+    const total = items.reduce((n, i) => n + i.qty, 0);
+    syncCart(items);
+    showCartChange(total - before, total);
+  }
+
+  function removeItem(id: string) {
+    const prev = readCart();
+    const removed = prev.find((i) => i.id === id)?.qty || 0;
+    const items = prev.filter((i) => i.id !== id);
+    const total = items.reduce((n, i) => n + i.qty, 0);
+    syncCart(items);
+    showCartChange(-removed, total);
+    if (items.length === 0) setCartStep('items');
+  }
+
+  function openCart() {
+    setMenuOpen(false);
+    setStoryIndex(null);
+    setCartStep('items');
+    setCart(readCart());
+    setCartOpen(true);
+  }
+
+  function closeCart() {
+    setCartOpen(false);
+    setCartStep('items');
+  }
+
+  function startCheckout() {
+    if (cart.length === 0) {
+      setToast('السلة فارغة — أضف منتجًا أولًا');
+      return;
+    }
+    trackStoreEvent('checkout', {
+      productId: cart[0]?.id || 'cart',
+      value: cartTotal,
+      contentName: cart.map((i) => i.name).join(' + '),
+    });
+    setCartStep('checkout');
+  }
+
+  async function submitOrder() {
+    const clean = phone.replace(/\D/g, '');
+    if (!name.trim() || !city || clean.length < 10) {
+      setPhoneError(
+        clean.length < 10 ? '⚠️ تأكد من رقم الهاتف (يجب أن يحتوي على 10 أرقام)' : ''
+      );
+      return;
+    }
+    setPhoneError('');
+    setSubmitting(true);
+
+    const offerLabel =
+      cart.length === 1
+        ? `${cart[0].name} × ${cart[0].qty}`
+        : cart.map((i) => `${i.name} × ${i.qty}`).join(' · ');
+    const orderId = Math.floor(1000 + Math.random() * 9000);
+    const productId = cart[0]?.id || 'cart';
+    const orderData = {
+      orderId,
+      name: name.trim(),
+      phone: clean,
+      city: city.trim(),
+      address: city.trim(),
+      offer: offerLabel,
+      offerName: offerLabel,
+      price: cartTotal,
+      pieces: cartCount,
+      packId: 0,
+      items: cart.map((i) => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
+      ...trackingFields(),
+      productId,
+    };
+
+    trackStoreEvent('purchase', {
+      productId,
+      value: cartTotal,
+      contentName: offerLabel,
+      orderId,
+      numItems: cartCount,
+    });
+    flushTrackingQueue();
+
+    localStorage.setItem('lastOrder', JSON.stringify(orderData));
+    localStorage.setItem('ac_last_order', JSON.stringify(orderData));
+    writeCart([]);
+    setCart([]);
+
+    try {
+      await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData),
+      });
+    } catch {
+      /* offline — thank you still works */
+    }
+
+    router.push('/thankyou');
+  }
+
   return (
-    <div className="store-page">
-      <div className="store-sky" aria-hidden />
-      <div className="store-orb store-orb-a" aria-hidden />
-      <div className="store-orb store-orb-b" aria-hidden />
+    <div className="store-page store-atlas">
+      <div className="atlas-marquee" aria-hidden>
+        <div className="atlas-marquee-track">
+          <span>توصيل آمن لجميع المدن · الدفع عند الاستلام · ضمان ذهبي · معاينة قبل الدفع</span>
+          <span>توصيل آمن لجميع المدن · الدفع عند الاستلام · ضمان ذهبي · معاينة قبل الدفع</span>
+          <span>توصيل آمن لجميع المدن · الدفع عند الاستلام · ضمان ذهبي · معاينة قبل الدفع</span>
+        </div>
+      </div>
 
       <div className="store-shell">
-        <nav className="store-nav">
+        <nav className="store-nav atlas-nav">
           <button
             type="button"
             className="store-burger"
@@ -264,7 +546,7 @@ export default function StoreHome() {
           <div className="store-nav-center">
             <div className="store-brand-lockup">
               <span className="store-mark" aria-hidden>
-                A
+                <i className="fa-solid fa-shield-halved" />
               </span>
               <div>
                 <strong className="store-nav-title" dir="ltr">
@@ -288,51 +570,123 @@ export default function StoreHome() {
 
           <button
             type="button"
-            className="store-cart-btn"
+            className={`store-cart-btn${cartShake ? ' is-bump' : ''}${cartCount > 0 ? ' has-items' : ''}`}
             aria-label={`السلة (${cartCount})`}
-            onClick={() =>
-              setToast(
-                cartCount > 0
-                  ? `سلتك فيها ${cartCount} منتج — أكمل الطلب من صفحة المنتج`
-                  : 'السلة فارغة حاليًا'
-              )
-            }
+            aria-expanded={cartOpen}
+            onClick={openCart}
           >
+            <span className="store-cart-ring" aria-hidden />
             <i className="fa-solid fa-bag-shopping" aria-hidden />
-            {cartCount > 0 ? <em className="store-cart-count">{cartCount}</em> : null}
+            {cartCount > 0 ? (
+              <em className="store-cart-count bump" key={`n-${cartCount}-${cartBump}`}>
+                {cartCount}
+              </em>
+            ) : null}
+            {cartPop ? (
+              <span
+                className={`store-cart-pop${cartPop.delta > 0 ? ' up' : ' down'}`}
+                key={`pop-${cartBump}`}
+              >
+                <b>{cartPop.delta > 0 ? `+${cartPop.delta}` : `${cartPop.delta}`}</b>
+                <small>{cartPop.total > 0 ? `${cartPop.total} في السلة` : 'فارغة'}</small>
+              </span>
+            ) : null}
           </button>
         </nav>
 
-        <header className="store-hero">
-          <div className="store-company" dir="ltr">
-            <span className="store-company-seal" aria-hidden>
-              <i className="fa-solid fa-shield-halved" />
-            </span>
-            <div>
-              <p className="store-company-name">{COMPANY.name}®</p>
-              <p className="store-company-tag">{COMPANY.tag}</p>
-            </div>
-          </div>
-          <p className="store-kicker">توصيل سريع · الدفع عند الاستلام · ضمان ذهبي</p>
-          <h1 className="store-title">المتجر الرسمي</h1>
-          <p className="store-lead">منتجات مختارة بعناية — جودة واضحة، طلب بضغطة واحدة، وثقة من أول اتصال حتى باب المنزل</p>
-          <div className="store-hero-stats" aria-label="مؤشرات الثقة">
-            <div>
-              <strong>+4٬800</strong>
-              <span>طلب مكتمل</span>
-            </div>
-            <div>
-              <strong>98%</strong>
-              <span>رضا العملاء</span>
-            </div>
-            <div>
-              <strong>24–72س</strong>
-              <span>متوسط التوصيل</span>
-            </div>
-          </div>
+        <section className="atlas-stories" aria-label="قصص المتجر">
+          {STORIES.map((story, i) => (
+            <button
+              key={story.id}
+              type="button"
+              className={`atlas-story${seenStories[story.id] ? ' seen' : ''}`}
+              onClick={() => setStoryIndex(i)}
+            >
+              <span className="atlas-story-ring" style={{ background: story.ring }}>
+                <span className="atlas-story-inner">
+                  {story.image ? (
+                    <Image src={story.image} alt="" width={64} height={64} />
+                  ) : (
+                    <i className={`fa-solid ${story.icon}`} aria-hidden />
+                  )}
+                </span>
+              </span>
+              <em>{story.label}</em>
+            </button>
+          ))}
+        </section>
+
+        <label className="store-search store-search-mobile">
+          <i className="fa-solid fa-magnifying-glass" aria-hidden />
+          <input
+            type="search"
+            placeholder="ابحث عن منتج..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            autoComplete="off"
+          />
+        </label>
+
+        <header className="store-hero atlas-hero">
+          <h1 className="store-title atlas-brand">المتجر الرسمي</h1>
+          <p className="store-lead">
+            اطلب بثقة: المنتج يوصلك لباب البيت، تعاينه بنفسك، وتدفع فقط إن أعجبك.
+          </p>
+
+          <ul className="atlas-trust-list" aria-label="لماذا تطلب من هنا">
+            <li>
+              <i className="fa-solid fa-eye" aria-hidden />
+              <span>معاينة عند الباب قبل الدفع — بلا مخاطرة</span>
+            </li>
+            <li>
+              <i className="fa-solid fa-hand-holding-dollar" aria-hidden />
+              <span>الدفع عند الاستلام فقط — لا تحويل مسبق</span>
+            </li>
+            <li>
+              <i className="fa-solid fa-phone-volume" aria-hidden />
+              <span>تأكيد هاتفي سريع + توصيل مجاني لبابك</span>
+            </li>
+          </ul>
+
+          <a href="#products" className="atlas-cta">
+            ابدأ شراء بثقة
+            <i className="fa-solid fa-arrow-down" aria-hidden />
+          </a>
         </header>
 
-        <section className="store-duo" aria-label="المنتجات">
+        <section className="rev-marquee" aria-label="آراء العملاء">
+          <div className="rev-marquee-frame" aria-hidden />
+          <div className="rev-marquee-head">
+            <span className="rev-marquee-kicker">⭐ تقييمات حقيقية</span>
+            <h2>ماذا يقول عملاؤنا؟</h2>
+            <p>تجارب حقيقية تساعد على الطلب بثقة أعلى.</p>
+          </div>
+          <div className="rev-marquee-viewport">
+            <div className="rev-marquee-track">
+              {[...SOCIAL_PROOF, ...SOCIAL_PROOF].map((r, i) => (
+                <article
+                  key={`${r.name}-${i}`}
+                  className="rev-marquee-card"
+                  aria-hidden={i >= SOCIAL_PROOF.length}
+                >
+                  <div className="rev-marquee-card-top">
+                    <span className="rev-marquee-av" aria-hidden>
+                      {r.av}
+                    </span>
+                    <div>
+                      <strong>{r.name}</strong>
+                      <em>⭐⭐⭐⭐⭐</em>
+                    </div>
+                    <span className="rev-marquee-badge">شراء مؤكد</span>
+                  </div>
+                  <p>&quot;{r.text}&quot;</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="store-duo" id="products" aria-label="المنتجات">
           <div className="store-duo-head">
             <h2>اختر منتجك</h2>
             <span>{filtered.length} منتجات مختارة</span>
@@ -341,30 +695,12 @@ export default function StoreHome() {
           {filtered.length === 0 ? (
             <div className="store-empty">لا توجد منتجات مطابقة لبحثك</div>
           ) : (
-            <div className={`store-duo-grid${filtered.length === 1 ? ' is-single' : ''}`}>
+            <div className="store-duo-grid">
               {filtered.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} onAdd={addToCart} />
               ))}
             </div>
           )}
-        </section>
-
-        <section className="store-trust" aria-label="مزايا المتجر">
-          <article>
-            <i className="fa-solid fa-truck-fast" aria-hidden />
-            <strong>توصيل مجاني</strong>
-            <span>إلى باب المنزل</span>
-          </article>
-          <article>
-            <i className="fa-solid fa-hand-holding-dollar" aria-hidden />
-            <strong>الدفع عند الاستلام</strong>
-            <span>بدون مخاطرة</span>
-          </article>
-          <article>
-            <i className="fa-solid fa-rotate-left" aria-hidden />
-            <strong>الضمان الذهبي</strong>
-            <span>إن لم يعجبك أرجعه</span>
-          </article>
         </section>
 
         <section className="store-flow" aria-label="كيف يتم الطلب">
@@ -383,26 +719,22 @@ export default function StoreHome() {
           </div>
         </section>
 
-        <section className="store-proof" aria-label="آراء العملاء">
-          <div className="store-section-intro">
-            <h2>ماذا يقول عملاؤنا؟</h2>
-            <p>تجارب حقيقية تساعد على الطلب بثقة أعلى.</p>
-          </div>
-          <div className="store-proof-grid">
-            {SOCIAL_PROOF.map((r) => (
-              <article key={r.name} className="store-proof-card">
-                <div className="store-proof-head">
-                  <span aria-hidden>{r.av}</span>
-                  <div>
-                    <strong>{r.name}</strong>
-                    <em>⭐⭐⭐⭐⭐</em>
-                  </div>
-                </div>
-                <p>&quot;{r.text}&quot;</p>
-              </article>
+        <div className="atlas-pills" aria-label="مزايا المتجر">
+          <div className="atlas-pills-track">
+            {[...TRUST_PILLS, ...TRUST_PILLS].map((pill, i) => (
+              <span
+                key={`${pill.text}-${i}`}
+                className="atlas-pill"
+                style={{ color: pill.color, background: pill.bg, borderColor: `${pill.color}33` }}
+                aria-hidden={i >= TRUST_PILLS.length}
+              >
+                <span className="atlas-pill-dot" style={{ background: pill.color }} aria-hidden />
+                <i className={`fa-solid ${pill.icon}`} aria-hidden />
+                {pill.text}
+              </span>
             ))}
           </div>
-        </section>
+        </div>
 
         <section className="store-policies" id="policies" aria-label="الشروط والسياسات">
           <div className="store-section-intro">
@@ -436,48 +768,114 @@ export default function StoreHome() {
         <section className="store-cvr" aria-label="لماذا تطلب الآن">
           <div className="store-cvr-inner">
             <h2>لماذا يطلب الناس من هنا؟</h2>
-            <ul>
-              <li>
+            <div className="store-cvr-list">
+              <div className="store-cvr-row">
                 <i className="fa-solid fa-phone-volume" aria-hidden />
-                تأكيد هاتفي سريع يقلّل الأخطاء ويرفع نسبة نجاح الطلب
-              </li>
-              <li>
+                <span>تأكيد هاتفي سريع يقلّل الأخطاء ويرفع نسبة نجاح الطلب</span>
+              </div>
+              <div className="store-cvr-row">
                 <i className="fa-solid fa-door-open" aria-hidden />
-                معاينة عند الباب قبل الدفع — راحة بال كاملة
-              </li>
-              <li>
+                <span>معاينة عند الباب قبل الدفع — راحة بال كاملة</span>
+              </div>
+              <div className="store-cvr-row">
                 <i className="fa-solid fa-clock" aria-hidden />
-                توصيل خلال 24–72 ساعة حسب المدينة
-              </li>
-              <li>
+                <span>توصيل خلال 24–72 ساعة حسب المدينة</span>
+              </div>
+              <div className="store-cvr-row">
                 <i className="fa-solid fa-medal" aria-hidden />
-                ضمان ذهبي: إن لم يعجبك المنتج يمكنك إرجاعه وفق السياسة
-              </li>
-            </ul>
-            <a href="#policies" className="store-cvr-link">
-              اقرأ الشروط وطرق الدفع
-              <i className="fa-solid fa-arrow-down" aria-hidden />
-            </a>
+                <span>ضمان ذهبي: إن لم يعجبك المنتج يمكنك إرجاعه وفق السياسة</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="store-gold" id="gold-guarantee" aria-label="الضمان الذهبي">
+          <div className="store-gold-frame" aria-hidden />
+          <div className="store-gold-glow" aria-hidden />
+          <div className="store-gold-top">
+            <div className="store-gold-seal" aria-hidden>
+              <span className="store-gold-ring" />
+              <i className="fa-solid fa-medal" />
+            </div>
+            <div className="store-gold-titles">
+              <p className="store-gold-kicker">وعد المتجر لكل طلب</p>
+              <h2>الضمان الذهبي</h2>
+              <p className="store-gold-lead">
+                إن لم يعجبك المنتج، يمكنك إرجاعه. شراء بلا مخاطرة على كل منتجات المتجر.
+              </p>
+            </div>
+          </div>
+          <div className="store-gold-grid">
+            <article>
+              <span className="store-gold-step">1</span>
+              <div className="store-gold-icon" aria-hidden>
+                <i className="fa-solid fa-face-frown-open" />
+              </div>
+              <strong>لم يعجبك؟</strong>
+              <span>حقّك محفوظ إذا لم يناسبك المنتج بعد الاستلام.</span>
+            </article>
+            <article>
+              <span className="store-gold-step">2</span>
+              <div className="store-gold-icon" aria-hidden>
+                <i className="fa-solid fa-rotate-left" />
+              </div>
+              <strong>أرجعه بسهولة</strong>
+              <span>طلب الاسترجاع يتم وفق السياسة دون تعقيد.</span>
+            </article>
+            <article>
+              <span className="store-gold-step">3</span>
+              <div className="store-gold-icon" aria-hidden>
+                <i className="fa-solid fa-box-open" />
+              </div>
+              <strong>معاينة قبل الدفع</strong>
+              <span>افحص عند الباب، ثم ادفع فقط إن اطمأننت.</span>
+            </article>
+          </div>
+          <div className="store-gold-ribbon">
+            <i className="fa-solid fa-certificate" aria-hidden />
+            <span>لم يعجبك؟ أرجعه — يسري على جميع منتجات المتجر</span>
           </div>
         </section>
 
         <footer className="store-footer">
-          <div className="store-footer-brand" dir="ltr">
-            <span className="store-mark" aria-hidden>
-              A
-            </span>
-            <div>
-              <strong>{COMPANY.name}®</strong>
-              <span>{COMPANY.legal} — {COMPANY.tag}</span>
+          <div className="store-footer-panel">
+            <div className="store-footer-brand" dir="ltr">
+              <span className="store-mark" aria-hidden>
+                <i className="fa-solid fa-shield-halved" />
+              </span>
+              <div>
+                <strong>{COMPANY.name}®</strong>
+                <span>{COMPANY.legal}</span>
+              </div>
             </div>
+            <p className="store-footer-tag">{COMPANY.tag}</p>
+
+            <nav className="store-footer-grid" aria-label="روابط السياسات">
+              <a href="#terms" className="store-footer-card">
+                <i className="fa-solid fa-file-contract" aria-hidden />
+                <strong>شروط الاستخدام</strong>
+              </a>
+              <a href="#policy" className="store-footer-card">
+                <i className="fa-solid fa-scale-balanced" aria-hidden />
+                <strong>سياسة الاسترجاع</strong>
+              </a>
+              <a href="#payment" className="store-footer-card">
+                <i className="fa-solid fa-wallet" aria-hidden />
+                <strong>طرق الدفع</strong>
+              </a>
+              <a href="#delivery" className="store-footer-card">
+                <i className="fa-solid fa-box-open" aria-hidden />
+                <strong>كيفية الاستلام</strong>
+              </a>
+            </nav>
+
+            <a href="#products" className="store-footer-cta">
+              <i className="fa-solid fa-bag-shopping" aria-hidden />
+              ابدأ شراء بثقة
+              <i className="fa-solid fa-arrow-up" aria-hidden />
+            </a>
+            <p className="store-footer-note">جودة مضمونة · خدمة سريعة · ثقة الزبون أولاً</p>
           </div>
-          <nav className="store-footer-links" aria-label="روابط السياسات">
-            <a href="#terms">شروط الاستخدام</a>
-            <a href="#policy">سياسة الاسترجاع</a>
-            <a href="#payment">طرق الدفع</a>
-            <a href="#delivery">كيفية الاستلام</a>
-          </nav>
-          <p className="store-footer-note">جودة مضمونة · خدمة سريعة · ثقة الزبون أولاً</p>
         </footer>
       </div>
 
@@ -504,38 +902,259 @@ export default function StoreHome() {
         </div>
 
         <div className="store-drawer-body">
-          <div className="store-drawer-quick">
-            {POLICY_BLOCKS.map((b) => (
-              <a
-                key={b.id}
-                href={`#${b.id}`}
-                onClick={() => {
-                  setOpenPolicy(b.id);
-                  setMenuOpen(false);
-                }}
-              >
-                {b.title}
-              </a>
-            ))}
+          <p className="store-drawer-faq-label">السياسات والشروط</p>
+          <div className="store-drawer-faq">
+            {POLICY_BLOCKS.map((b) => {
+              const key = `policy-${b.id}`;
+              const open = openDrawerFaq === key;
+              return (
+                <div key={b.id} className={`store-drawer-faq-item${open ? ' open' : ''}`}>
+                  <button
+                    type="button"
+                    className="store-drawer-faq-btn"
+                    aria-expanded={open}
+                    onClick={() => setOpenDrawerFaq(open ? null : key)}
+                  >
+                    <span className="store-drawer-icon" aria-hidden>
+                      <i className={`fa-solid ${b.icon}`} />
+                    </span>
+                    <strong>{b.title}</strong>
+                    <i className="fa-solid fa-chevron-down store-drawer-faq-chevron" aria-hidden />
+                  </button>
+                  <div className="store-drawer-faq-body">{b.body}</div>
+                </div>
+              );
+            })}
           </div>
-          {MENU_SECTIONS.map((s) => (
-            <article key={s.title} className="store-drawer-card">
-              <div className="store-drawer-icon">
-                <i className={`fa-solid ${s.icon}`} aria-hidden />
-              </div>
-              <div>
-                <h3>{s.title}</h3>
-                <p>{s.body}</p>
-              </div>
-            </article>
-          ))}
+
+          <p className="store-drawer-faq-label">أسئلة شائعة</p>
+          <div className="store-drawer-faq">
+            {MENU_SECTIONS.map((s, i) => {
+              const key = `menu-${i}`;
+              const open = openDrawerFaq === key;
+              return (
+                <div key={s.title} className={`store-drawer-faq-item${open ? ' open' : ''}`}>
+                  <button
+                    type="button"
+                    className="store-drawer-faq-btn"
+                    aria-expanded={open}
+                    onClick={() => setOpenDrawerFaq(open ? null : key)}
+                  >
+                    <span className="store-drawer-icon" aria-hidden>
+                      <i className={`fa-solid ${s.icon}`} />
+                    </span>
+                    <strong>{s.title}</strong>
+                    <i className="fa-solid fa-chevron-down store-drawer-faq-chevron" aria-hidden />
+                  </button>
+                  <div className="store-drawer-faq-body">{s.body}</div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </aside>
 
+      {/* سلة Shopify-style — portal فوق كل شيء */}
+      {mounted
+        ? createPortal(
+            <>
+              <div
+                className={`shop-cart-root${cartOpen && cartStep === 'items' ? ' open' : ''}`}
+                aria-hidden={!cartOpen || cartStep !== 'items'}
+              >
+                <button
+                  type="button"
+                  className="shop-cart-overlay"
+                  aria-label="إغلاق السلة"
+                  onClick={closeCart}
+                />
+                <aside
+                  className="shop-cart-drawer"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="سلة المشتريات"
+                >
+                  <div className="shop-cart-head">
+                    <div className="shop-cart-title">
+                      <strong>سلتك</strong>
+                      <span>{cartCount > 0 ? `${cartCount} منتج` : 'فارغة'}</span>
+                    </div>
+                    <button type="button" className="shop-cart-x" aria-label="إغلاق" onClick={closeCart}>
+                      <i className="fa-solid fa-xmark" aria-hidden />
+                    </button>
+                  </div>
+
+                  <div className="shop-cart-body">
+                    {cart.length === 0 ? (
+                      <div className="shop-cart-empty">
+                        <i className="fa-solid fa-bag-shopping" aria-hidden />
+                        <p>سلتك فارغة</p>
+                        <span>أضف منتجاتك ثم أكمل الطلب من هنا</span>
+                        <button type="button" onClick={closeCart}>
+                          متابعة التسوق
+                        </button>
+                      </div>
+                    ) : (
+                      cart.map((item) => (
+                        <article key={item.id} className="shop-cart-line">
+                          <div className="shop-cart-thumb">
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              fill
+                              sizes="72px"
+                              style={{ objectFit: 'cover' }}
+                            />
+                          </div>
+                          <div className="shop-cart-info">
+                            <div className="shop-cart-top">
+                              <h3>{item.name}</h3>
+                              <button
+                                type="button"
+                                className="shop-cart-del"
+                                aria-label="حذف"
+                                onClick={() => removeItem(item.id)}
+                              >
+                                <i className="fa-solid fa-trash-can" aria-hidden />
+                              </button>
+                            </div>
+                            <strong>{formatSar(item.price)}</strong>
+                            <div className="shop-qty">
+                              <button
+                                type="button"
+                                aria-label="إنقاص"
+                                onClick={() => setQty(item.id, item.qty - 1)}
+                              >
+                                −
+                              </button>
+                              <em>{item.qty}</em>
+                              <button
+                                type="button"
+                                aria-label="زيادة"
+                                onClick={() => setQty(item.id, item.qty + 1)}
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        </article>
+                      ))
+                    )}
+                  </div>
+
+                  {cart.length > 0 ? (
+                    <div className="shop-cart-foot">
+                      <div className="shop-cart-sub">
+                        <span>المجموع</span>
+                        <strong>{formatSar(cartTotal)}</strong>
+                      </div>
+                      <button type="button" className="shop-cart-cta" onClick={startCheckout}>
+                        إتمام الشراء
+                      </button>
+                      <button type="button" className="shop-cart-continue" onClick={closeCart}>
+                        متابعة التسوق
+                      </button>
+                    </div>
+                  ) : null}
+                </aside>
+              </div>
+
+              <StoreCheckoutSheet
+                open={cartOpen && cartStep === 'checkout'}
+                items={cart.map((i) => ({
+                  ...i,
+                  oldPrice: PRODUCTS.find((p) => p.id === i.id)?.oldPrice,
+                }))}
+                total={cartTotal}
+                name={name}
+                phone={phone}
+                city={city}
+                phoneError={phoneError}
+                submitting={submitting}
+                onBack={() => setCartStep('items')}
+                onName={setName}
+                onPhone={(v) => {
+                  setPhone(v);
+                  setPhoneError(
+                    v.length > 0 && v.length < 10
+                      ? '⚠️ تأكد من رقم الهاتف (يجب أن يحتوي على 10 أرقام)'
+                      : ''
+                  );
+                }}
+                onCity={setCity}
+                onSubmit={submitOrder}
+              />
+            </>,
+            document.body
+          )
+        : null}
+
+      {activeStory && storyIndex != null ? (
+        <div
+          className="atlas-story-viewer"
+          role="dialog"
+          aria-modal="true"
+          aria-label={activeStory.title}
+          onClick={() => {
+            if (storyIndex < STORIES.length - 1) setStoryIndex(storyIndex + 1);
+            else setStoryIndex(null);
+          }}
+        >
+          <div className="atlas-story-bars" aria-hidden>
+            {STORIES.map((s, i) => (
+              <span key={s.id} className={i < storyIndex ? 'done' : i === storyIndex ? 'active' : ''} />
+            ))}
+          </div>
+          <button
+            type="button"
+            className="atlas-story-close"
+            aria-label="إغلاق"
+            onClick={(e) => {
+              e.stopPropagation();
+              setStoryIndex(null);
+            }}
+          >
+            <i className="fa-solid fa-xmark" />
+          </button>
+          <div className="atlas-story-content" style={{ ['--story-ring' as string]: activeStory.ring }}>
+            {activeStory.image ? (
+              <div className="atlas-story-media">
+                <Image src={activeStory.image} alt="" fill sizes="100vw" style={{ objectFit: 'contain' }} />
+              </div>
+            ) : (
+              <div className="atlas-story-iconbig">
+                <i className={`fa-solid ${activeStory.icon}`} aria-hidden />
+              </div>
+            )}
+            <h3>{activeStory.title}</h3>
+            <p>{activeStory.text}</p>
+            <span className="atlas-story-hint">اضغط للانتقال</span>
+          </div>
+        </div>
+      ) : null}
+
       {toast ? (
         <div className="store-toast" role="status">
-          {toast}
+          <i className="fa-solid fa-circle-check" aria-hidden />
+          <span>{toast}</span>
         </div>
+      ) : null}
+
+      {showCartTicket ? (
+        <button
+          type="button"
+          className={`store-cart-ticket${cartShake ? ' is-bump' : ''}${cartCount > 0 ? ' has-items' : ''}`}
+          onClick={openCart}
+          aria-label={`فتح السلة (${cartCount})`}
+        >
+          <i className="fa-solid fa-bag-shopping" aria-hidden />
+          <span className="store-cart-ticket-label">السلة</span>
+          {cartCount > 0 ? (
+            <em className="store-cart-ticket-count" key={`t-${cartCount}-${cartBump}`}>
+              {cartCount}
+            </em>
+          ) : null}
+        </button>
       ) : null}
     </div>
   );

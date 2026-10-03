@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { OFFERS } from '../../lib/offers';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
-import { trackingFields, trackStoreEvent } from '../../lib/tracking';
+import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 
 interface BottomSheetProps {
   isOpen: boolean;
@@ -49,6 +49,7 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
       typeof window !== 'undefined'
         ? window.location.pathname.match(/^\/product\/([^/?#]+)/)?.[1] || 'produit-1'
         : 'produit-1';
+    const orderId = Date.now().toString().slice(-6);
     trackStoreEvent('checkout', {
       productId,
       value: selectedOffer.price,
@@ -56,6 +57,7 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
     });
 
     const orderData = {
+      orderId,
       name: name.trim(),
       phone,
       city,
@@ -70,11 +72,17 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
       productId,
     };
 
+    trackStoreEvent('purchase', {
+      productId,
+      value: selectedOffer.price,
+      contentName: selectedOffer.name,
+      orderId,
+      numItems: selectedOffer.pieces || 1,
+    });
+    flushTrackingQueue();
+
     localStorage.setItem('lastOrder', JSON.stringify(orderData));
-    localStorage.setItem('ac_last_order', JSON.stringify({
-      ...orderData,
-      orderId: Date.now().toString().slice(-6),
-    }));
+    localStorage.setItem('ac_last_order', JSON.stringify(orderData));
 
     try {
       await fetch('/api/orders', {

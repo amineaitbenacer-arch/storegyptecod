@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import type { ProductPageConfig, OfferPack } from '../../lib/productPages';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
-import { trackingFields, trackStoreEvent } from '../../lib/tracking';
+import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 import './product-landing.css';
 
 export default function ProductLanding({ product }: { product: ProductPageConfig }) {
@@ -40,17 +40,18 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
       return;
     }
     setLoading(true);
+    const orderId = Math.floor(1000 + Math.random() * 9000);
     trackStoreEvent('checkout', {
       productId: product.id,
       value: offer.price,
       contentName: offer.name,
     });
     const orderData = {
-      orderId: Math.floor(1000 + Math.random() * 9000),
+      orderId,
       name: name.trim(),
       phone: clean,
       city,
-      address: address.trim(),
+      address: address.trim() || city,
       offer: offer.name,
       offerName: `${product.brand} — ${offer.name}`,
       price: offer.price,
@@ -59,6 +60,14 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
       ...trackingFields(),
       productId: product.id,
     };
+    trackStoreEvent('purchase', {
+      productId: product.id,
+      value: offer.price,
+      contentName: orderData.offerName,
+      orderId,
+      numItems: 1,
+    });
+    flushTrackingQueue();
     localStorage.setItem('lastOrder', JSON.stringify(orderData));
     localStorage.setItem('ac_last_order', JSON.stringify(orderData));
     try {

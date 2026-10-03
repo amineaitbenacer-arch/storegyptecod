@@ -1,6 +1,7 @@
 import {
   trackPixelAddToCart,
   trackPixelCheckout,
+  trackPixelPurchase,
   trackPixelViewContent,
 } from './pixels';
 
@@ -13,6 +14,7 @@ export type StoreEventType =
   | 'product'
   | 'addtocart'
   | 'checkout'
+  | 'purchase'
   | 'scroll25'
   | 'scroll50'
   | 'scroll75'
@@ -109,19 +111,6 @@ export function captureVisitSource(): AdSource {
   }
 }
 
-export function trackingFields() {
-  if (typeof window !== 'undefined') captureVisitSource();
-  const click = readClicks();
-  return {
-    source: captureVisitSource(),
-    productId: currentProductId(),
-    fbclid: click.fbclid || '',
-    ttclid: click.ttclid || '',
-    sccid: click.sccid || '',
-    utm_source: click.utm_source || '',
-  };
-}
-
 function visitorId() {
   let id = lsGet(VID_KEY);
   if (!id) {
@@ -133,6 +122,25 @@ function visitorId() {
     lsSet(VID_KEY, id);
   }
   return id;
+}
+
+export function getVisitorId() {
+  if (typeof window === 'undefined') return '';
+  return visitorId();
+}
+
+export function trackingFields() {
+  if (typeof window !== 'undefined') captureVisitSource();
+  const click = readClicks();
+  return {
+    source: captureVisitSource(),
+    productId: currentProductId(),
+    visitorId: typeof window !== 'undefined' ? visitorId() : '',
+    fbclid: click.fbclid || '',
+    ttclid: click.ttclid || '',
+    sccid: click.sccid || '',
+    utm_source: click.utm_source || '',
+  };
 }
 
 const recent = new Set<string>();
@@ -161,16 +169,22 @@ function enqueue(body: string) {
   writeQueue(list);
 }
 
-function sendBody(body: string) {
-  let ok = false;
-  try {
-    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
-      ok = navigator.sendBeacon('/api/analytics', new Blob([body], { type: 'application/json' }));
+function sendBody(body: string, critical = false) {
+  let beaconOk = false;
+  if (!critical) {
+    try {
+      if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+        beaconOk = navigator.sendBeacon(
+          '/api/analytics',
+          new Blob([body], { type: 'application/json' })
+        );
+      }
+    } catch {
+      beaconOk = false;
     }
-  } catch {
-    ok = false;
+    if (beaconOk) return;
   }
-  if (ok) return;
+
   fetch('/api/analytics', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -193,7 +207,13 @@ export function flushTrackingQueue() {
 
 export function trackStoreEvent(
   type: StoreEventType,
-  opts?: { productId?: string; value?: number; contentName?: string }
+  opts?: {
+    productId?: string;
+    value?: number;
+    contentName?: string;
+    orderId?: string | number;
+    numItems?: number;
+  }
 ) {
   if (typeof window === 'undefined') return;
   try {
@@ -204,11 +224,15 @@ export function trackStoreEvent(
     if (path.startsWith('/admin')) return;
     if (opts?.productId) lsSet(PID_KEY, opts.productId.slice(0, 80));
     const productId = opts?.productId || currentProductId();
-    const key = `${id}|${type}|${path}|${productId}`;
+    const orderKey = opts?.orderId != null ? String(opts.orderId) : '';
+    const key =
+      type === 'purchase'
+        ? `${id}|purchase|${orderKey || productId || path}`
+        : `${id}|${type}|${path}|${productId}`;
     if (recent.has(key)) return;
     recent.add(key);
     if (!type.startsWith('scroll')) {
-      window.setTimeout(() => recent.delete(key), 2500);
+      window.setTimeout(() => recent.delete(key), type === 'purchase' ? 15000 : 2500);
     }
 
     let loadMs = 0;
@@ -226,6 +250,7 @@ export function trackStoreEvent(
       source,
       path,
       productId,
+      orderId: orderKey,
       loadMs,
       ts: new Date().toISOString(),
       fbclid: click.fbclid || '',
@@ -234,7 +259,8 @@ export function trackStoreEvent(
       utm_source: click.utm_source || '',
     });
 
-    sendBody(body);
+    const critical = type === 'purchase' || type === 'checkout' || type === 'addtocart';
+    sendBody(body, critical);
 
     // Ad pixels (Meta / TikTok / Snap) — same moment as internal analytics
     try {
@@ -245,7 +271,7 @@ export function trackStoreEvent(
         content_name: opts?.contentName,
         currency: 'SAR',
         value: opts?.value,
-        num_items: 1 as number | undefined,
+        num_items: opts?.numItems ?? 1,
       };
       if (type === 'product') {
         trackPixelViewContent(commerce);
@@ -253,6 +279,11 @@ export function trackStoreEvent(
         trackPixelAddToCart(commerce);
       } else if (type === 'checkout') {
         trackPixelCheckout(commerce);
+      } else if (type === 'purchase') {
+        trackPixelPurchase({
+          ...commerce,
+          transaction_id: orderKey || undefined,
+        });
       }
     } catch {
       /* ignore pixel errors */
