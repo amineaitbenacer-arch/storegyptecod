@@ -1,6 +1,9 @@
-import { redirect } from 'next/navigation';
+import ProductShell from './ProductShell';
+import '../../antichoc-base.css';
+import '../../antichoc-white.css';
+import './antichoc-page.css';
 
-/** الصفحة القديمة → AntiChoc */
-export default function AntichocRedirect() {
-  redirect('/product/produit-1');
+/** صفحة AntiChoc الأصلية كاملة */
+export default function AntichocPage() {
+  return <ProductShell />;
 }

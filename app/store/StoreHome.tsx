@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { PRODUCTS, type StoreProduct } from '../../lib/products';
 import { formatSar } from '../../lib/money';
 import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../lib/shipping';
@@ -205,7 +204,7 @@ const TRUST_PILLS = [
   { icon: 'fa-hand-holding-dollar', color: '#2563eb', bg: '#eff6ff', text: 'الدفع عند الاستلام فقط' },
   { icon: 'fa-medal', color: '#ca8a04', bg: '#fffbeb', text: 'ضمان ذهبي — استرجاع 3 أيام / استبدال 7 أيام' },
   { icon: 'fa-headset', color: '#0f766e', bg: '#f0fdfa', text: 'تأكيد هاتفي ودعم قبل وبعد الطلب' },
-  { icon: 'fa-shield-halved', color: '#b45309', bg: '#fff7ed', text: 'منتجات مختارة بجودة عالية' },
+  { icon: 'fa-shield-halved', color: '#b45309', bg: '#fff7ed', text: 'منتجات مختارة لحماية المنزل' },
   { icon: 'fa-box-open', color: '#059669', bg: '#ecfdf5', text: 'معاينة المنتج قبل الدفع' },
 ];
 
@@ -217,7 +216,6 @@ type StoryItem = {
   icon?: string;
   title: string;
   text: string;
-  href?: string;
 };
 
 const STORIES: StoryItem[] = [
@@ -228,7 +226,6 @@ const STORIES: StoryItem[] = [
     image: '/images/hero_anti_choc_product_1789640183592.png',
     title: 'عازل AntiChoc Protect',
     text: 'حماية حقيقية من تسرب الكهرباء في السخان — الأكثر طلبًا في المتجر.',
-    href: '/product/produit-1',
   },
   {
     id: 's2',
@@ -261,12 +258,10 @@ const STORIES: StoryItem[] = [
     image: '/images/robotdog-hero.png',
     title: 'كلب روبوت بالذكاء الاصطناعي',
     text: 'يرقص ويمارس الكونغ فو — هدية STEM للأطفال والعائلة.',
-    href: '/product/kalb-robot-ai',
   },
 ];
 
 export default function StoreHome() {
-  const router = useRouter();
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -712,7 +707,7 @@ export default function StoreHome() {
           {filtered.length === 0 ? (
             <div className="store-empty">لا توجد منتجات مطابقة لبحثك</div>
           ) : (
-            <div className={`store-duo-grid${filtered.length === 1 ? ' is-single' : ''}`}>
+            <div className="store-duo-grid">
               {filtered.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} onAdd={addToCart} />
               ))}
@@ -1128,11 +1123,6 @@ export default function StoreHome() {
           aria-modal="true"
           aria-label={activeStory.title}
           onClick={() => {
-            if (activeStory.href) {
-              setStoryIndex(null);
-              router.push(activeStory.href);
-              return;
-            }
             if (storyIndex < STORIES.length - 1) setStoryIndex(storyIndex + 1);
             else setStoryIndex(null);
           }}

@@ -354,8 +354,8 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
 ];
 
 export function getProductPage(id: string) {
-  const alias = id === 'antichoc' ? 'produit-1' : id;
-  return PRODUCT_PAGES.find((p) => p.id === alias);
+  if (id === 'antichoc') return PRODUCT_PAGES.find((p) => p.id === 'produit-1');
+  return PRODUCT_PAGES.find((p) => p.id === id);
 }
 
 export const PRODUCTS = PRODUCT_PAGES.filter((p) => p.listed !== false)
@@ -372,7 +372,7 @@ export const PRODUCTS = PRODUCT_PAGES.filter((p) => p.listed !== false)
     shortDesc: p.shortDesc,
     category: ['all'],
     tags: [p.brand, p.type],
-    href: `/product/${p.id}`,
+    href: p.id === 'produit-1' ? '/product/antichoc' : `/product/${p.id}`,
     featured: true,
   }))
   .sort((a, b) => (a.id === 'produit-1' ? -1 : b.id === 'produit-1' ? 1 : 0));
@@ -380,6 +380,6 @@ export const PRODUCTS = PRODUCT_PAGES.filter((p) => p.listed !== false)
 export const FILTERS = [{ id: 'all', label: 'الكل' }];
 
 export function getProduct(id: string) {
-  const alias = id === 'antichoc' ? 'produit-1' : id;
-  return PRODUCTS.find((p) => p.id === alias);
+  if (id === 'antichoc') return PRODUCTS.find((p) => p.id === 'produit-1');
+  return PRODUCTS.find((p) => p.id === id);
 }
