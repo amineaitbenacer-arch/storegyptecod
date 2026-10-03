@@ -1,9 +1,5 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { getSql, hasDatabase } from './db';
 import { isAdSource, sourceFromClick, type AdSource } from './tracking';
-
-const FILE = path.join(process.cwd(), 'analytics.json');
-const TMP = path.join(process.cwd(), 'analytics.json.tmp');
 
 export type TrackType =
   | 'pageview'
@@ -41,59 +37,107 @@ const TYPES = new Set<TrackType>([
   'scroll100',
 ]);
 
-let writeChain: Promise<unknown> = Promise.resolve();
+type EventRow = {
+  visitor_id: string;
+  type: string;
+  source: string;
+  path: string;
+  product_id: string;
+  order_id: string;
+  ts: string | Date;
+  load_ms: number;
+};
+
+function rowToEvent(row: EventRow): StoredEvent {
+  return {
+    visitorId: row.visitor_id,
+    type: row.type as TrackType,
+    source: row.source as AdSource,
+    path: row.path,
+    productId: row.product_id || '',
+    orderId: row.order_id || undefined,
+    ts: typeof row.ts === 'string' ? row.ts : new Date(row.ts).toISOString(),
+    loadMs: Number(row.load_ms) || 0,
+  };
+}
 
 export async function readEvents(): Promise<StoredEvent[]> {
-  try {
-    const raw = await fs.readFile(FILE, 'utf-8');
-    const data = JSON.parse(raw) as { events?: StoredEvent[] };
-    return Array.isArray(data.events) ? data.events : [];
-  } catch {
-    return [];
+  const sql = getSql();
+  if (!sql || !hasDatabase()) return [];
+  const rows = (await sql`
+    SELECT visitor_id, type, source, path, product_id, order_id, ts, load_ms
+    FROM analytics_events
+    ORDER BY ts DESC
+    LIMIT 25000
+  `) as EventRow[];
+  return rows.map(rowToEvent).reverse();
+}
+
+export async function appendEvent(event: StoredEvent) {
+  const sql = getSql();
+  if (!sql || !hasDatabase()) return;
+
+  const ts = event.ts;
+  const scrollType = String(event.type).startsWith('scroll');
+  const purchaseType = event.type === 'purchase';
+  const orderId = event.orderId || '';
+  const productId = event.productId || '';
+
+  if (purchaseType && orderId) {
+    const existing = (await sql`
+      SELECT id FROM analytics_events
+      WHERE visitor_id = ${event.visitorId}
+        AND type = ${event.type}
+        AND order_id = ${orderId}
+      LIMIT 1
+    `) as { id: number }[];
+    if (existing.length) return;
+  } else if (purchaseType) {
+    const existing = (await sql`
+      SELECT id FROM analytics_events
+      WHERE visitor_id = ${event.visitorId}
+        AND type = ${event.type}
+        AND ABS(EXTRACT(EPOCH FROM (ts - ${ts}::timestamptz))) < 8
+      LIMIT 1
+    `) as { id: number }[];
+    if (existing.length) return;
+  } else if (scrollType) {
+    const existing = (await sql`
+      SELECT id FROM analytics_events
+      WHERE visitor_id = ${event.visitorId}
+        AND type = ${event.type}
+        AND path = ${event.path}
+        AND product_id = ${productId}
+      LIMIT 1
+    `) as { id: number }[];
+    if (existing.length) return;
+  } else {
+    const existing = (await sql`
+      SELECT id FROM analytics_events
+      WHERE visitor_id = ${event.visitorId}
+        AND type = ${event.type}
+        AND path = ${event.path}
+        AND product_id = ${productId}
+        AND ABS(EXTRACT(EPOCH FROM (ts - ${ts}::timestamptz))) < 4
+      LIMIT 1
+    `) as { id: number }[];
+    if (existing.length) return;
   }
-}
 
-async function writeEvents(events: StoredEvent[]) {
-  const payload = JSON.stringify({ events }, null, 2);
-  await fs.writeFile(TMP, payload, 'utf-8');
-  await fs.rename(TMP, FILE);
-}
-
-export function appendEvent(event: StoredEvent) {
-  writeChain = writeChain
-    .then(async () => {
-      const events = await readEvents();
-      const ts = Date.parse(event.ts);
-      const scrollType = String(event.type).startsWith('scroll');
-      const purchaseType = event.type === 'purchase';
-      const duplicate = events.some((item) => {
-        if (item.visitorId !== event.visitorId || item.type !== event.type) return false;
-        if (purchaseType) {
-          const a = String(item.orderId || '');
-          const b = String(event.orderId || '');
-          return a && b ? a === b : Math.abs(Date.parse(item.ts) - ts) < 8000;
-        }
-        return (
-          item.path === event.path &&
-          String(item.productId || '') === String(event.productId || '') &&
-          (scrollType || Math.abs(Date.parse(item.ts) - ts) < 4000)
-        );
-      });
-      if (duplicate) return;
-      events.push(event);
-      const trimmed = events.length > 25000 ? events.slice(-25000) : events;
-      await writeEvents(trimmed);
-    })
-    .catch(async () => {
-      try {
-        const events = await readEvents();
-        events.push(event);
-        await writeEvents(events.slice(-25000));
-      } catch {
-        /* last resort swallow */
-      }
-    });
-  return writeChain;
+  await sql`
+    INSERT INTO analytics_events (
+      visitor_id, type, source, path, product_id, order_id, ts, load_ms
+    ) VALUES (
+      ${event.visitorId},
+      ${event.type},
+      ${event.source},
+      ${event.path},
+      ${productId},
+      ${orderId},
+      ${ts},
+      ${event.loadMs || 0}
+    )
+  `;
 }
 
 export function normalizeIncoming(body: Record<string, unknown>): StoredEvent | null {
