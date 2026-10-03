@@ -40,3 +40,5 @@ orders.json
 analytics.json
 .neon
 .agents/
+.vercel
+.env*
