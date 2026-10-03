@@ -1,0 +1,121 @@
+/* أرقام فرنسية — بلا تكسير الموبايل */
+#antichoc-root,
+#antichoc-root * {
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "locl" 0, "lnum" 1, "tnum" 1;
+}
+
+#antichoc-root .latin-nums,
+.latin-nums {
+  font-family: Arial, Helvetica, sans-serif !important;
+  unicode-bidi: isolate;
+  direction: ltr;
+  display: inline-block;
+}
+
+#antichoc-root .nav-title-main {
+  color: #B45309 !important;
+  -webkit-text-fill-color: #B45309 !important;
+}
+
+/* =========================
+   PC فقط — التليفون مبقى كما هو
+   ========================= */
+@media (min-width: 900px) {
+  #antichoc-root,
+  .ac-root {
+    max-width: 560px !important; /* نفس عرض الموبايل */
+    border-radius: 16px;
+    overflow-x: hidden;
+    overflow-y: visible;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+  }
+
+  #antichoc-root .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* صورة البطل — زوايا دائرية مثل AntiChoc */
+  #antichoc-root .hero-image-fullbleed {
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    box-shadow: 0 12px 35px rgba(15, 23, 42, 0.12) !important;
+  }
+
+  #antichoc-root .hero-image-fullbleed img,
+  #antichoc-root .hero-image-fullbleed #hero-main-img {
+    width: 100% !important;
+    max-height: 400px !important;
+    object-fit: cover !important;
+    border-radius: 0 !important;
+    display: block !important;
+  }
+
+  #antichoc-root .hero-dark-bar {
+    border-radius: 0 0 20px 20px !important;
+  }
+
+  /* ثمبنيلز — كلها ظاهرة + زوايا دائرية */
+  #antichoc-root .thumb-gallery {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 0.85rem !important;
+    justify-content: space-between !important;
+    overflow: visible !important;
+    padding: 0 0 1rem 0 !important;
+    margin-top: 15px !important;
+    width: 100% !important;
+  }
+
+  #antichoc-root .thumb-gallery .thumb-img {
+    width: calc((100% - 2.55rem) / 4) !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    min-width: 0 !important;
+    border-radius: 12px !important;
+    flex: 1 1 0 !important;
+    opacity: 0.45;
+  }
+
+  #antichoc-root .thumb-gallery .thumb-img.active,
+  #antichoc-root .thumb-gallery .thumb-img:hover {
+    opacity: 1 !important;
+    border-color: #F59E0B !important;
+  }
+
+  /* النافبار مايتقصّاش العرض */
+  #antichoc-root .luxury-navbar,
+  #antichoc-root .nav {
+    overflow: visible !important;
+  }
+
+  #antichoc-root .nav-inner-container {
+    gap: 0.5rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    overflow: visible !important;
+  }
+
+  #antichoc-root .nav-offer-item,
+  #antichoc-root #nav-offer-badge-bg {
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* sticky bar بمحاذاة العمود */
+  #antichoc-root ~ .buy-bar,
+  .buy-bar {
+    max-width: 560px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    border-radius: 16px 16px 0 0 !important;
+  }
+}

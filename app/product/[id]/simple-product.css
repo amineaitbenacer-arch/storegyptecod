@@ -1,0 +1,140 @@
+.simple-product {
+  max-width: 720px;
+}
+
+.sp-hero {
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .sp-hero {
+    grid-template-columns: 1.1fr 1fr;
+    align-items: center;
+    padding: 1.5rem;
+  }
+}
+
+.sp-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #fff;
+  border: 1px solid rgba(28, 25, 23, 0.1);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(28, 25, 23, 0.08);
+}
+
+.sp-info h1 {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 900;
+  margin: 0.35rem 0 0.6rem;
+  color: #1C1917;
+}
+
+.sp-info p {
+  color: #78716C;
+  line-height: 1.7;
+  font-weight: 600;
+  margin-bottom: 0.9rem;
+}
+
+.sp-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.sp-price {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #9A7B1A;
+}
+
+.sp-price small {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.sp-old {
+  color: #A8A29E;
+  text-decoration: line-through;
+  font-weight: 700;
+}
+
+.sp-form-card {
+  margin: 0 1rem 2rem;
+  background: #fff;
+  border: 1px solid rgba(28, 25, 23, 0.1);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 28px rgba(28, 25, 23, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sp-form-card h2 {
+  font-size: 1.15rem;
+  font-weight: 900;
+  margin-bottom: 0.25rem;
+  color: #1C1917;
+}
+
+.sp-input {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  border: 1.5px solid #E7E5E4;
+  font-size: 16px;
+  font-family: inherit;
+  direction: rtl;
+  background: #FFFDF8;
+  color: #1C1917;
+}
+
+.sp-input:focus {
+  outline: none;
+  border-color: #C9A227;
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.18);
+}
+
+.sp-input.error {
+  border-color: #EF4444;
+}
+
+.sp-error {
+  color: #DC2626;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: -0.25rem 0 0;
+}
+
+.sp-submit {
+  margin-top: 0.35rem;
+  width: 100%;
+  min-height: 56px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #22C55E, #16A34A);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 900;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.sp-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.sp-trust {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #78716C;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}

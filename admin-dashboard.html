@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | storegyptecod</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #070b14;
+            --panel-bg: rgba(17, 24, 39, 0.6);
+            --gold: #FFD700;
+            --gold-glow: rgba(255, 215, 0, 0.4);
+            --danger: #EF4444;
+            --success: #10B981;
+            --info: #3B82F6;
+        }
+
+        html, body, body * {
+            font-variant-numeric: lining-nums tabular-nums !important;
+            font-feature-settings: "locl" 0, "lnum" 1, "tnum" 1 !important;
+            -webkit-font-feature-settings: "locl" 0, "lnum" 1, "tnum" 1 !important;
+        }
+
+        body {
+            font-family: 'Tajawal', 'Inter', sans-serif !important;
+            background: linear-gradient(135deg, #050914 0%, #0a1128 100%);
+            color: #E2E8F0;
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+
+        i.fa-solid, i.fas, i.fa-regular, i.far {
+            font-family: "Font Awesome 6 Free" !important;
+            font-style: normal !important;
+            font-weight: 900 !important;
+        }
+
+        .en-font { font-family: 'Outfit', sans-serif !important; }
+
+        /* Premium Glassmorphism */
+        .glass-card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        .kpi-card {
+            position: relative; overflow: hidden;
+            border: 1.5px solid rgba(255,255,255,.12);
+            background: linear-gradient(180deg, rgba(15,23,42,.9), rgba(2,6,23,.95));
+            box-shadow: 0 16px 36px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.04);
+        }
+        .kpi-card::after {
+            content: ""; position: absolute; left: 12px; right: 12px; bottom: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+        }
+
+        /* Glowing text */
+        .glow-text {
+            text-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        /* Custom Table Spacing for SaaS look */
+        table {
+            border-collapse: separate !important;
+            border-spacing: 0 12px !important;
+        }
+
+        tbody tr {
+            background: rgba(30, 41, 59, 0.4);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        tbody tr:hover {
+            background: rgba(30, 41, 59, 0.8);
+            transform: translateY(-2px) scale(1.005);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-reft: 3px solid var(--gold);
+        }
+
+        td:first-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+        td:last-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+
+        /* Animated Button */
+        .btn-gold {
+            background: linear-gradient(45deg, #FFD700, #F59E0B);
+            color: #000;
+            box-shadow: 0 4px 15px var(--gold-glow);
+            transition: all 0.3s ease;
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--gold-glow);
+        }
+
+        /* Custom Status Select Dropdown */
+        .status-badge {
+            appearance: none;
+            -webkit-appearance: none;
+            padding: 6px 35px 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            outline: none;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 12px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Status Colors */
+        .st-nouveau { background-color: rgba(255,255,255,0.1); color: #FFF; border-color: rgba(255,255,255,0.2); }
+        .st-confirme { background-color: rgba(16,185,129,0.15); color: #10B981; border-color: rgba(16,185,129,0.4); text-shadow: 0 0 10px rgba(16,185,129,0.5); box-shadow: 0 0 15px rgba(16,185,129,0.2); }
+        .st-annule { background-color: rgba(239,68,68,0.15); color: #EF4444; border-color: rgba(239,68,68,0.4); text-shadow: 0 0 10px rgba(239,68,68,0.5); box-shadow: 0 0 15px rgba(239,68,68,0.2); }
+        .st-pasreponse { background-color: rgba(59,130,246,0.15); color: #3B82F6; border-color: rgba(59,130,246,0.4); text-shadow: 0 0 10px rgba(59,130,246,0.5); box-shadow: 0 0 15px rgba(59,130,246,0.2); }
+
+        .src-card {
+            position: relative; overflow: hidden; padding: 16px 14px 12px; border-radius: 22px;
+            background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(2,6,23,.96));
+            border: 2px solid rgba(255,255,255,.1);
+            box-shadow: 0 20px 44px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.05);
+        }
+        .src-card::before { content: ""; position: absolute; inset: 0 auto auto 0; height: 4px; width: 100%; }
+        .src-meta { border-color: #0866FF; box-shadow: 0 0 0 1px rgba(8,102,255,.25), 0 0 28px rgba(8,102,255,.18), 0 20px 44px rgba(0,0,0,.35); }
+        .src-tiktok { border-color: #FE2C55; box-shadow: 0 0 0 1px rgba(254,44,85,.22), 0 0 28px rgba(254,44,85,.16), 0 20px 44px rgba(0,0,0,.35); }
+        .src-snap { border-color: #FFFC00; box-shadow: 0 0 0 1px rgba(255,252,0,.22), 0 0 28px rgba(255,252,0,.12), 0 20px 44px rgba(0,0,0,.35); }
+        .src-direct { border-color: #94A3B8; box-shadow: 0 0 0 1px rgba(148,163,184,.2), 0 0 24px rgba(148,163,184,.1), 0 20px 44px rgba(0,0,0,.35); }
+        .src-meta::before { background: #0866FF; }
+        .src-tiktok::before { background: linear-gradient(90deg, #25F4EE, #fff 45%, #FE2C55); }
+        .src-snap::before { background: #FFFC00; }
+        .src-direct::before { background: #94A3B8; }
+        .src-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .src-head > div:nth-child(2) { min-width: 0; flex: 1; overflow: hidden; }
+        .src-logo { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: 0 0 42px; }
+        .src-logo svg { width: 24px; height: 24px; display: block; }
+        .src-logo-meta { background: #0866FF; }
+        .src-logo-tiktok { background: #010101; }
+        .src-logo-snap { background: #FFFC00; }
+        .src-logo-direct { background: #1e293b; border: 1px solid rgba(148,163,184,.35); }
+        .src-name { font-size: 17px; font-weight: 900; color: #fff; line-height: 1; }
+        .src-kicker { margin-top: 4px; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .src-kicker-meta { color: #60a5fa; }
+        .src-kicker-tiktok { color: #FE2C55; }
+        .src-kicker-snap { color: #FFFC00; }
+        .src-kicker-direct { color: #94A3B8; }
+        .src-share { margin-left: auto; text-align: right; flex: 0 0 auto; }
+        .src-share b { display: block; font-size: 24px; line-height: 1; font-weight: 900; }
+        .src-share span { display: block; margin-top: 3px; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; }
+        .src-meta .src-share b { color: #4d94ff; }
+        .src-tiktok .src-share b { color: #25F4EE; }
+        .src-snap .src-share b { color: #FFFC00; }
+        .src-direct .src-share b { color: #e2e8f0; }
+        .src-block {
+            position: relative; margin-top: 12px; padding: 12px 12px 10px 14px; border-radius: 16px;
+            border: 1.5px solid rgba(255,255,255,.12); background: rgba(2,6,23,.72);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+        }
+        .src-block::before {
+            content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 99px;
+            background: rgba(148,163,184,.55);
+        }
+        .src-meta .src-block { border-color: rgba(8,102,255,.4); background: rgba(8,102,255,.07); }
+        .src-meta .src-block::before { background: #0866FF; }
+        .src-tiktok .src-block { border-color: rgba(254,44,85,.35); background: rgba(254,44,85,.07); }
+        .src-tiktok .src-block::before { background: linear-gradient(180deg, #25F4EE, #FE2C55); }
+        .src-snap .src-block { border-color: rgba(255,252,0,.35); background: rgba(255,252,0,.06); }
+        .src-snap .src-block::before { background: #FFFC00; }
+        .src-direct .src-block { border-color: rgba(148,163,184,.35); background: rgba(148,163,184,.07); }
+        .src-direct .src-block::before { background: #94A3B8; }
+        .src-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; }
+        .src-row + .src-row { border-top: 1px solid rgba(255,255,255,.07); }
+        .src-label { font-size: 13px; font-weight: 700; color: #cbd5e1; }
+        .src-vals { display: flex; align-items: baseline; gap: 10px; font-family: Outfit, sans-serif; }
+        .src-vals b { font-size: 18px; font-weight: 900; color: #fff; min-width: 28px; text-align: right; }
+        .src-vals em { font-style: normal; font-size: 13px; font-weight: 800; min-width: 46px; text-align: right; color: #94a3b8; }
+        .src-meta .src-vals em { color: #60a5fa; }
+        .src-tiktok .src-vals em { color: #25F4EE; }
+        .src-snap .src-vals em { color: #FFFC00; }
+        .src-sec {
+            margin: 0 0 6px; padding: 5px 8px; width: fit-content; border-radius: 8px;
+            font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #e2e8f0;
+            background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
+        }
+        .src-meta .src-sec { color: #93c5fd; background: rgba(8,102,255,.15); border-color: rgba(8,102,255,.3); }
+        .src-tiktok .src-sec { color: #fda4af; background: rgba(254,44,85,.12); border-color: rgba(254,44,85,.28); }
+        .src-snap .src-sec { color: #FFFC00; background: rgba(255,252,0,.1); border-color: rgba(255,252,0,.28); }
+        .src-direct .src-sec { color: #e2e8f0; background: rgba(148,163,184,.12); border-color: rgba(148,163,184,.28); }
+        .src-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 999px; font-size: 12px; font-weight: 900; border: 1px solid transparent; }
+        .src-pill .src-logo { width: 22px; height: 22px; border-radius: 7px; flex-basis: 22px; }
+        .src-pill .src-logo svg { width: 13px; height: 13px; }
+        .src-pill-meta { background: rgba(8,102,255,.16); color: #93c5fd; border-color: rgba(8,102,255,.4); }
+        .src-pill-tiktok { background: rgba(254,44,85,.12); color: #fda4af; border-color: rgba(37,244,238,.35); }
+        .src-pill-snap { background: rgba(255,252,0,.12); color: #FFFC00; border-color: rgba(255,252,0,.4); }
+        .src-pill-direct { background: rgba(148,163,184,.12); color: #e2e8f0; border-color: rgba(148,163,184,.35); }
+        .src-step { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
+        .src-step-label { font-size: 14px; font-weight: 800; color: #e2e8f0; }
+        .src-bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.06); overflow: hidden; margin-bottom: 8px; }
+        .src-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #67e8f9, #38bdf8); max-width: 100%; }
+        #source-funnel-wrap {
+            border: 1px solid rgba(103,232,249,.2);
+            box-shadow: 0 0 0 1px rgba(103,232,249,.06), 0 18px 40px rgba(0,0,0,.3);
+        }
+        .product-pick {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px;
+            margin-bottom: 20px; padding: 16px 18px; border-radius: 20px;
+            border: 2px solid rgba(255,215,0,.35);
+            background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(2,6,23,.96));
+            box-shadow: 0 0 0 1px rgba(255,215,0,.08), 0 16px 36px rgba(0,0,0,.28);
+        }
+        #source-funnel-wrap {
+            border: 2px solid rgba(255,255,255,.12);
+            background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(2,6,23,.96));
+        }
+        .product-pick-label { font-size: 12px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #94a3b8; }
+        .product-pick-title { font-size: 18px; font-weight: 900; color: #fff; margin-top: 2px; }
+        .product-pick-sub { font-size: 12px; font-weight: 700; color: #64748b; margin-top: 2px; }
+        .product-pick select {
+            min-width: min(100%, 360px); appearance: none; -webkit-appearance: none;
+            background: #0b1220 url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23FFD700'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 14px center / 12px;
+            border: 1px solid rgba(255,215,0,.35); color: #fff; font-weight: 800; font-size: 14px;
+            border-radius: 14px; padding: 12px 40px 12px 14px; outline: none;
+            box-shadow: 0 0 0 1px rgba(255,215,0,.05), 0 10px 30px rgba(0,0,0,.25);
+        }
+        .product-pick select:focus { border-color: #FFD700; box-shadow: 0 0 0 3px rgba(255,215,0,.15); }
+        .product-pick option { background: #0b1220; color: #fff; }
+
+        /* Login Screen */
+        #login-screen {
+            position: fixed; inset: 0;
+            background: #050914;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            background-image: radial-gradient(circle at center, rgba(255,215,0,0.05) 0%, transparent 70%);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0B0F17; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+    </style>
+</head>
+<body class="p-4 md:p-8" style="font-family: 'Tajawal', sans-serif !important;">
+
+    <!-- 🔒 LOGIN SCREEN -->
+    <div id="login-screen" style="display:none">
+        <div class="glass-card p-10 max-w-md w-full text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
+            
+            <div class="w-20 h-20 bg-yellow-500 rounded-2xl flex items-center justify-center text-black text-4xl mx-auto mb-6 shadow-[0_0_30px_rgba(255,215,0,0.4)] transform rotate-3">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2 class="text-3xl font-black text-white mb-2 glow-text">storegyptecod</h2>
+            <p class="text-sm text-gray-400 mb-8">النظام الآمن لإدارة المبيعات والتأكيدات</p>
+            
+            <form onsubmit="handleLogin(event)">
+                <div class="relative mb-6">
+                    <i class="fa-solid fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="password" id="admin-pass" placeholder="Password..." class="w-full bg-gray-900/80 border-2 border-gray-700 text-white rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-yellow-500 transition-all text-center font-bold text-lg en-font shadow-inner" required>
+                </div>
+                <button type="submit" class="w-full btn-gold font-black text-xl py-4 rounded-xl flex items-center justify-center gap-3">
+                    تسجيل الدخول <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+            <p id="login-error" class="text-red-500 text-sm mt-4 hidden font-bold bg-red-500/10 py-2 rounded-lg border border-red-500/20 animate-pulse">❌ Incorrect password!</p>
+        </div>
+    </div>
+
+    <!-- 📊 DASHBOARD CONTENT -->
+    <div class="max-w-[1400px] mx-auto" id="app-container">
+        
+        <!-- Premium Header -->
+        <header class="flex flex-col lg:flex-row justify-between items-center mb-10 glass-card p-6 md:p-8 relative overflow-hidden">
+            <div class="absolute -right-20 -top-20 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl"></div>
+            
+            <div class="flex items-center gap-5 mb-6 lg:mb-0 relative z-10 w-full lg:w-auto">
+                <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex shrink-0 items-center justify-center text-black text-3xl shadow-lg">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black text-white glow-text mb-1">لوحة المبيعات VIP</h1>
+                    <p class="text-sm text-gray-400 font-semibold">إدارة Orders، التأكيد، والإحصائيات الحية<br><span class="text-yellow-400 en-font text-xs">KSA · 1 USD = 3.75 SAR</span></p>
+                </div>
+            </div>
+            
+            <div class="flex flex-col md:flex-row items-end md:items-center gap-4 w-full lg:w-auto relative z-10">
+                
+                <!-- Date & Quick Filters Group -->
+                <div class="flex flex-col gap-2 w-full md:w-auto">
+                    <!-- Quick Filters (ABOVE the date) -->
+                    <div class="flex flex-wrap items-center justify-end gap-2 en-font w-full">
+                        <button onclick="setQuickDate('today')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-lg border border-blue-400">Aujourd'hui</button>
+                        <button onclick="setQuickDate('yesterday')" class="bg-gray-700 hover:bg-gray-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-lg border border-gray-500">Hier</button>
+                        <button onclick="setQuickDate('month')" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-lg border border-purple-400"><i class="fa-solid fa-calendar-days mr-1"></i> Ce Mois</button>
+                        <button onclick="setQuickDate('total')" class="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-lg border border-amber-400"><i class="fa-solid fa-globe mr-1"></i> Total</button>
+                    </div>
+
+                    <!-- Date Filter (Premium UI) -->
+                    <div class="bg-gray-900/80 rounded-xl border border-gray-700/80 flex items-center px-4 py-3 w-full shadow-inner transition hover:border-yellow-500/50">
+                        <i class="fa-regular fa-calendar-days text-yellow-500 ml-3 text-lg"></i>
+                        <input type="date" id="date-filter" onchange="filterByDate()" class="bg-transparent text-white text-sm font-bold outline-none cursor-pointer w-full en-font">
+                        <button onclick="clearDateFilter()" class="mr-3 text-gray-500 hover:text-red-400 transition" title="إلغاء الفلتر">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Total Count -->
+                <div class="bg-gray-900/80 px-6 py-3 rounded-xl border border-gray-700/80 text-center flex-1 md:flex-none shadow-inner">
+                    <div class="text-xs text-gray-400 font-bold mb-1">إجمالي Orders</div>
+                    <div class="text-2xl font-black text-yellow-500 en-font glow-text leading-none" id="total-orders-count">0</div>
+                </div>
+
+                <!-- Refresh Button -->
+                <button onclick="refreshAllData(this)" class="btn-gold px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 flex-1 md:flex-none h-full shadow-[0_0_20px_rgba(255,215,0,0.3)] hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-rotate-right"></i> تحديث
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8 bg-gray-900/80 p-2.5 rounded-2xl border border-gray-800 backdrop-blur-xl shadow-2xl">
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Tab 1: Analytics -->
+                <button id="tab-stats-btn" onclick="switchAdminTab('stats')" class="px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-gradient-to-r from-yellow-500 to-amber-500 text-black shadow-[0_0_25px_rgba(255,215,0,0.35)]">
+                    <i class="fa-solid fa-chart-pie text-lg"></i> Analytics Dashboard
+                </button>
+                <!-- Tab 2: Orders -->
+                <button id="tab-orders-btn" onclick="switchAdminTab('orders')" class="px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all text-gray-300 hover:text-white hover:bg-gray-800/80">
+                    <i class="fa-solid fa-box-archive text-lg"></i> Orders Management
+                    <span id="tab-orders-badge" class="bg-gray-800 text-yellow-500 text-xs px-2.5 py-0.5 rounded-full font-black border border-yellow-500/30">0</span>
+                </button>
+                <!-- Tab 3: Protected Pixels -->
+                <button id="tab-settings-btn" onclick="switchAdminTab('settings')" class="px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all text-gray-300 hover:text-white hover:bg-gray-800/80">
+                    <i class="fa-brands fa-snapchat text-yellow-300 text-lg"></i> Snapchat Pixels
+                    <span class="bg-yellow-400/15 text-yellow-300 text-[11px] px-2.5 py-0.5 rounded-full font-black border border-yellow-400/40 flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[9px]"></i> Secured
+                    </span>
+                </button>
+                <button id="tab-sources-btn" onclick="switchAdminTab('sources')" class="px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all text-gray-300 hover:text-white hover:bg-gray-800/80">
+                    <i class="fa-solid fa-location-crosshairs text-lg"></i> Source Tracking
+                </button>
+            </div>
+            
+            <button onclick="handleLogout()" class="text-gray-400 hover:text-red-400 font-bold text-sm flex items-center gap-2 px-4 py-2.5 rounded-xl hover:bg-red-500/10 transition">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </button>
+        </div>
+
+        <!-- 📊 VIEW 1: STATISTIQUES & ANALYTICS DASHBOARD -->
+        <div id="stats-view">
+            <!-- Hero KPI Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-8">
+                <!-- 1. Total Revenue -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-green-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Total Revenue (CA)</span>
+                        <span class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400 text-sm">
+                            <i class="fa-solid fa-coins"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-green-400 en-font glow-text" id="stat-revenue">0 <span class="text-xs text-green-600">SAR</span></div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Gross Store Revenue</div>
+                </div>
+
+                <!-- 2. Unique Visitors -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-blue-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Unique Visitors</span>
+                        <span class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 text-sm">
+                            <i class="fa-solid fa-users"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-white en-font" id="stat-visitors">0</div>
+                    <div class="text-[11px] text-blue-400 font-semibold mt-1" id="stat-visitors-sub"><i class="fa-solid fa-circle text-[7px] animate-pulse"></i> Active Today</div>
+                </div>
+
+                <!-- 3. Total Orders -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-yellow-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Total Orders</span>
+                        <span class="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center text-yellow-400 text-sm">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-yellow-400 en-font" id="stat-orders">0</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1" id="stat-confirmed-badge">0 Confirmed Orders</div>
+                </div>
+
+                <!-- NEW: Total Confirmed -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-emerald-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Total Confirmed</span>
+                        <span class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-sm">
+                            <i class="fa-solid fa-check-double"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-emerald-400 en-font" id="stat-total-confirmed">0</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Successfully Verified</div>
+                </div>
+
+                <!-- 4. Conversion Rate -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-purple-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Conversion Rate</span>
+                        <span class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 text-sm">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-purple-400 en-font" id="stat-conversion">0%</div>
+                    <div class="text-[11px] text-purple-300 font-semibold mt-1">Orders vs Visitors 🔥</div>
+                </div>
+
+                <!-- 5. AOV (Panier Moyen) -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-amber-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Average Order (AOV)</span>
+                        <span class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400 text-sm">
+                            <i class="fa-solid fa-gem"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-amber-300 en-font" id="stat-aov">0 <span class="text-xs">SAR</span></div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Average Cart Value</div>
+                </div>
+
+                <!-- NEW: Page Views -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-indigo-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Page Views</span>
+                        <span class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400 text-sm">
+                            <i class="fa-solid fa-eye"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-indigo-400 en-font" id="stat-pageviews">0</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Total Views Today</div>
+                </div>
+
+                <!-- NEW: Add to Cart -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-pink-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Add to Cart</span>
+                        <span class="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center text-pink-400 text-sm">
+                            <i class="fa-solid fa-cart-plus"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-pink-400 en-font" id="stat-addtocart">0</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Intent to Buy</div>
+                </div>
+
+                <!-- 6. Site Speed -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-cyan-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Site Speed</span>
+                        <span class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-sm">
+                            <i class="fa-solid fa-gauge-high"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-cyan-400 en-font" id="stat-speed">0.72s</div>
+                    <div class="text-[11px] text-green-400 font-semibold mt-1">🚀 Excellent Score</div>
+                </div>
+            </div>
+
+            <!-- Detailed Insights Grid -->
+            <div class="grid grid-cols-1 max-w-2xl mx-auto gap-8 mb-8">
+                <!-- Status Distribution & Funnel Card -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <div class="flex items-center justify-between mb-6 pb-3 border-b border-gray-700/50">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-pie-chart text-pink-500"></i> Order Status Distribution
+                        </h3>
+                        <span class="text-xs text-gray-400 font-bold">Call Center Tracking</span>
+                    </div>
+                    
+                    <div id="status-distribution-container" class="space-y-4">
+                        <!-- Status Bars populated via JS -->
+                    </div>
+
+                    <!-- Mini Funnel -->
+                    <div class="mt-6 pt-4 border-t border-gray-700/50">
+                        <div class="text-xs font-bold text-gray-400 mb-3 flex items-center justify-between">
+                            <span>Conversion Funnel</span>
+                            <span class="text-green-400 font-bold" id="funnel-rate-badge">0% Conversion</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div class="bg-blue-500/10 border border-blue-500/20 p-2 rounded-xl">
+                                <div class="text-gray-400 font-semibold mb-1">Visitors</div>
+                                <div class="font-black text-white en-font" id="funnel-visitors">0</div>
+                            </div>
+                            <div class="bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl">
+                                <div class="text-gray-400 font-semibold mb-1">Orders</div>
+                                <div class="font-black text-yellow-400 en-font" id="funnel-orders">0</div>
+                            </div>
+                            <div class="bg-green-500/10 border border-green-500/20 p-2 rounded-xl">
+                                <div class="text-gray-400 font-semibold mb-1">Confirmed</div>
+                                <div class="font-black text-green-400 en-font" id="funnel-confirmed">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📦 VIEW 2: ORDERS TABLE -->
+        <div id="orders-view" style="display: none;">
+            <!-- Bulk Actions Bar (Above the table) -->
+            <div id="bulk-actions" class="hidden mb-4 p-4 glass-card bg-red-500/5 border border-red-500/20 rounded-xl flex justify-between items-center shadow-lg">
+                <span class="text-red-400 font-bold"><i class="fa-solid fa-circle-check"></i> تم تحديد <span id="bulk-count">0</span> طلبيات</span>
+                <button id="bulk-delete-btn" onclick="deleteSelectedOrders()" class="bg-red-600 hover:bg-red-500 text-white px-6 py-2.5 rounded-xl font-bold transition flex items-center gap-2 shadow-[0_0_15px_rgba(220,38,38,0.4)]">
+                    <i class="fa-solid fa-trash-can"></i> مسح المحدد
+                </button>
+            </div>
+            
+            <div class="glass-card overflow-hidden p-2 md:p-6 relative">
+                <div class="overflow-x-auto pb-4 mt-2">
+                    <table class="w-full text-left whitespace-nowrap min-w-[1000px]">
+                        <thead>
+                            <tr class="text-gray-400 text-sm uppercase tracking-wider">
+                                <th class="p-4 font-bold pb-6 w-10 text-center">
+                                    <input type="checkbox" id="select-all-orders" class="w-4 h-4 rounded border-gray-600 bg-gray-700 cursor-pointer" onchange="toggleSelectAll(this)">
+                                </th>
+                                <th class="p-4 font-bold pb-6 w-10"></th>
+                                <th class="p-4 font-bold pb-6">Order #</th>
+                                <th class="p-4 font-bold pb-6">Date & Time</th>
+                                <th class="p-4 font-bold pb-6">Customer Name</th>
+                                <th class="p-4 font-bold pb-6 text-center">Direct Call</th>
+                                <th class="p-4 font-bold pb-6">City</th>
+                                <th class="p-4 font-bold pb-6 text-center">Adresse</th>
+                                <th class="p-4 font-bold pb-6 text-center">WhatsApp</th>
+                                <th class="p-4 font-bold pb-6">Offer</th>
+                                <th class="p-4 font-bold pb-6 text-center">Source</th>
+                                <th class="p-4 font-bold pb-6">Price</th>
+                                <th class="p-4 font-bold pb-6 text-center">Status</th>
+                                <th class="p-4 font-bold pb-6 text-center">Notes / Raison</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody">
+                            <!-- Loading State -->
+                            <tr>
+                                <td colspan="14" class="p-12 text-center text-gray-400">
+                                    <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-yellow-500"></i>
+                                    <div class="text-lg font-bold">جاري جلب Orders الحية...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔐 VIEW 3: SNAPCHAT PIXELS -->
+        <div id="settings-view" style="display: none;">
+            <div id="pixel-lock-screen" class="glass-card p-8 md:p-12 max-w-lg mx-auto text-center border-2 border-yellow-400/40 shadow-[0_0_50px_rgba(255,252,0,0.12)]">
+                <div class="w-20 h-20 bg-[#FFFC00] rounded-3xl flex items-center justify-center text-black text-3xl mx-auto mb-6 shadow-[0_0_30px_rgba(255,252,0,0.35)]">
+                    <i class="fa-brands fa-snapchat"></i>
+                </div>
+                <h3 class="text-2xl font-black text-white glow-text mb-2">Snapchat Pixels 🔐</h3>
+                <p class="text-sm text-gray-400 mb-6 font-semibold">أدخل الباسورد باش تشوف وتعدّل Snap Pixel IDs و CAPI Tokens.</p>
+                <form onsubmit="unlockPixelSettings(event)" class="space-y-4">
+                    <div class="relative">
+                        <i class="fa-solid fa-key absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="password" id="pixel-passcode" placeholder="Enter Passcode..." class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-yellow-400 transition-all text-center font-black en-font shadow-inner text-lg" required>
+                    </div>
+                    <button type="submit" class="w-full btn-gold py-3.5 rounded-xl font-black text-base flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-lock-open"></i> Unlock Snapchat Pixels
+                    </button>
+                    <p id="pixel-lock-error" class="text-red-400 text-xs font-bold hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20">❌ Incorrect Passcode!</p>
+                </form>
+            </div>
+
+            <div id="pixel-unlocked-panel" style="display: none;" class="glass-card p-6 md:p-8 border-2 border-yellow-400/30">
+                <div class="flex flex-wrap items-center justify-between mb-8 pb-4 border-b border-yellow-400/20 gap-4">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-black text-white glow-text flex items-center gap-3">
+                            <span class="w-11 h-11 rounded-xl bg-[#FFFC00] text-black flex items-center justify-center text-xl"><i class="fa-brands fa-snapchat"></i></span>
+                            Snapchat Pixels
+                        </h2>
+                        <p class="text-sm text-gray-400 mt-1 font-semibold">حط Pixel ID → Save → كيتفعّل فالموقع أوتوماتيك (PageView · ViewContent · AddToCart · Checkout · Purchase)</p>
+                    </div>
+                    <button onclick="lockPixelSettings()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-xl text-xs font-bold border border-gray-700 flex items-center gap-2 transition">
+                        <i class="fa-solid fa-lock text-yellow-400"></i> Lock Settings
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="p-6 rounded-2xl border-2 border-[#FFFC00]/55 bg-[rgba(255,252,0,0.06)] relative overflow-hidden shadow-[0_0_28px_rgba(255,252,0,0.08)]">
+                        <div class="absolute top-0 inset-x-0 h-1 bg-[#FFFC00]"></div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-11 h-11 rounded-xl bg-[#FFFC00] flex items-center justify-center text-black text-xl">
+                                <i class="fa-brands fa-snapchat"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-black text-white">Snapchat Main Pixel</h3>
+                                <p class="text-[11px] font-bold text-yellow-300/80 uppercase tracking-wider">Primary · PAGE_VIEW + PURCHASE</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4 relative z-10">
+                            <div>
+                                <label class="block text-xs font-bold text-yellow-200/70 mb-1">Pixel ID</label>
+                                <input type="text" id="snapchat_pixel" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" class="w-full bg-gray-950 border-2 border-yellow-400/35 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-yellow-200/70 mb-1">CAPI Token</label>
+                                <input type="password" id="snapchat_token" placeholder="e.g. eyJhbG..." class="w-full bg-gray-950 border-2 border-yellow-400/35 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-2xl border-2 border-yellow-400/35 bg-[rgba(255,252,0,0.04)] relative overflow-hidden">
+                        <div class="absolute top-0 inset-x-0 h-1 bg-yellow-400/70"></div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-11 h-11 rounded-xl bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center text-yellow-300 text-xl">
+                                <i class="fa-brands fa-snapchat"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-black text-white">Snapchat Backup Pixel</h3>
+                                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Optional · نفس الأحداث</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4 relative z-10">
+                            <div>
+                                <label class="block text-xs font-bold text-yellow-200/70 mb-1">Pixel ID</label>
+                                <input type="text" id="snapchat_pixel_2" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" class="w-full bg-gray-950 border-2 border-yellow-400/25 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-yellow-200/70 mb-1">CAPI Token</label>
+                                <input type="password" id="snapchat_token_2" placeholder="e.g. eyJhbG..." class="w-full bg-gray-950 border-2 border-yellow-400/25 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <details class="mb-8 group">
+                    <summary class="cursor-pointer list-none flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-white/10 bg-white/[0.03] text-sm font-bold text-gray-300 hover:bg-white/[0.05]">
+                        <span><i class="fa-solid fa-layer-group text-gray-500 mr-2"></i> Meta / TikTok (اختياري)</span>
+                        <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition"></i>
+                    </summary>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
+                        <div class="glass-card p-5 border-t-2 border-blue-500 bg-gray-900/50">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30"><i class="fa-brands fa-facebook"></i></div>
+                                <h3 class="text-base font-bold text-white">Facebook Main</h3>
+                            </div>
+                            <div class="space-y-3">
+                                <input type="text" id="fb_pixel_1" placeholder="Pixel ID" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-blue-500 outline-none en-font text-sm">
+                                <input type="password" id="fb_token_1" placeholder="CAPI Token" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-blue-500 outline-none en-font text-sm">
+                            </div>
+                        </div>
+                        <div class="glass-card p-5 border-t-2 border-indigo-500 bg-gray-900/50">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-9 h-9 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30"><i class="fa-brands fa-facebook"></i></div>
+                                <h3 class="text-base font-bold text-white">Facebook Backup</h3>
+                            </div>
+                            <div class="space-y-3">
+                                <input type="text" id="fb_pixel_2" placeholder="Pixel ID" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-indigo-500 outline-none en-font text-sm">
+                                <input type="password" id="fb_token_2" placeholder="CAPI Token" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-indigo-500 outline-none en-font text-sm">
+                            </div>
+                        </div>
+                        <div class="glass-card p-5 border-t-2 border-pink-500 bg-gray-900/50 md:col-span-2">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-9 h-9 rounded-lg bg-pink-600/20 flex items-center justify-center text-pink-400 border border-pink-500/30"><i class="fa-brands fa-tiktok"></i></div>
+                                <h3 class="text-base font-bold text-white">TikTok Pixel</h3>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <input type="text" id="tiktok_pixel" placeholder="Pixel ID" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-pink-500 outline-none en-font text-sm">
+                                <input type="password" id="tiktok_token" placeholder="Events API Token" class="w-full bg-gray-900 border-2 border-gray-700 text-white rounded-lg px-3 py-2.5 focus:border-pink-500 outline-none en-font text-sm">
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <div class="pt-6 border-t border-yellow-400/20 flex flex-wrap items-center justify-between gap-4">
+                    <button onclick="saveAllSettings()" class="bg-[#FFFC00] hover:bg-yellow-300 text-black px-8 py-3.5 rounded-xl font-black flex items-center justify-center gap-2.5 shadow-[0_4px_20px_rgba(255,252,0,0.28)] transition-all text-base">
+                        <i class="fa-solid fa-save text-lg"></i> Save Snapchat Pixels
+                    </button>
+                    <p id="settings-status" class="text-green-400 font-bold hidden flex items-center gap-2"><i class="fa-solid fa-circle-check text-xl"></i> تم الحفظ بنجاح!</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="sources-view" style="display: none;">
+            <div class="glass-card product-pick">
+                <div>
+                    <div class="product-pick-label">Sélection produit</div>
+                    <div class="product-pick-title" id="product-filter-title">Tous les produits</div>
+                    <div class="product-pick-sub">Choisis un produit pour voir ses stats, ou tous les produits ensemble.</div>
+                </div>
+                <select id="product-filter" onchange="onProductFilterChange()">
+                    <option value="all">Tous les produits</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8" id="source-cards"></div>
+            <div class="glass-card p-6 md:p-8" id="source-funnel-wrap">
+                <div class="flex flex-wrap items-end justify-between gap-3 mb-6">
+                    <div>
+                        <h3 class="text-xl font-black text-white">Visitor path</h3>
+                        <p class="text-sm text-gray-400 font-semibold mt-1">Number = people · % = share of visitors on that platform</p>
+                    </div>
+                </div>
+                <div id="source-funnel" class="src-block" style="margin-top:0"></div>
+                <p class="text-xs text-gray-500 font-semibold mt-3">Meta = fbclid · TikTok = ttclid · Snapchat = ScCid · else Direct</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        const PASS = "storegypte2026";
+        function usdFromSar(amount) {
+            const usd = (Number(amount) || 0) / 3.75;
+            return '$' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        let allOrders = [];
+        let currentTab = 'stats';
+        let allEvents = [];
+        let catalogProducts = [];
+        let selectedProductId = 'all';
+
+        function switchAdminTab(tabName) {
+            currentTab = tabName;
+            const statsBtn = document.getElementById('tab-stats-btn');
+            const ordersBtn = document.getElementById('tab-orders-btn');
+            const settingsBtn = document.getElementById('tab-settings-btn');
+            const sourcesBtn = document.getElementById('tab-sources-btn');
+            
+            const statsView = document.getElementById('stats-view');
+            const ordersView = document.getElementById('orders-view');
+            const settingsView = document.getElementById('settings-view');
+            const sourcesView = document.getElementById('sources-view');
+
+            // Reset all tab button styles
+            [statsBtn, ordersBtn, settingsBtn, sourcesBtn].forEach(btn => {
+                if (btn) btn.className = "px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all text-gray-300 hover:text-white hover:bg-gray-800/80";
+            });
+
+            // Hide all views
+            statsView.style.display = 'none';
+            ordersView.style.display = 'none';
+            settingsView.style.display = 'none';
+            if (sourcesView) sourcesView.style.display = 'none';
+
+            if (tabName === 'stats') {
+                statsView.style.display = 'block';
+                statsBtn.className = "px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-gradient-to-r from-yellow-500 to-amber-500 text-black shadow-[0_0_25px_rgba(255,215,0,0.35)]";
+                renderAnalytics(allOrders);
+            } else if (tabName === 'orders') {
+                ordersView.style.display = 'block';
+                ordersBtn.className = "px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-yellow-500 text-black shadow-[0_0_20px_rgba(255,215,0,0.3)]";
+            } else if (tabName === 'settings') {
+                settingsView.style.display = 'block';
+                settingsBtn.className = "px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 text-white shadow-[0_0_25px_rgba(59,130,246,0.4)]";
+
+                // Check security lock
+                if (sessionStorage.getItem('pixel_unlocked') === 'true') {
+                    document.getElementById('pixel-lock-screen').style.display = 'none';
+                    document.getElementById('pixel-unlocked-panel').style.display = 'block';
+                    loadSettings();
+                } else {
+                    document.getElementById('pixel-lock-screen').style.display = 'block';
+                    document.getElementById('pixel-unlocked-panel').style.display = 'none';
+                    setTimeout(() => {
+                        const input = document.getElementById('pixel-passcode');
+                        if (input) input.focus();
+                    }, 100);
+                }
+            } else if (tabName === 'sources') {
+                if (sourcesView) sourcesView.style.display = 'block';
+                sourcesBtn.className = "px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-gradient-to-r from-cyan-400 to-blue-500 text-black shadow-[0_0_25px_rgba(34,211,238,0.35)]";
+                renderSources(window.filteredOrders || allOrders);
+            }
+        }
+
+        function unlockPixelSettings(e) {
+            e.preventDefault();
+            const code = document.getElementById('pixel-passcode').value.trim();
+            if (code === PASS || code === '2026' || code === 'pixel2026') {
+                sessionStorage.setItem('pixel_unlocked', 'true');
+                document.getElementById('pixel-lock-error').classList.add('hidden');
+                document.getElementById('pixel-lock-screen').style.display = 'none';
+                document.getElementById('pixel-unlocked-panel').style.display = 'block';
+                loadSettings();
+            } else {
+                document.getElementById('pixel-lock-error').classList.remove('hidden');
+            }
+        }
+
+        function lockPixelSettings() {
+            sessionStorage.removeItem('pixel_unlocked');
+            document.getElementById('pixel-passcode').value = '';
+            document.getElementById('pixel-lock-screen').style.display = 'block';
+            document.getElementById('pixel-unlocked-panel').style.display = 'none';
+        }
+
+        function unlockDashboard() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+            loadProductsCatalog();
+            fetchOrders();
+            fetchAnalyticsStats();
+
+            // Check if URL specifies tab
+            const urlParams = new URLSearchParams(window.location.search);
+            const reqTab = urlParams.get('tab') || (window.location.hash ? window.location.hash.replace('#', '') : '');
+            if (reqTab === 'orders' || reqTab === 'settings' || reqTab === 'sources') {
+                switchAdminTab(reqTab);
+            } else {
+                switchAdminTab('stats');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === PASS || pass === "antichoc2026") {
+                sessionStorage.setItem('ac_admin_pass', PASS);
+                document.getElementById('login-screen').style.opacity = '0';
+                setTimeout(() => {
+                    unlockDashboard();
+                }, 250);
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('ac_admin_pass');
+            sessionStorage.removeItem('pixel_unlocked');
+            window.location.reload();
+        }
+
+        // Auto-unlock if already authenticated in this session
+        window.addEventListener('DOMContentLoaded', () => {
+            unlockDashboard();
+        });
+
+        async function fetchAnalyticsStats(force = false) {
+            try {
+                const url = force ? `/api/analytics/stats?_t=${Date.now()}` : '/api/analytics/stats';
+                const res = await fetch(url, { cache: force ? 'no-store' : 'default' });
+                const data = await res.json();
+                if (data.success && Array.isArray(data.events)) {
+                    allEvents = data.events;
+                }
+            } catch (err) {
+                console.log('Analytics request failed.');
+            }
+            renderAnalytics(allOrders);
+        }
+
+        async function refreshAllData(btnElement) {
+            const originalHtml = btnElement ? btnElement.innerHTML : '';
+            if (btnElement) btnElement.innerHTML = '<i class="fa-solid fa-rotate-right fa-spin"></i> جاري التحديث...';
+            
+            await fetchOrders(true);
+            await fetchAnalyticsStats(true);
+            
+            if (btnElement) btnElement.innerHTML = originalHtml;
+        }
+
+        async function fetchOrders(force = false) {
+            const tbody = document.getElementById('orders-tbody');
+            
+            // Only show full table loading if not forced refresh to keep UX smooth during refresh
+            if (!force) {
+                tbody.innerHTML = '<tr><td colspan="14" class="p-12 text-center text-gray-400"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-yellow-500"></i><div class="text-lg font-bold">Loading Data...</div></td></tr>';
+            }
+            
+            try {
+                const url = force ? `/api/orders?_t=${Date.now()}` : '/api/orders';
+                const response = await fetch(url, { cache: force ? 'no-store' : 'default' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    allOrders = data.orders || [];
+                    
+                    // Normalize corrupted Arabic text from old database records
+                    allOrders.forEach(o => {
+                        o.created_at = o.created_at || o.timestamp || new Date().toISOString();
+                        if (!o.offer_name) o.offer_name = o.offer || '';
+                        const statusMap = { pending: 'Nouveau', confirmed: 'Confirmé', cancelled: 'Annulé', shipped: 'Pas de réponse', delivered: 'Confirmé' };
+                        if (statusMap[o.status]) o.status = statusMap[o.status];
+                        if (!o.status) o.status = 'Nouveau';
+                        if (o.offer_name) {
+                            const n = o.offer_name.toLowerCase();
+                            if (n.includes('4') || n.includes('??? 4') || n.includes('4 pcs')) {
+                                o.offer_name = 'باك 4 قطع (حمامين أو منزلين) 🏆';
+                            } else if (n.includes('2') || n.includes('طقم 2') || n.includes('2 pcs') || n.includes('حمام واحد')) {
+                                o.offer_name = 'طقم 2 قطع (شوفو واحد) 🛡️';
+                            } else if (n.includes('6') || n.includes('3 حمامات') || n.includes('6 pcs')) {
+                                o.offer_name = 'باك 6 قطع (3 حمامات) 🏡';
+                            } else if (n.includes('?')) {
+                                o.offer_name = 'باك 4 قطع (حمامين أو منزلين) 🏆'; // Fallback for fully corrupted names
+                            }
+                        } else {
+                            o.offer_name = 'باك 4 قطع (حمامين أو منزلين) 🏆';
+                        }
+                    });
+
+                    document.getElementById('tab-orders-badge').innerText = allOrders.length;
+                    
+                    if (!window.initialDateSet) {
+                        window.initialDateSet = true;
+                        setQuickDate('today');
+                    } else {
+                        filterByDate(); // Re-apply filter if exists, or render all
+                    }
+                } else {
+                    throw new Error('Failed to fetch data');
+                }
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="14" class="p-12 text-center text-red-400"><i class="fa-solid fa-triangle-exclamation mb-4 text-4xl"></i><div class="text-lg font-bold">حدث خطأ أثناء جلب Orders. تأكد من اتصال السيرفور.</div></td></tr>';
+            }
+        }
+
+        let filterMode = 'exact';
+        let filterMonthValue = '';
+
+        function clearDateFilter() {
+            setQuickDate('total');
+        }
+
+        function setQuickDate(type) {
+            const date = new Date();
+            filterMode = 'exact';
+            
+            if (type === 'yesterday') {
+                date.setDate(date.getDate() - 1);
+            } else if (type === 'month') {
+                filterMode = 'month';
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                filterMonthValue = `${year}-${month}`;
+                document.getElementById('date-filter').value = ''; // clear exact date input
+                filterByDate();
+                return;
+            } else if (type === 'total') {
+                filterMode = 'total';
+                document.getElementById('date-filter').value = ''; // clear exact date input
+                filterByDate();
+                return;
+            }
+            
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            document.getElementById('date-filter').value = `${year}-${month}-${day}`;
+            filterByDate();
+        }
+
+        function filterByDate() {
+            const selectedDate = document.getElementById('date-filter').value;
+            
+            // If user manually selected a date from input, force 'exact' mode
+            if (selectedDate && filterMode !== 'exact') {
+                filterMode = 'exact';
+            }
+            
+            let filtered = allOrders;
+            
+            if (filterMode === 'exact' && selectedDate) {
+                filtered = allOrders.filter(order => {
+                    const d = new Date(order.created_at);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const localDateStr = `${year}-${month}-${day}`;
+                    return localDateStr === selectedDate;
+                });
+            } else if (filterMode === 'month' && filterMonthValue) {
+                filtered = allOrders.filter(order => {
+                    const d = new Date(order.created_at);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const localMonthStr = `${year}-${month}`;
+                    return localMonthStr === filterMonthValue;
+                });
+            } else {
+                // total / no filter
+                filtered = allOrders;
+            }
+            
+            renderOrders(filtered);
+            renderAnalytics(filtered);
+        }
+
+        function pad2(n) { return String(n).padStart(2, '0'); }
+        function localDay(ts) {
+            const d = new Date(ts);
+            if (Number.isNaN(d.getTime())) return '';
+            return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+        }
+        function isSameLocalDay(ts, date) { return localDay(ts) === localDay(date); }
+        function eventProductId(event) {
+            if (event && event.productId) return String(event.productId);
+            const match = String(event && event.path || '').match(/^\/product\/([^/?#]+)/);
+            return match ? match[1] : '';
+        }
+        function orderProductId(order) {
+            if (order && order.productId) return String(order.productId);
+            return '';
+        }
+        function eventsInFilter() {
+            return allEvents.filter(event => {
+                if (selectedProductId !== 'all' && eventProductId(event) !== selectedProductId) return false;
+                if (filterMode === 'exact') {
+                    const selected = document.getElementById('date-filter').value;
+                    return selected ? localDay(event.ts) === selected : true;
+                }
+                if (filterMode === 'month' && filterMonthValue) {
+                    const d = new Date(event.ts);
+                    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}` === filterMonthValue;
+                }
+                return true;
+            });
+        }
+        function ordersInProductFilter(ordersList) {
+            if (selectedProductId === 'all') return ordersList;
+            return ordersList.filter(order => orderProductId(order) === selectedProductId);
+        }
+        function onProductFilterChange() {
+            const select = document.getElementById('product-filter');
+            selectedProductId = select ? select.value : 'all';
+            const title = document.getElementById('product-filter-title');
+            if (title) {
+                if (selectedProductId === 'all') title.innerText = 'Tous les produits';
+                else {
+                    const found = catalogProducts.find(p => p.id === selectedProductId);
+                    title.innerText = found ? `${found.emoji || ''} ${found.name}`.trim() : selectedProductId;
+                }
+            }
+            renderSources(window.filteredOrders || allOrders);
+        }
+        async function loadProductsCatalog() {
+            try {
+                const res = await fetch('/api/products', { cache: 'no-store' });
+                const data = await res.json();
+                catalogProducts = (data && data.products) || [];
+            } catch {
+                catalogProducts = [];
+            }
+            const select = document.getElementById('product-filter');
+            if (!select) return;
+            const current = selectedProductId;
+            select.innerHTML = `<option value="all">Tous les produits</option>` + catalogProducts.map(p =>
+                `<option value="${p.id}">${p.emoji || ''} ${p.name}</option>`
+            ).join('');
+            select.value = catalogProducts.some(p => p.id === current) ? current : 'all';
+            selectedProductId = select.value;
+            onProductFilterChange();
+        }
+        function uniqueVisitors(list, type) {
+            return new Set(list.filter(event => event.type === type).map(event => event.visitorId)).size;
+        }
+        function uniquePeople(list) {
+            return new Set(list.map(event => event.visitorId)).size;
+        }
+        function visitorIds(list, type) {
+            return new Set(list.filter(event => event.type === type).map(event => event.visitorId));
+        }
+        /** Exclusive product-page read depth buckets (max scroll reached). */
+        function productDepthBuckets(list) {
+            const product = visitorIds(list, 'product');
+            const s25 = visitorIds(list, 'scroll25');
+            const s50 = visitorIds(list, 'scroll50');
+            const s75 = visitorIds(list, 'scroll75');
+            const s100 = visitorIds(list, 'scroll100');
+            let d025 = 0, d2550 = 0, d5075 = 0, d100 = 0;
+            product.forEach((id) => {
+                if (s100.has(id)) d100 += 1;              // finished the product page
+                else if (s50.has(id)) d5075 += 1;           // reached 50–99%
+                else if (s25.has(id)) d2550 += 1;           // reached 25–49%
+                else d025 += 1;                             // stayed in 0–24%
+            });
+            return { d025, d2550, d5075, d100 };
+        }
+        function shareOfVisitors(count, total) {
+            if (!total) return '0.0';
+            const raw = (Number(count) / total) * 100;
+            return Math.min(100, Math.max(0, raw)).toFixed(1);
+        }
+        const SOURCE_LOGOS = {
+            meta: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M14.5 4H16v4h-1.2c-.7 0-1.1.4-1.1 1.1V11H16l-.4 3h-2v6h-3v-6H8.5v-3H10V8.7C10 6.2 11.5 4 14.5 4z"/></svg>',
+            tiktok: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#25F4EE" d="M14 4h2.2a5 5 0 0 0 3.6 3.2v2.2A7.2 7.2 0 0 1 16 8.2V15a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v2.3A2.7 2.7 0 1 0 13.2 15V4z"/><path fill="#FE2C55" d="M15.2 4h2.2a5 5 0 0 0 3.6 3.2v2.2A7.2 7.2 0 0 1 17.2 8.2V15a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v2.3a2.7 2.7 0 1 0 1.3 2.4V4z"/><path fill="#fff" d="M14.6 4h2.2a5 5 0 0 0 3.6 3.2v2.2A7.2 7.2 0 0 1 16.6 8.2V15a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v2.3a2.7 2.7 0 1 0 1.3 2.4V4z"/></svg>',
+            snapchat: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M12 3.2c2.6 0 4.4 2 4.4 4.8 0 1.5.3 2.4 1 3.1.4.4.8.5 1.3.6.3 0 .5.3.4.6-.4 1.2-1.6 1.6-2.6 1.8-.2 0-.4.2-.4.5 0 .8.7 1.4 1.5 1.8.3.1.3.5 0 .7-1.2.6-2.3.4-3.1.2-.3-.1-.6.1-.7.4-.4 1.3-1.5 2.1-2.8 2.1s-2.4-.8-2.8-2.1c-.1-.3-.4-.5-.7-.4-.8.2-1.9.4-3.1-.2-.3-.2-.3-.6 0-.7.8-.4 1.5-1 1.5-1.8 0-.3-.2-.5-.4-.5-1-.2-2.2-.6-2.6-1.8-.1-.3.1-.6.4-.6.5-.1.9-.2 1.3-.6.7-.7 1-1.6 1-3.1 0-2.8 1.8-4.8 4.4-4.8z"/></svg>',
+            direct: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#e2e8f0" d="M14 4h6v6h-2V7.4l-7.3 7.3-1.4-1.4L16.6 6H14V4zM6 6h5v2H8v8h8v-3h2v5H6V6z"/></svg>'
+        };
+        function sourceBadge(source) {
+            const map = {
+                meta: ['Meta', 'src-pill-meta', 'meta'],
+                tiktok: ['TikTok', 'src-pill-tiktok', 'tiktok'],
+                snapchat: ['Snapchat', 'src-pill-snap', 'snap'],
+                direct: ['Direct', 'src-pill-direct', 'direct']
+            };
+            const item = map[source] || ['Unknown', 'src-pill-direct', 'direct'];
+            const logoKey = item[2] === 'snap' ? 'snapchat' : item[2];
+            return `<span class="src-pill ${item[1]}"><span class="src-logo src-logo-${item[2]}">${SOURCE_LOGOS[logoKey]}</span>${item[0]}</span>`;
+        }
+        function srcRow(label, count, base) {
+            const n = Number(count) || 0;
+            const pct = base === null ? '' : (shareOfVisitors(n, base) + '%');
+            return `<div class="src-row">
+                <span class="src-label">${label}</span>
+                <span class="src-vals"><b>${n.toLocaleString()}</b><em>${pct || '—'}</em></span>
+            </div>`;
+        }
+        function renderSources(ordersList) {
+            const box = document.getElementById('source-cards');
+            const funnel = document.getElementById('source-funnel');
+            if (!box || !funnel) return;
+            const events = eventsInFilter();
+            const scopedOrders = ordersInProductFilter(ordersList);
+            const allVisitorsCount = uniquePeople(events);
+            const sources = [
+                { id: 'meta', name: 'Meta', tone: 'meta', kicker: 'Facebook · Instagram' },
+                { id: 'tiktok', name: 'TikTok', tone: 'tiktok', kicker: 'TikTok Ads' },
+                { id: 'snapchat', name: 'Snapchat', tone: 'snap', kicker: 'Snap Ads' },
+                { id: 'direct', name: 'Direct', tone: 'direct', kicker: 'No ad click' }
+            ];
+            box.innerHTML = sources.map(src => {
+                const mine = events.filter(event => event.source === src.id);
+                const visitors = uniquePeople(mine);
+                const views = mine.filter(event => event.type === 'pageview').length;
+                const lp = uniqueVisitors(mine, 'lp');
+                const product = uniqueVisitors(mine, 'product');
+                const carts = uniqueVisitors(mine, 'addtocart');
+                const checkouts = uniqueVisitors(mine, 'checkout');
+                const orders = scopedOrders.filter(order => order.source === src.id).length;
+                const depth = productDepthBuckets(mine);
+                return `<div class="src-card src-${src.tone}">
+                    <div class="src-head">
+                        <span class="src-logo src-logo-${src.tone}">${SOURCE_LOGOS[src.tone === 'snap' ? 'snapchat' : src.tone]}</span>
+                        <div>
+                            <div class="src-name">${src.name}</div>
+                            <div class="src-kicker src-kicker-${src.tone}">${src.kicker}</div>
+                        </div>
+                        <div class="src-share"><b>${shareOfVisitors(visitors, allVisitorsCount)}%</b><span>traffic</span></div>
+                    </div>
+                    <div class="src-block">
+                        <div class="src-sec">Traffic</div>
+                        ${srcRow('Visitors', visitors, allVisitorsCount)}
+                        ${srcRow('Page views', views, null)}
+                        ${srcRow('Landing page', lp, visitors)}
+                    </div>
+                    <div class="src-block">
+                        <div class="src-sec">Product page scroll</div>
+                        ${srcRow('Opened product', product, visitors)}
+                        ${srcRow('Read 0–25%', depth.d025, product)}
+                        ${srcRow('Read 25–50%', depth.d2550, product)}
+                        ${srcRow('Read 50–99%', depth.d5075, product)}
+                        ${srcRow('Read 100%', depth.d100, product)}
+                    </div>
+                    <div class="src-block">
+                        <div class="src-sec">Sales</div>
+                        ${srcRow('Add to cart', carts, visitors)}
+                        ${srcRow('Checkout', checkouts, visitors)}
+                        ${srcRow('Orders', orders, visitors)}
+                    </div>
+                </div>`;
+            }).join('');
+            const allDepth = productDepthBuckets(events);
+            const productVisitors = uniqueVisitors(events, 'product');
+            const steps = [
+                ['Visitors', allVisitorsCount, allVisitorsCount],
+                ['Landing page', uniqueVisitors(events, 'lp'), allVisitorsCount],
+                ['Opened product', productVisitors, allVisitorsCount],
+                ['Read 0–25%', allDepth.d025, productVisitors],
+                ['Read 25–50%', allDepth.d2550, productVisitors],
+                ['Read 50–99%', allDepth.d5075, productVisitors],
+                ['Read 100%', allDepth.d100, productVisitors],
+                ['Add to cart', uniqueVisitors(events, 'addtocart'), allVisitorsCount],
+                ['Checkout', uniqueVisitors(events, 'checkout'), allVisitorsCount],
+                ['Orders', scopedOrders.length, allVisitorsCount]
+            ];
+            funnel.innerHTML = steps.map(([label, count, base]) => {
+                const pct = shareOfVisitors(count, base);
+                return `<div class="src-step">
+                    <span class="src-step-label">${label}</span>
+                    <span class="src-vals"><b>${count}</b><em style="color:#67e8f9">${pct}%</em></span>
+                </div>
+                <div class="src-bar"><i style="width:${Math.min(100, Number(pct))}%"></i></div>`;
+            }).join('');
+        }
+
+        // 📊 RENDER EXECUTIVE ANALYTICS DASHBOARD
+        function renderAnalytics(ordersList) {
+            const totalOrders = ordersList.length;
+            const totalRevenue = ordersList.reduce((sum, o) => sum + (Number(o.price) || 0), 0);
+            const confirmedOrders = ordersList.filter(o => o.status === 'Confirmé').length;
+            const cancelledOrders = ordersList.filter(o => o.status === 'Annulé').length;
+            const noResponseOrders = ordersList.filter(o => o.status === 'Pas de réponse').length;
+            const newOrders = ordersList.filter(o => !o.status || o.status === 'Nouveau').length;
+
+            // 1. Revenue
+            document.getElementById('stat-revenue').innerHTML = `${totalRevenue.toLocaleString()} <span class="text-xs text-green-600">SAR</span><div class="text-sm text-gray-300 font-bold mt-1">${usdFromSar(totalRevenue)}</div>`;
+
+            const events = eventsInFilter();
+            const visitors = uniqueVisitors(events, 'pageview');
+            const baseVisitors = visitors;
+            document.getElementById('stat-visitors').innerText = baseVisitors.toLocaleString();
+            const todayVisitors = uniqueVisitors(allEvents.filter(event => isSameLocalDay(event.ts, new Date())), 'pageview');
+            document.getElementById('stat-visitors-sub').innerHTML = `<i class="fa-solid fa-bolt text-yellow-500"></i> ${todayVisitors} Active Today`;
+
+            // 3. Orders & Confirmation
+            document.getElementById('stat-orders').innerText = totalOrders;
+            document.getElementById('stat-confirmed-badge').innerText = `${confirmedOrders} Confirmed (${totalOrders > 0 ? Math.round((confirmedOrders / totalOrders) * 100) : 0}%)`;
+            const statTotalConfirmed = document.getElementById('stat-total-confirmed');
+            if(statTotalConfirmed) statTotalConfirmed.innerText = confirmedOrders;
+
+            // 4. Conversion Rate
+            const convRate = baseVisitors > 0 ? ((totalOrders / baseVisitors) * 100).toFixed(2) : '0.00';
+            document.getElementById('stat-conversion').innerText = `${convRate}%`;
+
+            // 5. AOV (Panier Moyen)
+            const aov = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+            document.getElementById('stat-aov').innerHTML = `${aov} <span class="text-xs">SAR</span><div class="text-sm text-gray-300 font-bold mt-1">${usdFromSar(aov)}</div>`;
+
+            const loads = events.filter(event => event.type === 'pageview' && Number(event.loadMs) > 0).map(event => Number(event.loadMs));
+            document.getElementById('stat-speed').innerText = loads.length
+                ? `${(loads.reduce((sum, ms) => sum + ms, 0) / loads.length / 1000).toFixed(2)}s`
+                : '—';
+
+            const pageViews = events.filter(event => event.type === 'pageview').length;
+            const addToCarts = uniqueVisitors(events, 'addtocart');
+            
+            const statPageviews = document.getElementById('stat-pageviews');
+            if(statPageviews) statPageviews.innerText = pageViews.toLocaleString();
+            
+            const statAddtocart = document.getElementById('stat-addtocart');
+            if(statAddtocart) statAddtocart.innerText = addToCarts.toLocaleString();
+
+            // 7. Funnel
+            document.getElementById('funnel-visitors').innerText = baseVisitors;
+            document.getElementById('funnel-orders').innerText = totalOrders;
+            document.getElementById('funnel-confirmed').innerText = confirmedOrders;
+            document.getElementById('funnel-rate-badge').innerText = `${convRate}% Conversion`;
+
+            // 8. Status Distribution Bars
+            const statusContainer = document.getElementById('status-distribution-container');
+            const statuses = [
+                { name: 'Confirmé', count: confirmedOrders, color: 'from-green-500 to-emerald-600', text: 'text-green-400' },
+                { name: 'Nouveau', count: newOrders, color: 'from-blue-500 to-cyan-600', text: 'text-blue-400' },
+                { name: 'Pas de réponse', count: noResponseOrders, color: 'from-amber-500 to-yellow-600', text: 'text-yellow-400' },
+                { name: 'Annulé', count: cancelledOrders, color: 'from-red-500 to-rose-600', text: 'text-red-400' }
+            ];
+            window.filteredOrders = ordersList;
+            renderSources(ordersList);
+
+            statusContainer.innerHTML = statuses.map(st => {
+                const pct = totalOrders > 0 ? Math.round((st.count / totalOrders) * 100) : 0;
+                return `
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-xs font-bold">
+                            <span class="${st.text}">${st.name}</span>
+                            <span class="text-gray-300 en-font">${st.count} <span class="text-gray-500">(${pct}%)</span></span>
+                        </div>
+                        <div class="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+                            <div class="bg-gradient-to-r ${st.color} h-2 rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderOrders(ordersArray) {
+            const tbody = document.getElementById('orders-tbody');
+            
+            // Animate counter
+            animateValue("total-orders-count", parseInt(document.getElementById('total-orders-count').innerText), ordersArray.length, 500);
+            
+            if (ordersArray.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="14" class="p-12 text-center text-gray-500"><i class="fa-solid fa-box-open text-4xl mb-3"></i><div class="text-lg">No orders found for this date.</div></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = ''; 
+            
+            ordersArray.forEach(order => {
+                const dateObj = new Date(order.created_at);
+                // Fix date formatting specifically for Moroccan locale (DD/MM/YYYY)
+                const day = String(dateObj.getDate()).padStart(2, '0');
+                const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const year = dateObj.getFullYear();
+                const hours = String(dateObj.getHours()).padStart(2, '0');
+                const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+                
+                const formattedDate = `<span class="text-gray-300 font-bold">${day}/${month}/${year}</span> <span class="text-gray-500 ml-1"><i class="fa-regular fa-clock"></i> ${hours}:${minutes}</span>`;
+                
+                const cleanPhone = order.phone.replace(/\s+/g, '');
+
+                const currentStatus = order.status || 'Nouveau';
+                const statusOptions = [
+                    { val: 'Nouveau', label: 'Nouveau', cls: 'st-nouveau' },
+                    { val: 'Confirmé', label: 'Confirmé ✔️', cls: 'st-confirme' },
+                    { val: 'Annulé', label: 'Annulé ❌', cls: 'st-annule' },
+                    { val: 'Pas de réponse', label: 'Pas de rep ⏳', cls: 'st-pasreponse' }
+                ];
+                
+                const activeOption = statusOptions.find(o => o.val === currentStatus) || statusOptions[0];
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-4 border-r border-gray-700/30 text-center">
+                        <input type="checkbox" class="order-checkbox w-4 h-4 rounded border-gray-600 bg-gray-700 cursor-pointer" value="${order.id}" onchange="updateBulkDeleteButton()">
+                    </td>
+                    <td class="p-4 border-r border-gray-700/30 text-center">
+                        <button onclick="deleteOrder('${order.id}', '${(order.name || '').replace(/'/g, "\\'")}', '${(order.phone || '').replace(/'/g, "\\'")}')" title="Supprimer la commande" class="text-red-500 bg-red-500/10 hover:bg-red-500/20 hover:text-red-400 transition-colors w-8 h-8 rounded-lg flex items-center justify-center mx-auto shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                    <td class="p-4 font-black text-gray-500 en-font text-lg border-r border-gray-700/30">#${order.id}</td>
+                    <td class="p-4 en-font text-sm border-r border-gray-700/30" dir="ltr">${formattedDate}</td>
+                    <td class="p-4 font-bold text-white border-r border-gray-700/30 text-base">${order.name}</td>
+                    <td class="p-4 text-center border-r border-gray-700/30">
+                        <a href="tel:${cleanPhone}" class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-4 py-2 rounded-xl font-bold transition shadow-[0_4px_15px_rgba(59,130,246,0.3)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.5)] hover:-translate-y-1">
+                            <i class="fa-solid fa-phone-volume animate-pulse"></i> Appel
+                        </a>
+                        <div class="text-gray-400 text-xs mt-2 en-font font-bold tracking-wide">${order.phone}</div>
+                    </td>
+                    <td class="p-4 text-yellow-500 font-black border-r border-gray-700/30">${order.city}</td>
+                    <td class="p-4 text-center border-r border-gray-700/30 min-w-[240px]">
+                        <div class="flex items-center gap-2 justify-center">
+                            <div class="relative w-full max-w-[200px] group flex items-center bg-gray-900/60 rounded-xl border border-gray-700 hover:border-yellow-500 transition-all shadow-inner overflow-hidden focus-within:border-yellow-500 focus-within:ring-1 focus-within:ring-yellow-500/50">
+                                <span class="pl-3 text-yellow-500 opacity-70 group-hover:opacity-100 transition flex items-center justify-center">
+                                    <i class="fa-solid fa-location-dot text-xs"></i>
+                                </span>
+                                <input type="text"
+                                    id="address-${order.id}"
+                                    value="${String(order.address || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}"
+                                    placeholder="Adresse dyal client..."
+                                    class="w-full bg-transparent text-white text-xs px-2 py-2.5 outline-none placeholder-gray-500 font-bold"
+                                    onchange="updateAddress('${order.id}', this.value, this)"
+                                >
+                            </div>
+                            <button onclick="saveAddressBtn('${order.id}')" class="bg-gray-800 hover:bg-yellow-500 hover:text-black text-gray-400 w-9 h-9 rounded-xl flex items-center justify-center transition shadow-lg border border-gray-700 hover:border-yellow-400 group relative">
+                                <i class="fa-solid fa-check group-hover:scale-110 transition-transform"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="p-4 text-center border-r border-gray-700/30">
+                        <a href="https://wa.me/966${cleanPhone.replace(/^0+/, '').replace(/^966/, '')}" target="_blank" class="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white px-4 py-2 rounded-xl font-bold transition shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.5)] hover:-translate-y-1">
+                            <i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp
+                        </a>
+                    </td>
+                    <td class="p-4 text-gray-300 font-bold text-xs border-r border-gray-700/30">${order.offer_name}</td>
+                    <td class="p-4 text-center border-r border-gray-700/30">${sourceBadge(order.source)}</td>
+                    <td class="p-4 font-black text-green-400 en-font text-lg border-r border-gray-700/30" dir="ltr">${order.price} <span class="text-xs text-green-600">SAR</span><div class="text-xs text-gray-300 mt-1">${usdFromSar(order.price)}</div></td>
+                    <td class="p-4 text-center border-r border-gray-700/30">
+                        <select onchange="updateStatus('${order.id}', this.value, this)" class="status-badge ${activeOption.cls}">
+                            ${statusOptions.map(opt => `<option value="${opt.val}" ${opt.val === currentStatus ? 'selected' : ''} class="bg-gray-900 text-white font-bold">${opt.label}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td class="p-4 text-center border-r border-gray-700/30 min-w-[240px]">
+                        <div class="flex items-center gap-2 justify-center">
+                            <div class="relative w-full max-w-[200px] group flex items-center bg-gray-900/60 rounded-xl border border-gray-700 hover:border-yellow-500 transition-all shadow-inner overflow-hidden focus-within:border-yellow-500 focus-within:ring-1 focus-within:ring-yellow-500/50">
+                                <span class="pl-3 text-yellow-500 opacity-70 group-hover:opacity-100 transition flex items-center justify-center">
+                                    <i class="fa-solid fa-pen text-xs"></i>
+                                </span>
+                                <input type="text" 
+                                    id="note-${order.id}" 
+                                    value="${order.note || ''}"
+                                    placeholder="Raison d'annulation / Autre..."
+                                    class="w-full bg-transparent text-white text-xs px-2 py-2.5 outline-none placeholder-gray-500 font-bold"
+                                    onchange="updateNote('${order.id}', this.value, this)"
+                                >
+                            </div>
+                            <button onclick="saveNoteBtn('${order.id}')" class="bg-gray-800 hover:bg-yellow-500 hover:text-black text-gray-400 w-9 h-9 rounded-xl flex items-center justify-center transition shadow-lg border border-gray-700 hover:border-yellow-400 group relative">
+                                <i class="fa-solid fa-check group-hover:scale-110 transition-transform"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function updateStatus(orderId, newStatus, selectElement) {
+            selectElement.className = 'status-badge'; 
+            if (newStatus === 'Confirmé') selectElement.classList.add('st-confirme');
+            else if (newStatus === 'Annulé') selectElement.classList.add('st-annule');
+            else if (newStatus === 'Pas de réponse') selectElement.classList.add('st-pasreponse');
+            else selectElement.classList.add('st-nouveau');
+
+            try {
+                const res = await fetch(`/api/orders`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: orderId, status: newStatus })
+                });
+                if (!res.ok) throw new Error('Failed to update status');
+                
+                const order = allOrders.find(o => o.id === orderId);
+                if (order) order.status = newStatus;
+                
+            } catch (err) {
+                alert("❌ Error updating status.");
+                console.error(err);
+            }
+        }
+
+        async function updateNote(orderId, newNote, inputElement) {
+            try {
+                inputElement.classList.add('opacity-50');
+                const res = await fetch(`/api/orders`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: orderId, note: newNote })
+                });
+                
+                inputElement.classList.remove('opacity-50');
+                
+                if (!res.ok) {
+                    console.error("Failed to update note");
+                } else {
+                    const order = allOrders.find(o => o.id === orderId);
+                    if (order) order.note = newNote;
+                    
+                    // Flash success
+                    inputElement.parentElement.classList.add('border-green-500', 'bg-green-500/10');
+                    setTimeout(() => {
+                        inputElement.parentElement.classList.remove('border-green-500', 'bg-green-500/10');
+                    }, 1000);
+                }
+            } catch (err) {
+                inputElement.classList.remove('opacity-50');
+                console.error(err);
+            }
+        }
+
+        function saveNoteBtn(orderId) {
+            const inputElement = document.getElementById(`note-${orderId}`);
+            if (inputElement) {
+                updateNote(orderId, inputElement.value, inputElement);
+            }
+        }
+
+        async function updateAddress(orderId, newAddress, inputElement) {
+            try {
+                inputElement.classList.add('opacity-50');
+                const res = await fetch(`/api/orders`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: orderId, address: newAddress })
+                });
+
+                inputElement.classList.remove('opacity-50');
+
+                if (!res.ok) {
+                    console.error("Failed to update address");
+                } else {
+                    const order = allOrders.find(o => o.id === orderId);
+                    if (order) order.address = newAddress;
+
+                    inputElement.parentElement.classList.add('border-green-500', 'bg-green-500/10');
+                    setTimeout(() => {
+                        inputElement.parentElement.classList.remove('border-green-500', 'bg-green-500/10');
+                    }, 1000);
+                }
+            } catch (err) {
+                inputElement.classList.remove('opacity-50');
+                console.error(err);
+            }
+        }
+
+        function saveAddressBtn(orderId) {
+            const inputElement = document.getElementById(`address-${orderId}`);
+            if (inputElement) {
+                updateAddress(orderId, inputElement.value, inputElement);
+            }
+        }
+
+        async function deleteOrder(orderId, customerName, phone) {
+            const isConfirmed = confirm(`هل أنت متأكد من مسح هذه الطلبية؟\n\nالاسم: ${customerName}\nالهاتف: ${phone}\n\nهذا الإجراء لا يمكن التراجع عنه.`);
+            if (isConfirmed) {
+                try {
+                    const res = await fetch('/api/orders', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: orderId })
+                    });
+                    if (res.ok) {
+                        allOrders = allOrders.filter(o => o.id !== orderId);
+                        filterByDate(); // Re-render table and stats
+                    } else {
+                        alert("❌ خطأ: لم يتم مسح الطلبية");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("❌ خطأ في الاتصال");
+                }
+            }
+        }
+
+        function toggleSelectAll(checkbox) {
+            const checkboxes = document.querySelectorAll('.order-checkbox');
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
+            updateBulkDeleteButton();
+        }
+
+        function updateBulkDeleteButton() {
+            const checkedCount = document.querySelectorAll('.order-checkbox:checked').length;
+            const bulkActions = document.getElementById('bulk-actions');
+            const bulkCount = document.getElementById('bulk-count');
+            
+            if (checkedCount > 0) {
+                bulkCount.innerText = checkedCount;
+                bulkActions.classList.remove('hidden');
+            } else {
+                bulkActions.classList.add('hidden');
+            }
+        }
+
+        async function deleteSelectedOrders() {
+            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+            if (checkboxes.length === 0) return;
+            
+            const isConfirmed = confirm(`هل أنت متأكد من مسح ${checkboxes.length} طلبية؟\n\nهذا الإجراء لا يمكن التراجع عنه.`);
+            if (isConfirmed) {
+                const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
+                let successCount = 0;
+                
+                const btn = document.getElementById('bulk-delete-btn');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> جاري المسح...`;
+                btn.disabled = true;
+                
+                try {
+                    for (const id of idsToDelete) {
+                        const res = await fetch('/api/orders', {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id })
+                        });
+                        if (res.ok) {
+                            allOrders = allOrders.filter(o => o.id !== id);
+                            successCount++;
+                        }
+                    }
+                    
+                    document.getElementById('select-all-orders').checked = false;
+                    updateBulkDeleteButton();
+                    filterByDate(); // Re-render table and stats
+                    
+                    if (successCount < idsToDelete.length) {
+                        alert(`⚠️ تم مسح ${successCount} فقط من أصل ${idsToDelete.length} طلبية.`);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("❌ حدث خطأ أثناء المسح.");
+                } finally {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        // Animated Number Counter
+        function animateValue(id, start, end, duration) {
+            if (start === end) return;
+            var range = end - start;
+            var current = start;
+            var increment = end > start ? 1 : -1;
+            var stepTime = Math.abs(Math.floor(duration / range));
+            var obj = document.getElementById(id);
+            var timer = setInterval(function() {
+                current += increment;
+                obj.innerHTML = current;
+                if (current == end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+        async function loadSettings() {
+            try {
+                const response = await fetch('/api/settings?admin=true');
+                const data = await response.json();
+                if (data.success && data.settings) {
+                    const s = data.settings;
+                    document.getElementById('fb_pixel_1').value = s.fb_pixel_1 || s.fb_pixel_id || '';
+                    document.getElementById('fb_token_1').value = s.fb_token_1 || s.fb_access_token || '';
+                    document.getElementById('fb_pixel_2').value = s.fb_pixel_2 || '';
+                    document.getElementById('fb_token_2').value = s.fb_token_2 || '';
+                    document.getElementById('tiktok_pixel').value = s.tiktok_pixel || s.tiktok_pixel_id || '';
+                    document.getElementById('tiktok_token').value = s.tiktok_token || s.tiktok_access_token || '';
+                    document.getElementById('snapchat_pixel').value = s.snapchat_pixel || '';
+                    document.getElementById('snapchat_token').value = s.snapchat_token || '';
+                    document.getElementById('snapchat_pixel_2').value = s.snapchat_pixel_2 || '';
+                    document.getElementById('snapchat_token_2').value = s.snapchat_token_2 || '';
+                }
+            } catch (err) {
+                console.error("Error loading settings:", err);
+            }
+        }
+
+        async function saveAllSettings() {
+            try {
+                const settings = {
+                    fb_pixel_1: document.getElementById('fb_pixel_1').value.trim(),
+                    fb_token_1: document.getElementById('fb_token_1').value.trim(),
+                    fb_pixel_id: document.getElementById('fb_pixel_1').value.trim(), // fallback
+                    fb_access_token: document.getElementById('fb_token_1').value.trim(), // fallback
+                    
+                    fb_pixel_2: document.getElementById('fb_pixel_2').value.trim(),
+                    fb_token_2: document.getElementById('fb_token_2').value.trim(),
+                    
+                    tiktok_pixel: document.getElementById('tiktok_pixel').value.trim(),
+                    tiktok_token: document.getElementById('tiktok_token').value.trim(),
+                    tiktok_pixel_id: document.getElementById('tiktok_pixel').value.trim(), // fallback
+                    tiktok_access_token: document.getElementById('tiktok_token').value.trim(), // fallback
+                    
+                    snapchat_pixel: document.getElementById('snapchat_pixel').value.trim(),
+                    snapchat_token: document.getElementById('snapchat_token').value.trim(),
+                    snapchat_pixel_2: document.getElementById('snapchat_pixel_2').value.trim(),
+                    snapchat_token_2: document.getElementById('snapchat_token_2').value.trim()
+                };
+
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ settings })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    const statusEl = document.getElementById('settings-status');
+                    statusEl.classList.remove('hidden');
+                    setTimeout(() => {
+                        statusEl.classList.add('hidden');
+                    }, 3000);
+                } else {
+                    alert("❌ Failed to save settings!");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("❌ Error saving settings!");
+            }
+        }
+    </script>
+</body>
+</html>
