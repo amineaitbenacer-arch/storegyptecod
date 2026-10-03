@@ -75,6 +75,8 @@ export type ProductPageConfig = {
   guaranteeText: string;
   guaranteePoints?: string[];
   ctaLabel: string;
+  /** يظهر في شبكة المتجر (الافتراضي: نعم) */
+  listed?: boolean;
 };
 
 const sharedOffers = (a: number, b: number, c: number): OfferPack[] => [
@@ -91,6 +93,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     type: 'ألعاب ذكية',
     badge: 'هدية STEM رقم 1',
     badgeColor: '#0284C7',
+    listed: true,
     marquee: 'الدفع عند الاستلام بعد المعاينة | تجهيز سريع لجميع مدن المملكة',
     warning: 'الهدية اللي ما تترميش بعد أسبوع — رفيق ذكي يرقص ويعمل كونغ فو ويبرمج مع طفلك.',
     heroTitle: 'كلب روبوت بالذكاء الاصطناعي — يرقص ويمارس الكونغ فو',
@@ -304,6 +307,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     type: 'منتج 2',
     badge: 'جديد',
     badgeColor: '#0E7C7B',
+    listed: false,
     marquee: 'توصيل لجميع المدن | الدفع عند الاستلام',
     warning: 'استبدل هذه الجملة بحسب منتجك.',
     heroTitle: 'اسم المنتج الثاني هنا',
@@ -351,6 +355,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     type: 'منتج 3',
     badge: 'عرض',
     badgeColor: '#7C3AED',
+    listed: false,
     marquee: 'توصيل لجميع المدن | الدفع عند الاستلام',
     warning: 'استبدل هذه الجملة بحسب منتجك.',
     heroTitle: 'اسم المنتج الثالث هنا',
@@ -398,6 +403,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     type: 'منتج 4',
     badge: 'ترند',
     badgeColor: '#C9632A',
+    listed: false,
     marquee: 'توصيل لجميع المدن | الدفع عند الاستلام',
     warning: 'استبدل هذه الجملة بحسب منتجك.',
     heroTitle: 'اسم المنتج الرابع هنا',
@@ -445,7 +451,7 @@ export function getProductPage(id: string) {
   return PRODUCT_PAGES.find((p) => p.id === alias);
 }
 
-export const PRODUCTS = PRODUCT_PAGES.map((p) => ({
+export const PRODUCTS = PRODUCT_PAGES.filter((p) => p.listed !== false).map((p) => ({
   id: p.id,
   name: p.heroTitle,
   type: p.type,

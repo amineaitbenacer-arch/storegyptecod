@@ -222,10 +222,10 @@ const STORIES: StoryItem[] = [
   {
     id: 's1',
     label: 'الأكثر مبيعًا',
-    ring: '#d97706',
-    image: '/images/hero_anti_choc_product_1789640183592.png',
-    title: 'عازل AntiChoc Protect',
-    text: 'حماية حقيقية من تسرب الكهرباء في السخان — الأكثر طلبًا في المتجر.',
+    ring: '#0284c7',
+    image: '/images/robotdog-hero.png',
+    title: 'كلب روبوت بالذكاء الاصطناعي',
+    text: 'يرقص ويمارس الكونغ فو — هدية STEM الأكثر طلبًا في المتجر.',
   },
   {
     id: 's2',
@@ -255,9 +255,9 @@ const STORIES: StoryItem[] = [
     id: 's5',
     label: 'اختيارنا',
     ring: '#0f766e',
-    image: '/images/new_box.jpg',
-    title: 'منتجات مختارة',
-    text: 'كل منتج في المتجر مختار بعناية لسهولة الطلب وثقة الأسرة.',
+    image: '/images/robotdog-kids.png',
+    title: 'هدية تبهِر الأطفال',
+    text: 'تحكم صوتي + تطبيق + ريموت — أكثر من 25 حركة تفاعلية.',
   },
 ];
 
