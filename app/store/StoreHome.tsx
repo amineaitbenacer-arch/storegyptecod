@@ -61,7 +61,7 @@ function ProductCard({
       className={`duo-card${index === 0 ? ' duo-card-lead' : ''}`}
       style={{ animationDelay: `${0.15 + index * 0.12}s` }}
     >
-      <Link href={product.href} className="duo-card-hit" aria-label={`افتح ${product.name}`}>
+      <Link href={product.href} className="duo-media-link" aria-label={product.name}>
         <div className="duo-media">
           <Image
             src={product.image}
@@ -78,40 +78,43 @@ function ProductCard({
             {String(index + 1).padStart(2, '0')}
           </span>
         </div>
-
-        <div className="duo-body">
-          <div className="duo-meta">
-            <span className="duo-type">{product.type}</span>
-            <span className="duo-emoji" aria-hidden>
-              {product.emoji}
-            </span>
-          </div>
-          <h3 className="duo-name">{product.name}</h3>
-          <p className="duo-desc">{product.shortDesc}</p>
-
-          <div className="duo-price-block">
-            <span className="duo-old">{formatSar(product.oldPrice)}</span>
-            <strong className="duo-price">{formatSar(product.price)}</strong>
-          </div>
-
-          <span className="duo-cta duo-cta-order duo-cta-full">
-            <span className="duo-cta-long">اضغط لفتح المنتج والطلب</span>
-            <span className="duo-cta-short">افتح المنتج</span>
-            <i className="fa-solid fa-arrow-left" aria-hidden />
-          </span>
-        </div>
       </Link>
 
-      <button
-        type="button"
-        className="duo-cta duo-cta-cart duo-card-cart"
-        onClick={() => onAdd(product)}
-        aria-label="أضف إلى السلة"
-      >
-        <span className="duo-cta-long">أضف إلى السلة</span>
-        <span className="duo-cta-short">سلة</span>
-        <i className="fa-solid fa-cart-plus" aria-hidden />
-      </button>
+      <div className="duo-body">
+        <div className="duo-meta">
+          <span className="duo-type">{product.type}</span>
+          <span className="duo-emoji" aria-hidden>
+            {product.emoji}
+          </span>
+        </div>
+        <h3 className="duo-name">
+          <Link href={product.href}>{product.name}</Link>
+        </h3>
+        <p className="duo-desc">{product.shortDesc}</p>
+
+        <div className="duo-price-block">
+          <span className="duo-old">{formatSar(product.oldPrice)}</span>
+          <strong className="duo-price">{formatSar(product.price)}</strong>
+        </div>
+
+        <div className="duo-actions">
+          <Link href={product.href} className="duo-cta duo-cta-order">
+            <span className="duo-cta-long">اضغط للطلب</span>
+            <span className="duo-cta-short">اطلب</span>
+            <i className="fa-solid fa-arrow-left" aria-hidden />
+          </Link>
+          <button
+            type="button"
+            className="duo-cta duo-cta-cart"
+            onClick={() => onAdd(product)}
+            aria-label="أضف إلى السلة"
+          >
+            <span className="duo-cta-long">أضف إلى السلة</span>
+            <span className="duo-cta-short">سلة</span>
+            <i className="fa-solid fa-cart-plus" aria-hidden />
+          </button>
+        </div>
+      </div>
     </article>
   );
 }
@@ -221,11 +224,11 @@ const STORIES: StoryItem[] = [
   {
     id: 's1',
     label: 'الأكثر مبيعًا',
-    ring: '#0284c7',
-    image: '/images/robotdog-hero.png',
-    title: 'كلب روبوت بالذكاء الاصطناعي',
-    text: 'يرقص ويمارس الكونغ فو — هدية STEM الأكثر طلبًا في المتجر.',
-    href: '/product/kalb-robot-ai',
+    ring: '#d97706',
+    image: '/images/hero_anti_choc_product_1789640183592.png',
+    title: 'عازل AntiChoc Protect',
+    text: 'حماية حقيقية من تسرب الكهرباء في السخان — الأكثر طلبًا في المتجر.',
+    href: '/product/produit-1',
   },
   {
     id: 's2',
@@ -254,10 +257,10 @@ const STORIES: StoryItem[] = [
   {
     id: 's5',
     label: 'اختيارنا',
-    ring: '#0f766e',
-    image: '/images/robotdog-kids.png',
-    title: 'هدية تبهِر الأطفال',
-    text: 'تحكم صوتي + تطبيق + ريموت — أكثر من 25 حركة تفاعلية.',
+    ring: '#0284c7',
+    image: '/images/robotdog-hero.png',
+    title: 'كلب روبوت بالذكاء الاصطناعي',
+    text: 'يرقص ويمارس الكونغ فو — هدية STEM للأطفال والعائلة.',
     href: '/product/kalb-robot-ai',
   },
 ];

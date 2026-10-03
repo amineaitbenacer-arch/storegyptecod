@@ -294,33 +294,92 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     ],
     ctaLabel: 'اطلب الآن',
   },
+  {
+    id: 'produit-1',
+    brand: 'AntiChoc Protect',
+    emoji: '⚡',
+    type: 'أمان منزلي',
+    badge: 'الأكثر مبيعاً',
+    badgeColor: '#D97706',
+    listed: true,
+    marquee: 'توصيل آمن إلى جميع مدن المملكة | الدفع عند الاستلام',
+    warning: 'الكهرباء في أثناء الاستحمام لا تمنح فرصة ثانية. احمِ أطفالك وعائلتك اليوم.',
+    heroTitle: 'عازل السخان المائي الأصلي المزدوج من AntiChoc',
+    heroSubtitle: 'الأمان ليس رفاهية، وحماية عائلتك هي الأهم.',
+    heroBadge: 'وصل حديثاً',
+    images: [
+      '/images/hero_father_daughter.jpg',
+      '/images/hero_anti_choc_product_1789640183592.png',
+      '/images/product_pair.png',
+      '/images/product_installed.png',
+    ],
+    catalogImage: '/images/hero_anti_choc_product_1789640183592.png',
+    shortDesc: 'عازل تسرب الكهرباء الأصلي للسخان المائي',
+    offers: [
+      { id: 1, name: 'طقم قطعتين (سخان واحد)', sub: 'عازل مزدوج للماء البارد والساخن', price: 179, oldPrice: 399 },
+      { id: 2, name: 'عبوة أربع قطع (حمّامان)', sub: 'حماية كاملة', price: 249, oldPrice: 599, popular: true, badge: 'الأكثر طلبًا' },
+      { id: 3, name: 'عبوة ست قطع (ثلاثة حمّامات)', sub: 'حماية قصوى للمنزل كله', price: 299, oldPrice: 899, badge: 'عرض قوي' },
+    ],
+    trustCards: [
+      { icon: '🚚', title: 'توصيل 20 ريال', text: 'إلى جميع المدن حتى باب المنزل' },
+      { icon: '🤝', title: 'المعاينة قبل الدفع', text: 'افحص السلعة ثم ادفع' },
+    ],
+    painTitle: 'هل تعيش هذا القلق في كل مرة يستحم فيها أطفالك؟',
+    painText: 'مع الوقت، تتآكل مقاومة السخان وقد يحوّل الماء إلى خطر كهربائي متسرب!',
+    painItems: [
+      { icon: '⚡', title: 'وخزة كهربائية عند لمس الصنبور', text: 'إنذار لوجود تسرّب كهربائي مباشر.' },
+      { icon: '👶', title: 'الأطفال هم الأكثر حساسية', text: 'الحماية الحقيقية تبدأ بعازل أصلي.' },
+      { icon: '🔌', title: 'لا حاجة لفصل القابس قبل كل استحمام', text: 'استحمام آمن دون قطع الكهرباء.' },
+    ],
+    solutionTitle: 'الحل: AntiChoc Protect الأصلي',
+    solutionText: 'جهاز صغير يُركب على توصيلة السخان ويعزل التسرب.',
+    solutionImage: '/images/hero_anti_choc_product_1789640183592.png',
+    stepsTitle: 'التركيب سهل في ثلاث خطوات',
+    steps: ['افصل الماء والكهرباء', 'ركّب العازل على التوصيلة', 'أعد الماء وجرّب بأمان'],
+    reviews: [
+      { name: 'سعيد — الرياض', avatar: '👨‍👧', text: 'ركّبت العازل واطمأن قلبي تمامًا.' },
+      { name: 'نادية — جدة', avatar: '👩‍👦', text: 'التوصيل سريع والمنتج أصلي.' },
+      { name: 'يوسف — الدمام', avatar: '👨‍🔧', text: 'أصبح الحمّام آمنًا تمامًا.' },
+    ],
+    faqs: [
+      { q: 'هل أستطيع تركيبه بنفسي؟', a: 'نعم، التركيب سهل ويرافقه شرح مبسّط.' },
+      { q: 'متى يصلني الطلب؟', a: 'غالبًا خلال أربع وعشرين إلى ثمانٍ وأربعين ساعة بعد التأكيد.' },
+      { q: 'هل أدفع الآن؟', a: 'لا. الدفع عند الاستلام فقط.' },
+      { q: 'كم تكلفة التوصيل؟', a: 'التوصيل بـ 20 ريال إلى جميع المدن.' },
+    ],
+    guaranteeTitle: 'لا تدفع شيئًا حتى ترى السلعة',
+    guaranteeText: 'افحص المنتج وتأكد منه، ثم ادفع.',
+    ctaLabel: 'اشترِ الآن',
+  },
 ];
 
 export function getProductPage(id: string) {
-  const alias = id === 'produit-1' ? 'kalb-robot-ai' : id;
+  const alias = id === 'antichoc' ? 'produit-1' : id;
   return PRODUCT_PAGES.find((p) => p.id === alias);
 }
 
-export const PRODUCTS = PRODUCT_PAGES.filter((p) => p.listed === true).map((p) => ({
-  id: p.id,
-  name: p.heroTitle,
-  type: p.type,
-  emoji: p.emoji,
-  price: p.offers.find((o) => o.popular)?.price ?? p.offers[0].price,
-  oldPrice: p.offers.find((o) => o.popular)?.oldPrice ?? p.offers[0].oldPrice,
-  image: p.catalogImage,
-  badge: p.badge,
-  badgeColor: p.badgeColor,
-  shortDesc: p.shortDesc,
-  category: ['all'],
-  tags: [p.brand, p.type],
-  href: `/product/${p.id}`,
-  featured: true,
-}));
+export const PRODUCTS = PRODUCT_PAGES.filter((p) => p.listed !== false)
+  .map((p) => ({
+    id: p.id,
+    name: p.heroTitle,
+    type: p.type,
+    emoji: p.emoji,
+    price: p.offers.find((o) => o.popular)?.price ?? p.offers[0].price,
+    oldPrice: p.offers.find((o) => o.popular)?.oldPrice ?? p.offers[0].oldPrice,
+    image: p.catalogImage,
+    badge: p.badge,
+    badgeColor: p.badgeColor,
+    shortDesc: p.shortDesc,
+    category: ['all'],
+    tags: [p.brand, p.type],
+    href: `/product/${p.id}`,
+    featured: true,
+  }))
+  .sort((a, b) => (a.id === 'produit-1' ? -1 : b.id === 'produit-1' ? 1 : 0));
 
 export const FILTERS = [{ id: 'all', label: 'الكل' }];
 
 export function getProduct(id: string) {
-  const alias = id === 'produit-1' ? 'kalb-robot-ai' : id;
+  const alias = id === 'antichoc' ? 'produit-1' : id;
   return PRODUCTS.find((p) => p.id === alias);
 }
