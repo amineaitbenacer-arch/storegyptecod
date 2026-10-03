@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import {
-  RETURN_EXCLUSIONS,
   RETURN_FOOT_NOTES,
   RETURN_FORM_TEMPLATE,
   RETURN_HIGHLIGHTS,
@@ -84,21 +83,6 @@ export default function ReturnPolicyPanel({
                 <li key={step}>{step}</li>
               ))}
             </ul>
-          </div>
-
-          <div className="rp-block rp-block-warn">
-            <h4>
-              <i className="fa-solid fa-triangle-exclamation" aria-hidden /> غير قابل للاستبدال/الإرجاع
-            </h4>
-            <p>
-              لا يتم الاستبدال أو الإرجاع للمنتجات المفتوحة إذا لم يثبت عيب مصنعي. كذلك كل ما يخرج عن شروط
-              الضمان مثل:
-            </p>
-            <div className="rp-chips">
-              {RETURN_EXCLUSIONS.map((x) => (
-                <span key={x}>{x}</span>
-              ))}
-            </div>
           </div>
 
           <ul className="rp-notes">

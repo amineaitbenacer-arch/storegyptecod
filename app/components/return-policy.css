@@ -156,39 +156,6 @@
   color: #4b5563;
 }
 
-.rp-block-warn {
-  background: #fff7ed;
-  border-color: rgba(234, 88, 12, 0.25);
-}
-
-.rp-block-warn h4 i {
-  color: #ea580c;
-}
-
-.rp-block-warn p {
-  margin: 0 0 0.65rem;
-  font-size: 0.88rem;
-  font-weight: 650;
-  line-height: 1.65;
-  color: #9a3412;
-}
-
-.rp-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.rp-chips span {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: #9a3412;
-  background: #ffedd5;
-  border: 1px solid rgba(234, 88, 12, 0.2);
-  border-radius: 999px;
-  padding: 0.28rem 0.65rem;
-}
-
 .rp-notes {
   margin: 0;
   padding: 0 1.1rem 0 0;
