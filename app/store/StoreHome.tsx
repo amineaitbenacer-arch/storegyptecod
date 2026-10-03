@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { PRODUCTS, type StoreProduct } from '../../lib/products';
 import { formatSar } from '../../lib/money';
 import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../lib/shipping';
@@ -60,7 +61,7 @@ function ProductCard({
       className={`duo-card${index === 0 ? ' duo-card-lead' : ''}`}
       style={{ animationDelay: `${0.15 + index * 0.12}s` }}
     >
-      <Link href={product.href} className="duo-media-link" aria-label={product.name}>
+      <Link href={product.href} className="duo-card-hit" aria-label={`افتح ${product.name}`}>
         <div className="duo-media">
           <Image
             src={product.image}
@@ -77,43 +78,40 @@ function ProductCard({
             {String(index + 1).padStart(2, '0')}
           </span>
         </div>
-      </Link>
 
-      <div className="duo-body">
-        <div className="duo-meta">
-          <span className="duo-type">{product.type}</span>
-          <span className="duo-emoji" aria-hidden>
-            {product.emoji}
+        <div className="duo-body">
+          <div className="duo-meta">
+            <span className="duo-type">{product.type}</span>
+            <span className="duo-emoji" aria-hidden>
+              {product.emoji}
+            </span>
+          </div>
+          <h3 className="duo-name">{product.name}</h3>
+          <p className="duo-desc">{product.shortDesc}</p>
+
+          <div className="duo-price-block">
+            <span className="duo-old">{formatSar(product.oldPrice)}</span>
+            <strong className="duo-price">{formatSar(product.price)}</strong>
+          </div>
+
+          <span className="duo-cta duo-cta-order duo-cta-full">
+            <span className="duo-cta-long">اضغط لفتح المنتج والطلب</span>
+            <span className="duo-cta-short">افتح المنتج</span>
+            <i className="fa-solid fa-arrow-left" aria-hidden />
           </span>
         </div>
-        <h3 className="duo-name">
-          <Link href={product.href}>{product.name}</Link>
-        </h3>
-        <p className="duo-desc">{product.shortDesc}</p>
+      </Link>
 
-        <div className="duo-price-block">
-          <span className="duo-old">{formatSar(product.oldPrice)}</span>
-          <strong className="duo-price">{formatSar(product.price)}</strong>
-        </div>
-
-        <div className="duo-actions">
-          <Link href={product.href} className="duo-cta duo-cta-order">
-            <span className="duo-cta-long">اضغط للطلب</span>
-            <span className="duo-cta-short">اطلب</span>
-            <i className="fa-solid fa-arrow-left" aria-hidden />
-          </Link>
-          <button
-            type="button"
-            className="duo-cta duo-cta-cart"
-            onClick={() => onAdd(product)}
-            aria-label="أضف إلى السلة"
-          >
-            <span className="duo-cta-long">أضف إلى السلة</span>
-            <span className="duo-cta-short">سلة</span>
-            <i className="fa-solid fa-cart-plus" aria-hidden />
-          </button>
-        </div>
-      </div>
+      <button
+        type="button"
+        className="duo-cta duo-cta-cart duo-card-cart"
+        onClick={() => onAdd(product)}
+        aria-label="أضف إلى السلة"
+      >
+        <span className="duo-cta-long">أضف إلى السلة</span>
+        <span className="duo-cta-short">سلة</span>
+        <i className="fa-solid fa-cart-plus" aria-hidden />
+      </button>
     </article>
   );
 }
@@ -216,6 +214,7 @@ type StoryItem = {
   icon?: string;
   title: string;
   text: string;
+  href?: string;
 };
 
 const STORIES: StoryItem[] = [
@@ -226,6 +225,7 @@ const STORIES: StoryItem[] = [
     image: '/images/robotdog-hero.png',
     title: 'كلب روبوت بالذكاء الاصطناعي',
     text: 'يرقص ويمارس الكونغ فو — هدية STEM الأكثر طلبًا في المتجر.',
+    href: '/product/kalb-robot-ai',
   },
   {
     id: 's2',
@@ -258,10 +258,12 @@ const STORIES: StoryItem[] = [
     image: '/images/robotdog-kids.png',
     title: 'هدية تبهِر الأطفال',
     text: 'تحكم صوتي + تطبيق + ريموت — أكثر من 25 حركة تفاعلية.',
+    href: '/product/kalb-robot-ai',
   },
 ];
 
 export default function StoreHome() {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -707,7 +709,7 @@ export default function StoreHome() {
           {filtered.length === 0 ? (
             <div className="store-empty">لا توجد منتجات مطابقة لبحثك</div>
           ) : (
-            <div className="store-duo-grid">
+            <div className={`store-duo-grid${filtered.length === 1 ? ' is-single' : ''}`}>
               {filtered.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} onAdd={addToCart} />
               ))}
@@ -1123,6 +1125,11 @@ export default function StoreHome() {
           aria-modal="true"
           aria-label={activeStory.title}
           onClick={() => {
+            if (activeStory.href) {
+              setStoryIndex(null);
+              router.push(activeStory.href);
+              return;
+            }
             if (storyIndex < STORIES.length - 1) setStoryIndex(storyIndex + 1);
             else setStoryIndex(null);
           }}
