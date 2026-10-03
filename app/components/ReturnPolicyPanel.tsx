@@ -2,11 +2,9 @@
 
 import { useState } from 'react';
 import {
-  RETURN_FOOT_NOTES,
   RETURN_FORM_TEMPLATE,
   RETURN_HIGHLIGHTS,
-  RETURN_PROCESS,
-  RETURN_RULES,
+  RETURN_POLICY_FAQS,
   RETURN_WHATSAPP,
   RETURN_WHATSAPP_URL,
 } from '../../lib/return-policy';
@@ -25,6 +23,7 @@ export default function ReturnPolicyPanel({
   showContact = true,
 }: Props) {
   const [copied, setCopied] = useState<'phone' | 'form' | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   async function copyText(text: string, kind: 'phone' | 'form') {
     try {
@@ -41,13 +40,13 @@ export default function ReturnPolicyPanel({
       {showTitle ? (
         <header className="rp-head">
           <span className="rp-badge" aria-hidden>
-            <i className="fa-solid fa-scale-balanced" />
+            <i className="fa-solid fa-shield-halved" />
           </span>
           <div>
-            <p className="rp-kicker">شفافية كاملة قبل وبعد الطلب</p>
-            <h3>سياسة الاستبدال والاسترجاع</h3>
+            <p className="rp-kicker">اشترِ بثقة — حقّك محفوظ</p>
+            <h3>الضمان الذهبي</h3>
             <p className="rp-lead">
-              حقّك محفوظ: استرجاع خلال 3 أيام واستبدال خلال 7 أيام من الاستلام — وفق البنود أدناه.
+              معاينة قبل الدفع، ودعم سريع، وضمان واضح — تشتري وقلبك مرتاح.
             </p>
           </div>
         </header>
@@ -64,40 +63,32 @@ export default function ReturnPolicyPanel({
       </div>
 
       {variant === 'full' ? (
-        <>
-          <ol className="rp-rules">
-            {RETURN_RULES.map((rule, i) => (
-              <li key={i}>
-                <em>{i + 1}</em>
-                <span>{rule}</span>
-              </li>
-            ))}
-          </ol>
-
-          <div className="rp-block">
-            <h4>
-              <i className="fa-solid fa-route" aria-hidden /> آلية الإرجاع
-            </h4>
-            <ul>
-              {RETURN_PROCESS.map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ul>
-          </div>
-
-          <ul className="rp-notes">
-            {RETURN_FOOT_NOTES.map((n) => (
-              <li key={n}>{n}</li>
-            ))}
-          </ul>
-        </>
+        <div className="rp-faqs" aria-label="أسئلة شائعة حول الضمان">
+          <p className="rp-faqs-title">أسئلة شائعة — اضغط على السؤال</p>
+          {RETURN_POLICY_FAQS.map((faq, i) => {
+            const open = openFaq === i;
+            return (
+              <div key={faq.q} className={`rp-faq${open ? ' open' : ''}`}>
+                <button
+                  type="button"
+                  className="rp-faq-btn"
+                  aria-expanded={open}
+                  onClick={() => setOpenFaq(open ? null : i)}
+                >
+                  <span>{faq.q}</span>
+                  <i className="fa-solid fa-chevron-down" aria-hidden />
+                </button>
+                <div className="rp-faq-body">{faq.a}</div>
+              </div>
+            );
+          })}
+        </div>
       ) : (
         <ul className="rp-compact-list">
-          <li>استرجاع 3 أيام · استبدال 7 أيام من الاستلام</li>
-          <li>منتج خاطئ؟ الشحن على المتجر</li>
-          <li>إرجاع لرغبة الزبون أو استبدال: رسوم شحن 25 ريال</li>
-          <li>يجب أن يكون المنتج بحالته الأصلية مع الملحقات والتغليف</li>
-          <li>دعم سريع خلال 48 ساعة لأي استفسار</li>
+          <li>معاينة المنتج عند الباب قبل الدفع</li>
+          <li>استرجاع 3 أيام · استبدال 7 أيام إن احتجت</li>
+          <li>منتج خاطئ؟ الشحن علينا ونصلّح الوضع فورًا</li>
+          <li>دعم سريع خلال 48 ساعة — تشتري بقلب مرتاح</li>
         </ul>
       )}
 
@@ -105,9 +96,9 @@ export default function ReturnPolicyPanel({
         <div className="rp-wa">
           <div className="rp-wa-top">
             <strong>
-              <i className="fa-brands fa-whatsapp" aria-hidden /> لطلب الاسترجاع / الاستبدال
+              <i className="fa-brands fa-whatsapp" aria-hidden /> دعم سريع لأي استفسار
             </strong>
-            <span>عبّئ النموذج ثم راسلنا — نرد خلال 48 ساعة</span>
+            <span>راسلنا متى ما احتجت — نرد خلال 48 ساعة</span>
           </div>
 
           <div className="rp-phone-row">

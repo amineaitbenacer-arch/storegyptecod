@@ -80,95 +80,71 @@
   color: #6b7280;
 }
 
-.rp-rules {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.rp-faqs {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
 }
 
-.rp-rules li {
-  display: flex;
-  gap: 0.65rem;
-  align-items: flex-start;
-  padding: 0.65rem 0.75rem;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid rgba(15, 118, 110, 0.12);
-}
-
-.rp-rules em {
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  font-style: normal;
-  font-size: 0.75rem;
-  font-weight: 900;
-  color: #fff;
-  background: #0f766e;
-}
-
-.rp-rules span {
-  font-size: 0.9rem;
-  font-weight: 650;
-  line-height: 1.7;
-  color: #374151;
-}
-
-.rp-block {
-  padding: 0.9rem 1rem;
-  border-radius: 14px;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-}
-
-.rp-block h4 {
-  margin: 0 0 0.55rem;
-  font-size: 0.98rem;
+.rp-faqs-title {
+  margin: 0 0 0.15rem;
+  font-size: 0.95rem;
   font-weight: 900;
   color: #102a2b;
+}
+
+.rp-faq {
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(15, 118, 110, 0.14);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rp-faq.open {
+  border-color: rgba(5, 150, 105, 0.35);
+  box-shadow: 0 8px 18px rgba(16, 185, 129, 0.1);
+}
+
+.rp-faq-btn {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: right;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #102a2b;
 }
 
-.rp-block h4 i {
-  color: #0f766e;
+.rp-faq-btn i {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: #059669;
+  transition: transform 0.2s ease;
 }
 
-.rp-block ul {
-  margin: 0;
-  padding: 0 1.1rem 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+.rp-faq.open .rp-faq-btn i {
+  transform: rotate(180deg);
 }
 
-.rp-block li {
-  font-size: 0.88rem;
+.rp-faq-body {
+  display: none;
+  padding: 0 1rem 0.95rem;
+  font-size: 0.9rem;
   font-weight: 650;
-  line-height: 1.65;
+  line-height: 1.75;
   color: #4b5563;
 }
 
-.rp-notes {
-  margin: 0;
-  padding: 0 1.1rem 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.rp-notes li {
-  font-size: 0.86rem;
-  font-weight: 650;
-  line-height: 1.65;
-  color: #4b5563;
+.rp-faq.open .rp-faq-body {
+  display: block;
 }
 
 .rp-compact-list {
@@ -334,24 +310,21 @@
 
 .rp-on-dark .rp-head h3,
 .rp-on-dark .rp-hi strong,
-.rp-on-dark .rp-block h4,
-.rp-on-dark .rp-rules em {
+.rp-on-dark .rp-faqs-title,
+.rp-on-dark .rp-faq-btn {
   color: #fff7ed;
 }
 
 .rp-on-dark .rp-lead,
 .rp-on-dark .rp-hi span,
-.rp-on-dark .rp-rules span,
-.rp-on-dark .rp-block li,
-.rp-on-dark .rp-notes li,
+.rp-on-dark .rp-faq-body,
 .rp-on-dark .rp-compact-list li,
 .rp-on-dark .rp-wa-top span {
   color: rgba(255, 247, 237, 0.78);
 }
 
 .rp-on-dark .rp-hi,
-.rp-on-dark .rp-rules li,
-.rp-on-dark .rp-block,
+.rp-on-dark .rp-faq,
 .rp-on-dark .rp-form,
 .rp-on-dark .rp-phone-card {
   background: rgba(255, 255, 255, 0.06);
