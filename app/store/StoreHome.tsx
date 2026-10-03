@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PRODUCTS, type StoreProduct } from '../../lib/products';
 import { formatSar } from '../../lib/money';
+import { saveLastOrder, thankYouHref } from '../../lib/last-order';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 import StoreCheckoutSheet from './StoreCheckoutSheet';
@@ -497,22 +498,27 @@ export default function StoreHome() {
     };
 
     try {
-      await submitOrderToApi(orderData);
+      const saved = await submitOrderToApi(orderData);
+      const finalOrder = {
+        ...orderData,
+        orderId: String(saved.orderId || orderId),
+        serverOrderId: saved.orderId,
+      };
 
       trackStoreEvent('purchase', {
         productId,
         value: cartTotal,
         contentName: offerLabel,
-        orderId,
+        orderId: finalOrder.orderId,
         numItems: cartCount,
       });
       flushTrackingQueue();
 
-      localStorage.setItem('lastOrder', JSON.stringify(orderData));
-      localStorage.setItem('ac_last_order', JSON.stringify(orderData));
+      saveLastOrder(finalOrder);
       writeCart([]);
       setCart([]);
-      router.push('/thankyou');
+      setCartOpen(false);
+      router.push(thankYouHref(String(finalOrder.orderId)));
     } catch {
       setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة (تحقق من الإنترنت)');
       setSubmitting(false);

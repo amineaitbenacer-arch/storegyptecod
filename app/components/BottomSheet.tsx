@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { OFFERS } from '../../lib/offers';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
+import { saveLastOrder, thankYouHref } from '../../lib/last-order';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 
@@ -75,18 +76,22 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
     };
 
     try {
-      await submitOrderToApi(orderData);
+      const saved = await submitOrderToApi(orderData);
+      const finalOrder = {
+        ...orderData,
+        orderId: String(saved.orderId || orderId),
+        serverOrderId: saved.orderId,
+      };
       trackStoreEvent('purchase', {
         productId,
         value: selectedOffer.price,
         contentName: selectedOffer.name,
-        orderId,
+        orderId: finalOrder.orderId,
         numItems: selectedOffer.pieces || 1,
       });
       flushTrackingQueue();
-      localStorage.setItem('lastOrder', JSON.stringify(orderData));
-      localStorage.setItem('ac_last_order', JSON.stringify(orderData));
-      window.location.href = '/thankyou';
+      saveLastOrder(finalOrder);
+      window.location.href = thankYouHref(String(finalOrder.orderId));
     } catch {
       setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة');
       setIsSubmitting(false);

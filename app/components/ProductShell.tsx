@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import AntichocMarkup from './AntichocMarkup';
 import { formatSar } from '../../lib/money';
+import { saveLastOrder, thankYouHref } from '../../lib/last-order';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 
@@ -209,18 +210,22 @@ export default function ProductShell() {
       };
 
       try {
-        await submitOrderToApi(orderData);
+        const saved = await submitOrderToApi(orderData);
+        const finalOrder = {
+          ...orderData,
+          orderId: String(saved.orderId || orderId),
+          serverOrderId: saved.orderId,
+        };
         trackStoreEvent('purchase', {
           productId,
           value: currentBundle.price,
           contentName: currentBundle.name,
-          orderId,
+          orderId: finalOrder.orderId,
           numItems: pieces,
         });
         flushTrackingQueue();
-        localStorage.setItem('ac_last_order', JSON.stringify(orderData));
-        localStorage.setItem('lastOrder', JSON.stringify(orderData));
-        window.location.href = '/thankyou';
+        saveLastOrder(finalOrder);
+        window.location.href = thankYouHref(String(finalOrder.orderId));
       } catch {
         alert('⚠️ ما تسجّلش الطلب — عاود المحاولة');
         if (submitBtn) {

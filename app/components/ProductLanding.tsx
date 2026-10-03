@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import type { ProductPageConfig, OfferPack } from '../../lib/productPages';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
+import { saveLastOrder, thankYouHref } from '../../lib/last-order';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 import './product-landing.css';
@@ -63,18 +64,22 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
       productId: product.id,
     };
     try {
-      await submitOrderToApi(orderData);
+      const saved = await submitOrderToApi(orderData);
+      const finalOrder = {
+        ...orderData,
+        orderId: String(saved.orderId || orderId),
+        serverOrderId: saved.orderId,
+      };
       trackStoreEvent('purchase', {
         productId: product.id,
         value: offer.price,
         contentName: orderData.offerName,
-        orderId,
+        orderId: finalOrder.orderId,
         numItems: 1,
       });
       flushTrackingQueue();
-      localStorage.setItem('lastOrder', JSON.stringify(orderData));
-      localStorage.setItem('ac_last_order', JSON.stringify(orderData));
-      router.push('/thankyou');
+      saveLastOrder(finalOrder);
+      router.push(thankYouHref(String(finalOrder.orderId)));
     } catch {
       setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة');
       setLoading(false);

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
 import { formatSar } from '../../lib/money';
+import { readLastOrder, saveLastOrder } from '../../lib/last-order';
 import { trackPixelPurchaseWhenReady } from '../../lib/pixels';
 import { flushTrackingQueue, trackStoreEvent } from '../../lib/tracking';
 import './thankyou.css';
@@ -58,14 +59,16 @@ function readOrder(): OrderView {
   const empty: OrderView = { id: '#----', name: '----', offer: '----', price: '----', phone: '00 00 00 00 00' };
   if (typeof window === 'undefined') return empty;
   try {
-    const raw = localStorage.getItem('ac_last_order') || localStorage.getItem('lastOrder');
-    if (!raw) return empty;
-    const data = JSON.parse(raw);
-    const orderId = data.orderId || Math.floor(1000 + Math.random() * 9000);
+    const data = readLastOrder();
+    if (!data) return empty;
+    const params = new URLSearchParams(window.location.search);
+    const oid = params.get('oid') || '';
+    const orderId = String(data.orderId || data.serverOrderId || oid || '').trim();
+    if (!orderId) return empty;
     return {
       id: `#${orderId}`,
-      name: data.name || 'عميلنا الكريم',
-      offer: data.offerName || data.offer || 'العرض المختار',
+      name: String(data.name || 'عميلنا الكريم'),
+      offer: String(data.offerName || data.offer || 'العرض المختار'),
       price: data.price != null ? String(data.price) : '---',
       phone: formatPhone(String(data.phone || '')),
     };
@@ -83,11 +86,41 @@ export default function ThankYouPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
-    document.title = 'AntiChoc Protect® | شكراً على طلبك';
+    document.title = 'شكراً على طلبك | المتجر الرسمي';
     const prevBg = document.body.style.background;
     document.body.style.background = '#F1F5F9';
-    const next = readOrder();
+    let next = readOrder();
     setOrder(next);
+    const cached = readLastOrder();
+    if (cached) saveLastOrder(cached);
+
+    const oid = new URLSearchParams(window.location.search).get('oid') || '';
+    if (next.id === '#----' && oid) {
+      fetch('/api/orders', { cache: 'no-store' })
+        .then((r) => r.json())
+        .then((payload) => {
+          const orders = Array.isArray(payload?.orders) ? payload.orders : [];
+          const found = orders.find(
+            (o: { id?: string; clientOrderId?: string; name?: string; offer?: string; price?: unknown; phone?: string }) =>
+              String(o.id) === oid || String(o.clientOrderId || '') === oid
+          );
+          if (!found) return;
+          const recovered = {
+            orderId: String(found.id || oid),
+            name: found.name,
+            offer: found.offer,
+            offerName: found.offer,
+            price: found.price,
+            phone: found.phone,
+          };
+          saveLastOrder(recovered);
+          next = readOrder();
+          setOrder(next);
+        })
+        .catch(() => {
+          /* ignore */
+        });
+    }
 
     const root = document.getElementById('ac-ty');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -115,8 +148,7 @@ export default function ThankYouPage() {
     const price = Number(next.price);
     const orderId = next.id.replace('#', '');
     try {
-      const raw = localStorage.getItem('ac_last_order') || localStorage.getItem('lastOrder');
-      const data = raw ? JSON.parse(raw) : {};
+      const data = readLastOrder() || {};
       trackStoreEvent('purchase', {
         productId: String(data.productId || ''),
         value: Number.isFinite(price) ? price : undefined,
@@ -152,13 +184,9 @@ export default function ThankYouPage() {
     const shown = formatPhone(digits);
     setOrder((prev) => ({ ...prev, phone: shown }));
     try {
-      const raw = localStorage.getItem('ac_last_order') || localStorage.getItem('lastOrder');
-      if (raw) {
-        const data = JSON.parse(raw);
-        data.phone = digits;
-        localStorage.setItem('ac_last_order', JSON.stringify(data));
-        localStorage.setItem('lastOrder', JSON.stringify(data));
-      }
+      const data = readLastOrder() || {};
+      data.phone = digits;
+      saveLastOrder(data);
     } catch {
       /* ignore */
     }
