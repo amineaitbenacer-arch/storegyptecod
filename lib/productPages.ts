@@ -103,8 +103,8 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     catalogImage: '/images/robotdog-hero.png',
     shortDesc: 'كلب روبوت ذكي: رقص، كونغ فو، أوامر صوتية، تطبيق وريموت',
     offers: [
-      { id: 1, name: 'قطعة واحدة', sub: 'كلب روبوت + ريموت + شاحن USB', price: 199, oldPrice: 399, pieces: 1, popular: true, badge: 'الأكثر طلبًا' },
-      { id: 2, name: 'قطعتان', sub: 'لعب مشترك للأخوة أو هدية مزدوجة', price: 329, oldPrice: 798, pieces: 2 },
+      { id: 1, name: 'قطعة واحدة', sub: 'كلب روبوت + ريموت + شاحن USB', price: 199, oldPrice: 399, pieces: 1 },
+      { id: 2, name: 'قطعتان', sub: 'لعب مشترك للأخوة أو هدية مزدوجة', price: 329, oldPrice: 798, pieces: 2, popular: true, badge: 'الأكثر طلبًا' },
       { id: 3, name: 'ثلاث قطع', sub: 'أفضل قيمة — وفر أكثر من 700 ريال', price: 449, oldPrice: 1197, pieces: 3, badge: 'توفير ضخم' },
     ],
     trustCards: [
