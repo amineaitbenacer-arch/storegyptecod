@@ -11,7 +11,8 @@ import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../../li
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../../lib/tracking';
 
 function pickOffer(product: ProductPageConfig) {
-  return product.offers.find((o) => o.popular) || product.offers[0];
+  // أول عرض = الأرخص — يظهر محددًا عند دخول الصفحة
+  return product.offers[0];
 }
 
 export default function ProductView({ product }: { product: ProductPageConfig }) {
