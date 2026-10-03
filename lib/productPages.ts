@@ -10,6 +10,21 @@ export type OfferPack = {
   oldPrice: number;
   popular?: boolean;
   badge?: string;
+  pieces?: number;
+};
+
+export type StoryBeatFrame = {
+  icon?: string;
+  title: string;
+  text: string;
+};
+
+export type StoryBeat = {
+  frames: StoryBeatFrame[];
+  image: string;
+  imageBadge?: string;
+  imageTitle?: string;
+  imageText?: string;
 };
 
 export type ProductPageConfig = {
@@ -29,6 +44,8 @@ export type ProductPageConfig = {
   shortDesc: string;
   offers: OfferPack[];
   trustCards: { icon: string; title: string; text: string }[];
+  featureStrip?: { icon: string; title: string; text: string }[];
+  storyBeats?: StoryBeat[];
   painTitle: string;
   painText: string;
   painItems: { icon: string; title: string; text: string }[];
@@ -41,6 +58,7 @@ export type ProductPageConfig = {
   faqs: { q: string; a: string }[];
   guaranteeTitle: string;
   guaranteeText: string;
+  guaranteePoints?: string[];
   ctaLabel: string;
 };
 
