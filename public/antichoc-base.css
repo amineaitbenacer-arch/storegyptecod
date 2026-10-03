@@ -133,6 +133,13 @@ img {
   transform: scale(1.08) rotate(-3deg);
 }
 
+.nav-logo-link {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  line-height: 0;
+}
+
 .nav-logo-mark {
   width: 42px !important;
   height: 42px !important;
@@ -144,6 +151,15 @@ img {
   background: #4a2a10;
   border: 1.5px solid #10b981;
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+#nav-offer-badge-bg[data-ac-click],
+.nav-aov-btn {
+  cursor: pointer;
+}
+
+#product-offers {
+  scroll-margin-top: 88px;
 }
 
 .nav-brand-text {

@@ -258,8 +258,11 @@ export default function ProductShell() {
     }
 
     function scrollToTop() {
-      const heroOffers = document.querySelector('.hero-offers-wrapper') || document.querySelector('.hero-offers-grid');
-      if (heroOffers) heroOffers.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const heroOffers =
+        document.getElementById('product-offers') ||
+        document.querySelector('.hero-offers-wrapper') ||
+        document.querySelector('.hero-offers-grid');
+      if (heroOffers) heroOffers.scrollIntoView({ behavior: 'smooth', block: 'start' });
       else window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
