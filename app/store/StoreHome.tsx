@@ -202,7 +202,7 @@ const TRUST_PILLS = [
   { icon: 'fa-hand-holding-dollar', color: '#2563eb', bg: '#eff6ff', text: 'الدفع عند الاستلام فقط' },
   { icon: 'fa-medal', color: '#ca8a04', bg: '#fffbeb', text: 'ضمان ذهبي — استرجاع 3 أيام / استبدال 7 أيام' },
   { icon: 'fa-headset', color: '#0f766e', bg: '#f0fdfa', text: 'تأكيد هاتفي ودعم قبل وبعد الطلب' },
-  { icon: 'fa-shield-halved', color: '#b45309', bg: '#fff7ed', text: 'منتجات مختارة لحماية المنزل' },
+  { icon: 'fa-shield-halved', color: '#b45309', bg: '#fff7ed', text: 'منتجات مختارة بجودة عالية' },
   { icon: 'fa-box-open', color: '#059669', bg: '#ecfdf5', text: 'معاينة المنتج قبل الدفع' },
 ];
 

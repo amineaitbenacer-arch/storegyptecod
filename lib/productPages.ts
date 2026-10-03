@@ -79,12 +79,6 @@ export type ProductPageConfig = {
   listed?: boolean;
 };
 
-const sharedOffers = (a: number, b: number, c: number): OfferPack[] => [
-  { id: 1, name: 'طقم قطعتين', sub: 'العرض الأساسي', price: a, oldPrice: a + 120 },
-  { id: 2, name: 'عبوة أربع قطع', sub: 'الأكثر طلبًا', price: b, oldPrice: b + 200, popular: true, badge: 'الأكثر طلبًا' },
-  { id: 3, name: 'عبوة ست قطع', sub: 'أفضل قيمة', price: c, oldPrice: c + 300, badge: 'توفير كبير' },
-];
-
 export const PRODUCT_PAGES: ProductPageConfig[] = [
   {
     id: 'kalb-robot-ai',
@@ -300,150 +294,6 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     ],
     ctaLabel: 'اطلب الآن',
   },
-{
-    id: 'produit-2',
-    brand: 'المنتج الثاني',
-    emoji: '✨',
-    type: 'منتج 2',
-    badge: 'جديد',
-    badgeColor: '#0E7C7B',
-    listed: false,
-    marquee: 'توصيل لجميع المدن | الدفع عند الاستلام',
-    warning: 'استبدل هذه الجملة بحسب منتجك.',
-    heroTitle: 'اسم المنتج الثاني هنا',
-    heroSubtitle: 'جملة قصيرة تشجّع العميل على الطلب.',
-    heroBadge: 'جديد',
-    images: ['/images/new_box.jpg', '/images/product_main.png', '/images/materials.png', '/images/easy_installation.jpg'],
-    catalogImage: '/images/new_box.jpg',
-    shortDesc: 'وصف قصير — استبدل هذا السطر',
-    offers: sharedOffers(149, 229, 279),
-    trustCards: [
-      { icon: '🚚', title: 'توصيل 20 ريال', text: 'حتى باب المنزل' },
-      { icon: '💳', title: 'الدفع عند الاستلام', text: 'دون مخاطرة' },
-    ],
-    painTitle: 'عنوان المشكلة',
-    painText: 'اشرح المشكلة في جملتين.',
-    painItems: [
-      { icon: '1', title: 'نقطة الألم الأولى', text: 'استبدل النص.' },
-      { icon: '2', title: 'نقطة الألم الثانية', text: 'استبدل النص.' },
-      { icon: '3', title: 'نقطة الألم الثالثة', text: 'استبدل النص.' },
-    ],
-    solutionTitle: 'حلّنا',
-    solutionText: 'اشرح كيف يحل المنتج المشكلة.',
-    solutionImage: '/images/product_main.png',
-    stepsTitle: 'كيف يُستخدم؟',
-    steps: ['الخطوة الأولى', 'الخطوة الثانية', 'الخطوة الثالثة'],
-    reviews: [
-      { name: 'عميل — الرياض', avatar: '👤', text: 'استبدل هذا الرأي.' },
-      { name: 'عميلة — جدة', avatar: '👤', text: 'استبدل هذا الرأي.' },
-      { name: 'عميل — الدمام', avatar: '👤', text: 'استبدل هذا الرأي.' },
-    ],
-    faqs: [
-      { q: 'سؤال 1؟', a: 'جواب 1.' },
-      { q: 'سؤال 2؟', a: 'جواب 2.' },
-      { q: 'كيف أدفع؟', a: 'الدفع عند الاستلام فقط.' },
-      { q: 'كم تكلفة التوصيل؟', a: 'التوصيل بـ 20 ريال إلى جميع المدن.' },
-    ],
-    guaranteeTitle: 'ضمان الرضا 100%',
-    guaranteeText: 'افحص السلعة قبل الدفع.',
-    ctaLabel: 'اطلب الآن',
-  },
-  {
-    id: 'produit-3',
-    brand: 'المنتج الثالث',
-    emoji: '🛡️',
-    type: 'منتج 3',
-    badge: 'عرض',
-    badgeColor: '#7C3AED',
-    listed: false,
-    marquee: 'توصيل لجميع المدن | الدفع عند الاستلام',
-    warning: 'استبدل هذه الجملة بحسب منتجك.',
-    heroTitle: 'اسم المنتج الثالث هنا',
-    heroSubtitle: 'جملة قصيرة تشجّع العميل على الطلب.',
-    heroBadge: 'عرض خاص',
-    images: ['/images/product_pair.png', '/images/offer_bundle_pack_1789640245480.png', '/images/guarantee.jpg', '/images/tech_specs.jpg'],
-    catalogImage: '/images/product_pair.png',
-    shortDesc: 'وصف قصير — استبدل هذا السطر',
-    offers: sharedOffers(159, 239, 289),
-    trustCards: [
-      { icon: '🚚', title: 'توصيل 20 ريال', text: 'حتى باب المنزل' },
-      { icon: '💳', title: 'الدفع عند الاستلام', text: 'دون مخاطرة' },
-    ],
-    painTitle: 'عنوان المشكلة',
-    painText: 'اشرح المشكلة في جملتين.',
-    painItems: [
-      { icon: '1', title: 'نقطة الألم الأولى', text: 'استبدل النص.' },
-      { icon: '2', title: 'نقطة الألم الثانية', text: 'استبدل النص.' },
-      { icon: '3', title: 'نقطة الألم الثالثة', text: 'استبدل النص.' },
-    ],
-    solutionTitle: 'حلّنا',
-    solutionText: 'اشرح كيف يحل المنتج المشكلة.',
-    solutionImage: '/images/product_pair.png',
-    stepsTitle: 'كيف يُستخدم؟',
-    steps: ['الخطوة الأولى', 'الخطوة الثانية', 'الخطوة الثالثة'],
-    reviews: [
-      { name: 'عميل — مكة المكرمة', avatar: '👤', text: 'استبدل هذا الرأي.' },
-      { name: 'عميلة — المدينة المنورة', avatar: '👤', text: 'استبدل هذا الرأي.' },
-      { name: 'عميل — أبها', avatar: '👤', text: 'استبدل هذا الرأي.' },
-    ],
-    faqs: [
-      { q: 'سؤال 1؟', a: 'جواب 1.' },
-      { q: 'سؤال 2؟', a: 'جواب 2.' },
-      { q: 'كيف أدفع؟', a: 'الدفع عند الاستلام فقط.' },
-      { q: 'كم تكلفة التوصيل؟', a: 'التوصيل بـ 20 ريال إلى جميع المدن.' },
-    ],
-    guaranteeTitle: 'ضمان الرضا 100%',
-    guaranteeText: 'افحص السلعة قبل الدفع.',
-    ctaLabel: 'اطلب الآن',
-  },
-  {
-    id: 'produit-4',
-    brand: 'المنتج الرابع',
-    emoji: '🔥',
-    type: 'منتج 4',
-    badge: 'ترند',
-    badgeColor: '#C9632A',
-    listed: false,
-    marquee: 'توصيل لجميع المدن | الدفع عند الاستلام',
-    warning: 'استبدل هذه الجملة بحسب منتجك.',
-    heroTitle: 'اسم المنتج الرابع هنا',
-    heroSubtitle: 'جملة قصيرة تشجّع العميل على الطلب.',
-    heroBadge: 'ترند',
-    images: ['/images/emotional_family_trust.jpg', '/images/before_after_split.jpg', '/images/easy_installation.jpg', '/images/materials.png'],
-    catalogImage: '/images/emotional_family_trust.jpg',
-    shortDesc: 'وصف قصير — استبدل هذا السطر',
-    offers: sharedOffers(169, 249, 299),
-    trustCards: [
-      { icon: '🚚', title: 'توصيل 20 ريال', text: 'حتى باب المنزل' },
-      { icon: '💳', title: 'الدفع عند الاستلام', text: 'دون مخاطرة' },
-    ],
-    painTitle: 'عنوان المشكلة',
-    painText: 'اشرح المشكلة في جملتين.',
-    painItems: [
-      { icon: '1', title: 'نقطة الألم الأولى', text: 'استبدل النص.' },
-      { icon: '2', title: 'نقطة الألم الثانية', text: 'استبدل النص.' },
-      { icon: '3', title: 'نقطة الألم الثالثة', text: 'استبدل النص.' },
-    ],
-    solutionTitle: 'حلّنا',
-    solutionText: 'اشرح كيف يحل المنتج المشكلة.',
-    solutionImage: '/images/emotional_family_trust.jpg',
-    stepsTitle: 'كيف يُستخدم؟',
-    steps: ['الخطوة الأولى', 'الخطوة الثانية', 'الخطوة الثالثة'],
-    reviews: [
-      { name: 'عميل — تبوك', avatar: '👤', text: 'استبدل هذا الرأي.' },
-      { name: 'عميلة — جازان', avatar: '👤', text: 'استبدل هذا الرأي.' },
-      { name: 'عميل — حائل', avatar: '👤', text: 'استبدل هذا الرأي.' },
-    ],
-    faqs: [
-      { q: 'سؤال 1؟', a: 'جواب 1.' },
-      { q: 'سؤال 2؟', a: 'جواب 2.' },
-      { q: 'كيف أدفع؟', a: 'الدفع عند الاستلام فقط.' },
-      { q: 'كم تكلفة التوصيل؟', a: 'التوصيل بـ 20 ريال إلى جميع المدن.' },
-    ],
-    guaranteeTitle: 'ضمان الرضا 100%',
-    guaranteeText: 'افحص السلعة قبل الدفع.',
-    ctaLabel: 'اطلب الآن',
-  },
 ];
 
 export function getProductPage(id: string) {
@@ -451,7 +301,7 @@ export function getProductPage(id: string) {
   return PRODUCT_PAGES.find((p) => p.id === alias);
 }
 
-export const PRODUCTS = PRODUCT_PAGES.filter((p) => p.listed !== false).map((p) => ({
+export const PRODUCTS = PRODUCT_PAGES.filter((p) => p.listed === true).map((p) => ({
   id: p.id,
   name: p.heroTitle,
   type: p.type,
