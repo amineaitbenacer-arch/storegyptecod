@@ -44,7 +44,7 @@ const REVIEWS: { av: string; name: string; text: string }[][] = [
 
 const FAQS = [
   { q: 'هل يصعب تركيبه بنفسي أم أحتاج إلى سبّاك؟', a: 'التركيب سهل ولا يحتاج إلى سبّاك. أغلق محبس الماء، ثم ركّب العازل بين السخان والأنابيب خلال ثلاث دقائق. مرفق معه شرح مبسّط.' },
-  { q: 'كيف تتم عملية التسليم والدفع؟', a: 'التوصيل بـ 20 ريال ومباشر إلى عنوانك في أي مدينة بالمملكة. لا تدفع ثمن المنتج حتى تستلم الطلب وتفحصه بنفسك.' },
+  { q: 'كيف تتم عملية التسليم والدفع؟', a: 'التوصيل مباشر إلى عنوانك في أي مدينة بالمملكة. لا تدفع ثمن المنتج حتى تستلم الطلب وتفحصه بنفسك.' },
   { q: 'هل يقلل الجهاز من قوة تدفّق الماء؟', a: 'لا. صُمّم المجرى الحلزوني ليمرّ الماء بسلاسة وبالقوة نفسها، دون أي تأثير على ضغط المياه.' },
   { q: 'هل يصدأ الجهاز مع الوقت أو يتأثر بالحرارة؟', a: 'لا. الجهاز مصنوع من البولي بروبيلين عالي الكثافة وسنون نحاسية صلبة، مقاوم للصدأ والتآكل ويتحمّل الحرارة العالية لسنوات.' },
   {
@@ -285,7 +285,7 @@ export default function ThankYouPage() {
           </div>
           <div className="ty-step">
             <div className="ty-step-icon"><i className="fa-solid fa-truck-fast" /></div>
-            <span className="ty-step-text">شحن سريع<span className="ty-step-sub">(20 ريال)</span></span>
+            <span className="ty-step-text">شحن سريع<span className="ty-step-sub">(إلى بابك)</span></span>
           </div>
           <div className="ty-step">
             <div className="ty-step-icon"><i className="fa-solid fa-hand-holding-dollar" /></div>
@@ -321,10 +321,6 @@ export default function ThankYouPage() {
               <span className="ty-label"><i className="fa-solid fa-gift" aria-hidden /> العرض المختار</span>
               <span className="ty-value ty-gold">{order.offer}</span>
             </div>
-            <div className="ty-row">
-              <span className="ty-label"><i className="fa-solid fa-truck-fast" aria-hidden /> التوصيل</span>
-              <span className="ty-value">{formatSar(SHIPPING_FEE_SAR)}</span>
-            </div>
             <div className="ty-row ty-row-total">
               <span className="ty-label"><i className="fa-solid fa-coins" aria-hidden /> المبلغ الإجمالي</span>
               <span className="ty-value ty-green">
@@ -333,8 +329,8 @@ export default function ThankYouPage() {
             </div>
           </div>
           <div className="ty-free">
-            <i className="fa-solid fa-truck-fast" aria-hidden />
-            التوصيل {formatSar(SHIPPING_FEE_SAR)} — مشمول في المبلغ الإجمالي
+            <i className="fa-solid fa-shield-halved" aria-hidden />
+            معاينة عند الباب ثم الدفع عند الاستلام
           </div>
         </div>
 
