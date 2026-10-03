@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import AntichocMarkup from './AntichocMarkup';
 import { formatSar } from '../../lib/money';
+import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 
 type Bundle = { id: number; name: string; price: number };
@@ -167,12 +168,11 @@ export default function ProductShell() {
 
       const phoneInput = document.getElementById('inp-phone') as HTMLInputElement | null;
       const phoneError = document.getElementById('phone-error') as HTMLElement | null;
-      const cleanPhone = phone.replace(/[^0-9+]/g, '');
-      if (cleanPhone.length < 10) {
-        if (phoneInput) {
-          phoneInput.style.border = '2px solid #ef4444';
-        }
+      const cleanPhone = normalizePhone(phone);
+      if (!isValidOrderPhone(cleanPhone)) {
+        if (phoneInput) phoneInput.style.border = '2px solid #ef4444';
         if (phoneError) phoneError.style.display = 'block';
+        alert('⚠️ تأكد من رقم الهاتف (10 أرقام)');
         return;
       }
       if (phoneError) phoneError.style.display = 'none';
@@ -189,13 +189,13 @@ export default function ProductShell() {
       });
 
       const fullLocation = address && address !== city ? `${city} - ${address}` : city;
-      const orderId = Math.floor(1000 + Math.random() * 9000);
+      const orderId = `ps-${Date.now().toString(36)}`;
       const pieces = currentBundle.id === 1 ? 2 : currentBundle.id === 2 ? 4 : 6;
 
       const orderData = {
         orderId,
         name,
-        phone,
+        phone: cleanPhone,
         city,
         address: fullLocation,
         offer: currentBundle.name,
@@ -203,33 +203,31 @@ export default function ProductShell() {
         pieces,
         price: currentBundle.price,
         packId: currentBundle.id,
+        timestamp: new Date().toISOString(),
         ...trackingFields(),
         productId,
       };
 
-      trackStoreEvent('purchase', {
-        productId,
-        value: currentBundle.price,
-        contentName: currentBundle.name,
-        orderId,
-        numItems: pieces,
-      });
-      flushTrackingQueue();
-
-      localStorage.setItem('ac_last_order', JSON.stringify(orderData));
-      localStorage.setItem('lastOrder', JSON.stringify(orderData));
-
       try {
-        await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(orderData),
+        await submitOrderToApi(orderData);
+        trackStoreEvent('purchase', {
+          productId,
+          value: currentBundle.price,
+          contentName: currentBundle.name,
+          orderId,
+          numItems: pieces,
         });
+        flushTrackingQueue();
+        localStorage.setItem('ac_last_order', JSON.stringify(orderData));
+        localStorage.setItem('lastOrder', JSON.stringify(orderData));
+        window.location.href = '/thankyou';
       } catch {
-        /* offline ok */
+        alert('⚠️ ما تسجّلش الطلب — عاود المحاولة');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'أكد الطلب الآن 🔒';
+        }
       }
-
-      window.location.href = '/thankyou';
     }
 
     function toggleFaq(btn: HTMLElement) {

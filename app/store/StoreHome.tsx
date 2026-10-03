@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PRODUCTS, type StoreProduct } from '../../lib/products';
 import { formatSar } from '../../lib/money';
+import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 import StoreCheckoutSheet from './StoreCheckoutSheet';
 import './store.css';
@@ -460,11 +461,13 @@ export default function StoreHome() {
   }
 
   async function submitOrder() {
-    const clean = phone.replace(/\D/g, '');
-    if (!name.trim() || !city || clean.length < 10) {
-      setPhoneError(
-        clean.length < 10 ? '⚠️ تأكد من رقم الهاتف (يجب أن يحتوي على 10 أرقام)' : ''
-      );
+    const clean = normalizePhone(phone);
+    if (!name.trim() || !city.trim()) {
+      setPhoneError('⚠️ كمّل الاسم والمدينة');
+      return;
+    }
+    if (!isValidOrderPhone(clean)) {
+      setPhoneError('⚠️ تأكد من رقم الهاتف (10 أرقام، مثال 0612345678)');
       return;
     }
     setPhoneError('');
@@ -474,7 +477,7 @@ export default function StoreHome() {
       cart.length === 1
         ? `${cart[0].name} × ${cart[0].qty}`
         : cart.map((i) => `${i.name} × ${i.qty}`).join(' · ');
-    const orderId = Math.floor(1000 + Math.random() * 9000);
+    const orderId = `st-${Date.now().toString(36)}`;
     const productId = cart[0]?.id || 'cart';
     const orderData = {
       orderId,
@@ -488,35 +491,32 @@ export default function StoreHome() {
       pieces: cartCount,
       packId: 0,
       items: cart.map((i) => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
+      timestamp: new Date().toISOString(),
       ...trackingFields(),
       productId,
     };
 
-    trackStoreEvent('purchase', {
-      productId,
-      value: cartTotal,
-      contentName: offerLabel,
-      orderId,
-      numItems: cartCount,
-    });
-    flushTrackingQueue();
-
-    localStorage.setItem('lastOrder', JSON.stringify(orderData));
-    localStorage.setItem('ac_last_order', JSON.stringify(orderData));
-    writeCart([]);
-    setCart([]);
-
     try {
-      await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-      });
-    } catch {
-      /* offline — thank you still works */
-    }
+      await submitOrderToApi(orderData);
 
-    router.push('/thankyou');
+      trackStoreEvent('purchase', {
+        productId,
+        value: cartTotal,
+        contentName: offerLabel,
+        orderId,
+        numItems: cartCount,
+      });
+      flushTrackingQueue();
+
+      localStorage.setItem('lastOrder', JSON.stringify(orderData));
+      localStorage.setItem('ac_last_order', JSON.stringify(orderData));
+      writeCart([]);
+      setCart([]);
+      router.push('/thankyou');
+    } catch {
+      setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة (تحقق من الإنترنت)');
+      setSubmitting(false);
+    }
   }
 
   return (

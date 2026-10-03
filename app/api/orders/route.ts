@@ -8,6 +8,7 @@ import {
   updateOrderFields,
   type StoreOrder,
 } from '../../../lib/orders-store';
+import { normalizePhone } from '../../../lib/submit-order';
 import { isAdSource, sourceFromClick, type AdSource } from '../../../lib/tracking';
 
 function requireDb() {
@@ -48,11 +49,13 @@ export async function POST(request: NextRequest) {
     } = body;
     const offerLabel = offer || offerName;
 
-    if (!name || !phone || !city || !offerLabel) {
+    const cleanPhone = normalizePhone(String(phone || ''));
+
+    if (!name || !cleanPhone || !city || !offerLabel) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    if (!/^\d{10}$/.test(phone)) {
+    if (!/^\d{10}$/.test(cleanPhone)) {
       return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
     }
 
@@ -72,7 +75,7 @@ export async function POST(request: NextRequest) {
     const order: StoreOrder = {
       id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
       name,
-      phone,
+      phone: cleanPhone,
       city,
       address: address || '',
       offer: offerLabel,

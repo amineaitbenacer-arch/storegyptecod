@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import type { ProductPageConfig, OfferPack } from '../../lib/productPages';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
+import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 import './product-landing.css';
 
@@ -34,13 +35,13 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
   }, [product.id, offer.price, offer.name]);
 
   async function submit() {
-    const clean = phone.replace(/\D/g, '');
-    if (!name.trim() || !city || !address.trim() || clean.length !== 10) {
-      setPhoneError(clean.length !== 10 ? '⚠️ رقم الهاتف يجب أن يكون 10 أرقام' : '');
+    const clean = normalizePhone(phone);
+    if (!name.trim() || !city || !address.trim() || !isValidOrderPhone(clean)) {
+      setPhoneError(!isValidOrderPhone(clean) ? '⚠️ رقم الهاتف يجب أن يكون 10 أرقام' : '');
       return;
     }
     setLoading(true);
-    const orderId = Math.floor(1000 + Math.random() * 9000);
+    const orderId = `pl-${Date.now().toString(36)}`;
     trackStoreEvent('checkout', {
       productId: product.id,
       value: offer.price,
@@ -57,29 +58,27 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
       price: offer.price,
       pieces: offer.id,
       packId: offer.id,
+      timestamp: new Date().toISOString(),
       ...trackingFields(),
       productId: product.id,
     };
-    trackStoreEvent('purchase', {
-      productId: product.id,
-      value: offer.price,
-      contentName: orderData.offerName,
-      orderId,
-      numItems: 1,
-    });
-    flushTrackingQueue();
-    localStorage.setItem('lastOrder', JSON.stringify(orderData));
-    localStorage.setItem('ac_last_order', JSON.stringify(orderData));
     try {
-      await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
+      await submitOrderToApi(orderData);
+      trackStoreEvent('purchase', {
+        productId: product.id,
+        value: offer.price,
+        contentName: orderData.offerName,
+        orderId,
+        numItems: 1,
       });
+      flushTrackingQueue();
+      localStorage.setItem('lastOrder', JSON.stringify(orderData));
+      localStorage.setItem('ac_last_order', JSON.stringify(orderData));
+      router.push('/thankyou');
     } catch {
-      /* offline */
+      setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة');
+      setLoading(false);
     }
-    router.push('/thankyou');
   }
 
   return (

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { OFFERS } from '../../lib/offers';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
+import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 
 interface BottomSheetProps {
@@ -39,8 +40,9 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
   }, []);
 
   const handleSubmit = async () => {
-    if (!name.trim() || phone.length !== 10 || !city || !address.trim()) {
-      if (phone.length !== 10) setPhoneError('⚠️ تأكد من رقم الهاتف (10 أرقام)');
+    const clean = normalizePhone(phone);
+    if (!name.trim() || !city || !address.trim() || !isValidOrderPhone(clean)) {
+      if (!isValidOrderPhone(clean)) setPhoneError('⚠️ تأكد من رقم الهاتف (10 أرقام)');
       return;
     }
 
@@ -49,7 +51,7 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
       typeof window !== 'undefined'
         ? window.location.pathname.match(/^\/product\/([^/?#]+)/)?.[1] || 'produit-1'
         : 'produit-1';
-    const orderId = Date.now().toString().slice(-6);
+    const orderId = `bs-${Date.now().toString(36)}`;
     trackStoreEvent('checkout', {
       productId,
       value: selectedOffer.price,
@@ -59,7 +61,7 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
     const orderData = {
       orderId,
       name: name.trim(),
-      phone,
+      phone: clean,
       city,
       address: address.trim(),
       offer: selectedOffer.name,
@@ -72,29 +74,23 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
       productId,
     };
 
-    trackStoreEvent('purchase', {
-      productId,
-      value: selectedOffer.price,
-      contentName: selectedOffer.name,
-      orderId,
-      numItems: selectedOffer.pieces || 1,
-    });
-    flushTrackingQueue();
-
-    localStorage.setItem('lastOrder', JSON.stringify(orderData));
-    localStorage.setItem('ac_last_order', JSON.stringify(orderData));
-
     try {
-      await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
+      await submitOrderToApi(orderData);
+      trackStoreEvent('purchase', {
+        productId,
+        value: selectedOffer.price,
+        contentName: selectedOffer.name,
+        orderId,
+        numItems: selectedOffer.pieces || 1,
       });
+      flushTrackingQueue();
+      localStorage.setItem('lastOrder', JSON.stringify(orderData));
+      localStorage.setItem('ac_last_order', JSON.stringify(orderData));
+      window.location.href = '/thankyou';
     } catch {
-      /* offline fallback — thank you still works via localStorage */
+      setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة');
+      setIsSubmitting(false);
     }
-
-    window.location.href = '/thankyou';
   };
 
   return (
