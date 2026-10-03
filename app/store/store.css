@@ -374,6 +374,8 @@
   gap: 0.7rem;
   min-width: max-content;
   direction: ltr; /* logo left, text right — don't flip in RTL */
+  text-decoration: none;
+  color: inherit;
 }
 
 .store-mark {

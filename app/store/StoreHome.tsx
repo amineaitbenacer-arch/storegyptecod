@@ -556,7 +556,7 @@ export default function StoreHome() {
           </button>
 
           <div className="store-nav-center">
-            <div className="store-brand-lockup">
+            <Link href="/" className="store-brand-lockup" aria-label="المتجر الكامل — كل المنتجات">
               <span className="store-mark" aria-hidden>
                 <Image src="/images/logo-mark.png" alt="" width={42} height={42} priority />
               </span>
@@ -566,7 +566,7 @@ export default function StoreHome() {
                 </strong>
                 <span className="store-nav-sub">{COMPANY.legal}</span>
               </div>
-            </div>
+            </Link>
 
             <label className="store-search">
               <i className="fa-solid fa-magnifying-glass" aria-hidden />

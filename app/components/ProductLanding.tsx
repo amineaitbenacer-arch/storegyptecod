@@ -87,9 +87,9 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
           <Link href="/" className="pl-back">
             ← المتجر
           </Link>
-          <span className="pl-brand">
+          <Link href="/" className="pl-brand" aria-label="المتجر الكامل">
             {product.emoji} {product.brand}
-          </span>
+          </Link>
         </div>
 
         <div className="pl-marquee">{product.marquee}</div>
