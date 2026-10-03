@@ -379,20 +379,48 @@
 .store-mark {
   width: 42px;
   height: 42px;
-  border-radius: 0;
+  border-radius: 50%;
   display: grid;
   place-items: center;
   overflow: visible;
   background: transparent;
-  box-shadow: none;
+  border: 1.5px solid #10b981;
+  box-shadow:
+    0 0 8px rgba(16, 185, 129, 0.55),
+    0 0 16px rgba(16, 185, 129, 0.35);
+  animation: store-mark-glow 2.2s ease-in-out infinite;
   flex-shrink: 0;
 }
 
 .store-mark img {
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
   object-fit: contain;
   display: block;
+  border-radius: 50%;
+}
+
+@keyframes store-mark-glow {
+  0%,
+  100% {
+    border-color: #10b981;
+    box-shadow:
+      0 0 6px rgba(16, 185, 129, 0.45),
+      0 0 12px rgba(16, 185, 129, 0.25);
+  }
+  50% {
+    border-color: #34d399;
+    box-shadow:
+      0 0 12px rgba(16, 185, 129, 0.85),
+      0 0 24px rgba(52, 211, 153, 0.5),
+      0 0 36px rgba(16, 185, 129, 0.28);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-mark {
+    animation: none;
+  }
 }
 
 .store-nav-title {
@@ -2507,11 +2535,18 @@ html {
 }
 
 .store-drawer-brand img {
-  width: 36px;
-  height: 36px;
-  border-radius: 0;
+  width: 34px;
+  height: 34px;
+  padding: 3px;
+  box-sizing: content-box;
+  border-radius: 50%;
   object-fit: contain;
   background: transparent;
+  border: 1.5px solid #10b981;
+  box-shadow:
+    0 0 8px rgba(16, 185, 129, 0.55),
+    0 0 16px rgba(16, 185, 129, 0.35);
+  animation: store-mark-glow 2.2s ease-in-out infinite;
   flex-shrink: 0;
 }
 

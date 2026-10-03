@@ -133,6 +133,45 @@ img {
   transform: scale(1.08) rotate(-3deg);
 }
 
+.nav-logo-mark {
+  width: 42px !important;
+  height: 42px !important;
+  padding: 4px;
+  box-sizing: border-box;
+  object-fit: contain;
+  border-radius: 50%;
+  display: block;
+  background: transparent;
+  border: 1.5px solid #10b981;
+  box-shadow:
+    0 0 8px rgba(16, 185, 129, 0.55),
+    0 0 16px rgba(16, 185, 129, 0.35);
+  animation: nav-logo-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes nav-logo-glow {
+  0%,
+  100% {
+    border-color: #10b981;
+    box-shadow:
+      0 0 6px rgba(16, 185, 129, 0.45),
+      0 0 12px rgba(16, 185, 129, 0.25);
+  }
+  50% {
+    border-color: #34d399;
+    box-shadow:
+      0 0 12px rgba(16, 185, 129, 0.85),
+      0 0 24px rgba(52, 211, 153, 0.5),
+      0 0 36px rgba(16, 185, 129, 0.28);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-logo-mark {
+    animation: none;
+  }
+}
+
 .nav-brand-text {
   display: flex;
   flex-direction: column;
