@@ -925,6 +925,11 @@ button.hero-offer-card {
   grid-template-columns: 1fr 1fr !important;
 }
 
+.pv-trust-bottom {
+  margin: 0 0 5.5rem;
+  padding: 1rem 0 0.5rem;
+}
+
 .reviews-nav-bar .rev-dot {
   border: none;
   cursor: pointer;

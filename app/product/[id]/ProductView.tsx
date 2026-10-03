@@ -565,20 +565,6 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             <div className="pv-price-save">وفّرت {formatSar(save)} اليوم — عرض محدود</div>
           </div>
 
-          <div className="trust-cadre-container">
-            <div className="trust-cadre-grid">
-              {product.trustCards.map((card) => (
-                <div key={card.title} className="trust-cadre-card">
-                  <div className="trust-cadre-icon-wrap delivery">{card.icon}</div>
-                  <div className="trust-cadre-content">
-                    <h4>{card.title}</h4>
-                    <p>{card.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div className="hero-offers-wrapper" id="product-offers">
             <div className="hero-offers-header">
               <span className="hero-offers-label">اختر العرض</span>
@@ -867,6 +853,22 @@ export default function ProductView({ product }: { product: ProductPageConfig })
           <button type="button" className="offer-cta-main" onClick={openSheet}>
             {product.ctaLabel} — {formatSar(offer.price)}
           </button>
+        </div>
+      </section>
+
+      <section className="trust-cadre-container pv-trust-bottom" aria-label="مزايا الطلب">
+        <div className="container">
+          <div className="trust-cadre-grid">
+            {product.trustCards.map((card) => (
+              <div key={card.title} className="trust-cadre-card">
+                <div className="trust-cadre-icon-wrap delivery">{card.icon}</div>
+                <div className="trust-cadre-content">
+                  <h4>{card.title}</h4>
+                  <p>{card.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
