@@ -197,8 +197,11 @@ export default function ProductShell() {
 
     async function handleOrderSubmit(event: Event) {
       event.preventDefault();
-      const form = event.target as HTMLFormElement;
-      const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+      const form =
+        (event.target as HTMLElement)?.closest?.('form') as HTMLFormElement | null ||
+        (document.getElementById('express-order-form') as HTMLFormElement | null);
+      const submitBtn = (form?.querySelector('button[type="submit"]') ||
+        document.querySelector('#express-order-form button[type="submit"]')) as HTMLButtonElement | null;
       const name = (document.getElementById('inp-name') as HTMLInputElement)?.value.trim() || '';
       const phone = (document.getElementById('inp-phone') as HTMLInputElement)?.value.trim() || '';
       const city = (document.getElementById('inp-city') as HTMLInputElement)?.value.trim() || '';
@@ -356,16 +359,30 @@ export default function ProductShell() {
 
     function onClick(e: MouseEvent) {
       const target = e.target as HTMLElement;
+
+      // Never hijack checkout form / submit (sheetBg has data-ac-click that was blocking submit)
+      if (
+        target.closest('#express-order-form') ||
+        target.closest('form[data-ac-submit]') ||
+        target.closest('button[type="submit"]')
+      ) {
+        return;
+      }
+
       if (target.closest('.close-btn')) {
         forceCloseSheet();
         return;
       }
+      // Backdrop only — not clicks bubbling from the sheet panel
       if (target.id === 'sheetBg') {
         forceCloseSheet();
         return;
       }
+
       const el = target.closest('[data-ac-click]') as HTMLElement | null;
       if (!el) return;
+      if (el.id === 'sheetBg' && target.closest('.sheet')) return;
+
       const code = el.getAttribute('data-ac-click');
       if (!code) return;
       e.preventDefault();

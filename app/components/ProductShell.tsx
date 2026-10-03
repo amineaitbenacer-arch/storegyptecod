@@ -314,6 +314,16 @@ export default function ProductShell() {
 
     function onClick(e: MouseEvent) {
       const target = e.target as HTMLElement;
+
+      // Never hijack checkout form / submit (sheetBg data-ac-click was blocking submit)
+      if (
+        target.closest('#express-order-form') ||
+        target.closest('form[data-ac-submit]') ||
+        target.closest('button[type="submit"]')
+      ) {
+        return;
+      }
+
       if (target.closest('.close-btn')) {
         forceCloseSheet();
         return;
@@ -324,6 +334,7 @@ export default function ProductShell() {
       }
       const el = target.closest('[data-ac-click]') as HTMLElement | null;
       if (!el) return;
+      if (el.id === 'sheetBg' && target.closest('.sheet')) return;
       const code = el.getAttribute('data-ac-click');
       if (!code) return;
       e.preventDefault();
