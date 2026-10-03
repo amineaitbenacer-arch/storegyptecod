@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
 import { formatSar } from '../../lib/money';
-import { SHIPPING_FEE_SAR } from '../../lib/shipping';
 import { readLastOrder, saveLastOrder } from '../../lib/last-order';
 import { trackPixelPurchaseWhenReady } from '../../lib/pixels';
 import { flushTrackingQueue, trackStoreEvent } from '../../lib/tracking';
@@ -25,7 +24,7 @@ const REVIEWS: { av: string; name: string; text: string }[][] = [
     { av: '👩‍👧', name: 'فاطمة الزهراء — جدة', text: 'وصلتني الطلبية بسرعة، ووجدت شرح التركيب واضحًا. التركيب تم بسهولة دون الحاجة إلى فني.' },
     { av: '👨‍👩‍👦', name: 'عمر — مكة المكرمة', text: 'فحصت السلعة أمام المندوب ثم دفعت. الجودة ممتازة والتعامل راقٍ من البداية للنهاية.' },
     { av: '🛠️', name: 'كريم — الدمام', text: 'خدمة عملاء متجاوبة، والمنتجات عملية وتستحق السعر. أنصح به لكل من يفضّل الشراء الآمن.' },
-    { av: '👩‍💼', name: 'خديجة — الخبر', text: 'اشتريت أكثر من منتج للمنزل. التوصيل بـ 20 ريال والسعر عادل، وراحة البال مع المعاينة قبل الدفع.' },
+    { av: '👩‍💼', name: 'خديجة — الخبر', text: 'اشتريت أكثر من منتج للمنزل. السعر عادل، وراحة البال مع المعاينة قبل الدفع.' },
   ],
   [
     { av: '👨‍💻', name: 'عبد العالي — أبها', text: 'الطلب وصل خلال يوم واحد تقريبًا. المنتج سليم والاستخدام واضح، والتجربة كانت سلسة جدًا.' },
