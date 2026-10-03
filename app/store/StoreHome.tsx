@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { PRODUCTS, type StoreProduct } from '../../lib/products';
 import { formatSar } from '../../lib/money';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
@@ -261,7 +260,6 @@ const STORIES: StoryItem[] = [
 ];
 
 export default function StoreHome() {
-  const router = useRouter();
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -501,7 +499,7 @@ export default function StoreHome() {
       const saved = await submitOrderToApi(orderData);
       const finalOrder = {
         ...orderData,
-        orderId: String(saved.orderId || orderId),
+        orderId,
         serverOrderId: saved.orderId,
       };
 
@@ -509,7 +507,7 @@ export default function StoreHome() {
         productId,
         value: cartTotal,
         contentName: offerLabel,
-        orderId: finalOrder.orderId,
+        orderId,
         numItems: cartCount,
       });
       flushTrackingQueue();
@@ -518,8 +516,11 @@ export default function StoreHome() {
       writeCart([]);
       setCart([]);
       setCartOpen(false);
-      router.push(thankYouHref(String(finalOrder.orderId)));
-    } catch {
+      setSubmitting(false);
+      // Hard navigation so thank-you always reads fresh storage
+      window.location.assign(thankYouHref(orderId));
+    } catch (error) {
+      console.error('[checkout] submit failed', error);
       setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة (تحقق من الإنترنت)');
       setSubmitting(false);
     }

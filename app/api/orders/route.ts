@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { appendEvent } from '../../../lib/analytics-store';
-import { hasDatabase } from '../../../lib/db';
 import {
   deleteOrder,
   insertOrder,
@@ -8,24 +7,11 @@ import {
   updateOrderFields,
   type StoreOrder,
 } from '../../../lib/orders-store';
-import { normalizePhone } from '../../../lib/submit-order';
+import { normalizePhone } from '../../../lib/phone';
 import { isAdSource, sourceFromClick, type AdSource } from '../../../lib/tracking';
-
-function requireDb() {
-  if (!hasDatabase()) {
-    return NextResponse.json(
-      { error: 'DATABASE_URL is not configured' },
-      { status: 503 }
-    );
-  }
-  return null;
-}
 
 export async function POST(request: NextRequest) {
   try {
-    const missing = requireDb();
-    if (missing) return missing;
-
     const body = await request.json();
 
     const {
@@ -48,7 +34,6 @@ export async function POST(request: NextRequest) {
       source: bodySource,
     } = body;
     const offerLabel = offer || offerName;
-
     const cleanPhone = normalizePhone(String(phone || ''));
 
     if (!name || !cleanPhone || !city || !offerLabel) {
@@ -73,12 +58,12 @@ export async function POST(request: NextRequest) {
           : 'direct';
 
     const order: StoreOrder = {
-      id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-      name,
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      name: String(name).trim(),
       phone: cleanPhone,
-      city,
-      address: address || '',
-      offer: offerLabel,
+      city: String(city).trim(),
+      address: String(address || city || '').trim(),
+      offer: String(offerLabel),
       pieces,
       price,
       timestamp: timestamp || new Date().toISOString(),
@@ -115,18 +100,18 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, orderId: order.id }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error('[orders] POST failed', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function GET() {
   try {
-    const missing = requireDb();
-    if (missing) return missing;
     const orders = await listOrders();
     return NextResponse.json({ success: true, orders, total: orders.length });
-  } catch {
+  } catch (error) {
+    console.error('[orders] GET failed', error);
     return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
   }
 }
@@ -144,9 +129,6 @@ const STATUSES = [
 ] as const;
 
 async function updateOrder(request: NextRequest) {
-  const missing = requireDb();
-  if (missing) return missing;
-
   const body = await request.json();
   const { id, status, note, address } = body as {
     id?: string;
@@ -168,7 +150,8 @@ async function updateOrder(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     return await updateOrder(request);
-  } catch {
+  } catch (error) {
+    console.error('[orders] PATCH failed', error);
     return NextResponse.json({ error: 'Failed to update order' }, { status: 500 });
   }
 }
@@ -176,21 +159,21 @@ export async function PATCH(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     return await updateOrder(request);
-  } catch {
+  } catch (error) {
+    console.error('[orders] PUT failed', error);
     return NextResponse.json({ error: 'Failed to update order' }, { status: 500 });
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
-    const missing = requireDb();
-    if (missing) return missing;
     const { id } = await request.json();
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
     const ok = await deleteOrder(id);
     if (!ok) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error('[orders] DELETE failed', error);
     return NextResponse.json({ error: 'Failed to delete order' }, { status: 500 });
   }
 }

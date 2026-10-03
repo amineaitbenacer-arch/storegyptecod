@@ -211,21 +211,17 @@ export default function ProductShell() {
 
       try {
         const saved = await submitOrderToApi(orderData);
-        const finalOrder = {
-          ...orderData,
-          orderId: String(saved.orderId || orderId),
-          serverOrderId: saved.orderId,
-        };
+        const finalOrder = { ...orderData, orderId, serverOrderId: saved.orderId };
         trackStoreEvent('purchase', {
           productId,
           value: currentBundle.price,
           contentName: currentBundle.name,
-          orderId: finalOrder.orderId,
+          orderId,
           numItems: pieces,
         });
         flushTrackingQueue();
         saveLastOrder(finalOrder);
-        window.location.href = thankYouHref(String(finalOrder.orderId));
+        window.location.assign(thankYouHref(orderId));
       } catch {
         alert('⚠️ ما تسجّلش الطلب — عاود المحاولة');
         if (submitBtn) {

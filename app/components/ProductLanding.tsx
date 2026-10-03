@@ -3,7 +3,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import type { ProductPageConfig, OfferPack } from '../../lib/productPages';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
@@ -13,7 +12,6 @@ import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/t
 import './product-landing.css';
 
 export default function ProductLanding({ product }: { product: ProductPageConfig }) {
-  const router = useRouter();
   const [mainIdx, setMainIdx] = useState(0);
   const [offer, setOffer] = useState<OfferPack>(product.offers.find((o) => o.popular) || product.offers[0]);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -65,21 +63,17 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
     };
     try {
       const saved = await submitOrderToApi(orderData);
-      const finalOrder = {
-        ...orderData,
-        orderId: String(saved.orderId || orderId),
-        serverOrderId: saved.orderId,
-      };
+      const finalOrder = { ...orderData, orderId, serverOrderId: saved.orderId };
       trackStoreEvent('purchase', {
         productId: product.id,
         value: offer.price,
         contentName: orderData.offerName,
-        orderId: finalOrder.orderId,
+        orderId,
         numItems: 1,
       });
       flushTrackingQueue();
       saveLastOrder(finalOrder);
-      router.push(thankYouHref(String(finalOrder.orderId)));
+      window.location.assign(thankYouHref(orderId));
     } catch {
       setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة');
       setLoading(false);

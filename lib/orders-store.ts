@@ -1,3 +1,5 @@
+import { promises as fs } from 'fs';
+import path from 'path';
 import { getSql, hasDatabase } from './db';
 
 export type StoreOrder = {
@@ -44,6 +46,8 @@ type OrderRow = {
   visitor_id: string;
 };
 
+const ORDERS_FILE = path.join(process.cwd(), 'orders.json');
+
 function parseMaybeJson(value: string | null): unknown {
   if (value == null || value === '') return value;
   try {
@@ -86,78 +90,146 @@ function encodeField(value: unknown): string {
   return JSON.stringify(value);
 }
 
+async function readFileOrders(): Promise<StoreOrder[]> {
+  try {
+    const raw = await fs.readFile(ORDERS_FILE, 'utf-8');
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? (data as StoreOrder[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function writeFileOrders(orders: StoreOrder[]) {
+  await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf-8');
+}
+
 export async function listOrders(): Promise<StoreOrder[]> {
-  const sql = getSql();
-  if (!sql || !hasDatabase()) return [];
-  const rows = (await sql`
-    SELECT *
-    FROM orders
-    ORDER BY timestamp DESC
-  `) as OrderRow[];
-  return rows.map(rowToOrder);
+  if (hasDatabase()) {
+    try {
+      const sql = getSql();
+      if (sql) {
+        const rows = (await sql`
+          SELECT *
+          FROM orders
+          ORDER BY timestamp DESC
+        `) as OrderRow[];
+        return rows.map(rowToOrder);
+      }
+    } catch (error) {
+      console.error('[orders] neon list failed, using file', error);
+    }
+  }
+  const fileOrders = await readFileOrders();
+  return [...fileOrders].sort(
+    (a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp)
+  );
 }
 
 export async function insertOrder(order: StoreOrder): Promise<void> {
-  const sql = getSql();
-  if (!sql || !hasDatabase()) {
-    throw new Error('DATABASE_URL missing');
+  if (hasDatabase()) {
+    try {
+      const sql = getSql();
+      if (sql) {
+        await sql`
+          INSERT INTO orders (
+            id, name, phone, city, address, offer, pieces, price,
+            timestamp, status, note, source, fbclid, ttclid, sccid,
+            utm_source, product_id, client_order_id, visitor_id
+          ) VALUES (
+            ${order.id},
+            ${order.name},
+            ${order.phone},
+            ${order.city},
+            ${order.address || ''},
+            ${order.offer},
+            ${encodeField(order.pieces)},
+            ${encodeField(order.price)},
+            ${order.timestamp},
+            ${order.status || 'Nouveau'},
+            ${order.note || ''},
+            ${order.source || 'direct'},
+            ${order.fbclid || ''},
+            ${order.ttclid || ''},
+            ${order.sccid || ''},
+            ${order.utm_source || ''},
+            ${order.productId || ''},
+            ${order.clientOrderId || ''},
+            ${order.visitorId || ''}
+          )
+        `;
+        return;
+      }
+    } catch (error) {
+      console.error('[orders] neon insert failed, using file', error);
+    }
   }
-  await sql`
-    INSERT INTO orders (
-      id, name, phone, city, address, offer, pieces, price,
-      timestamp, status, note, source, fbclid, ttclid, sccid,
-      utm_source, product_id, client_order_id, visitor_id
-    ) VALUES (
-      ${order.id},
-      ${order.name},
-      ${order.phone},
-      ${order.city},
-      ${order.address || ''},
-      ${order.offer},
-      ${encodeField(order.pieces)},
-      ${encodeField(order.price)},
-      ${order.timestamp},
-      ${order.status || 'Nouveau'},
-      ${order.note || ''},
-      ${order.source || 'direct'},
-      ${order.fbclid || ''},
-      ${order.ttclid || ''},
-      ${order.sccid || ''},
-      ${order.utm_source || ''},
-      ${order.productId || ''},
-      ${order.clientOrderId || ''},
-      ${order.visitorId || ''}
-    )
-  `;
+
+  const orders = await readFileOrders();
+  orders.push(order);
+  await writeFileOrders(orders);
 }
 
 export async function updateOrderFields(
   id: string,
   patch: { status?: string; note?: string; address?: string }
 ): Promise<StoreOrder | null> {
-  const sql = getSql();
-  if (!sql || !hasDatabase()) throw new Error('DATABASE_URL missing');
+  if (hasDatabase()) {
+    try {
+      const sql = getSql();
+      if (sql) {
+        const current = (await sql`
+          SELECT * FROM orders WHERE id = ${id} LIMIT 1
+        `) as OrderRow[];
+        if (!current[0]) return null;
+        const nextStatus = patch.status !== undefined ? patch.status : current[0].status;
+        const nextNote = patch.note !== undefined ? patch.note : current[0].note;
+        const nextAddress = patch.address !== undefined ? patch.address : current[0].address;
+        const rows = (await sql`
+          UPDATE orders
+          SET status = ${nextStatus},
+              note = ${nextNote},
+              address = ${nextAddress}
+          WHERE id = ${id}
+          RETURNING *
+        `) as OrderRow[];
+        return rows[0] ? rowToOrder(rows[0]) : null;
+      }
+    } catch (error) {
+      console.error('[orders] neon update failed, using file', error);
+    }
+  }
 
-  const rows = (await sql`
-    UPDATE orders
-    SET
-      status = COALESCE(${patch.status ?? null}, status),
-      note = COALESCE(${patch.note ?? null}, note),
-      address = COALESCE(${patch.address ?? null}, address)
-    WHERE id = ${id}
-    RETURNING *
-  `) as OrderRow[];
-
-  return rows[0] ? rowToOrder(rows[0]) : null;
+  const orders = await readFileOrders();
+  const index = orders.findIndex((order) => String(order.id) === String(id));
+  if (index === -1) return null;
+  if (patch.status !== undefined) orders[index].status = patch.status;
+  if (patch.note !== undefined) orders[index].note = patch.note;
+  if (patch.address !== undefined) orders[index].address = patch.address;
+  await writeFileOrders(orders);
+  return orders[index];
 }
 
 export async function deleteOrder(id: string): Promise<boolean> {
-  const sql = getSql();
-  if (!sql || !hasDatabase()) throw new Error('DATABASE_URL missing');
-  const rows = (await sql`
-    DELETE FROM orders
-    WHERE id = ${id}
-    RETURNING id
-  `) as { id: string }[];
-  return rows.length > 0;
+  if (hasDatabase()) {
+    try {
+      const sql = getSql();
+      if (sql) {
+        const rows = (await sql`
+          DELETE FROM orders
+          WHERE id = ${id}
+          RETURNING id
+        `) as { id: string }[];
+        if (rows.length > 0) return true;
+      }
+    } catch (error) {
+      console.error('[orders] neon delete failed, using file', error);
+    }
+  }
+
+  const orders = await readFileOrders();
+  const next = orders.filter((order) => String(order.id) !== String(id));
+  if (next.length === orders.length) return false;
+  await writeFileOrders(next);
+  return true;
 }

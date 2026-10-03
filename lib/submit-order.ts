@@ -1,17 +1,6 @@
-/** Shared client/server helpers so orders always reach Neon. */
+import { isValidOrderPhone, normalizePhone } from './phone';
 
-export function normalizePhone(phone: string): string {
-  let digits = String(phone || '').replace(/\D/g, '');
-  if (digits.startsWith('212') && digits.length >= 12) {
-    digits = `0${digits.slice(3)}`;
-  }
-  if (digits.length > 10) digits = digits.slice(-10);
-  return digits;
-}
-
-export function isValidOrderPhone(phone: string): boolean {
-  return /^\d{10}$/.test(normalizePhone(phone));
-}
+export { isValidOrderPhone, normalizePhone };
 
 export async function submitOrderToApi(payload: Record<string, unknown>) {
   const phone = normalizePhone(String(payload.phone || ''));
@@ -22,7 +11,11 @@ export async function submitOrderToApi(payload: Record<string, unknown>) {
   const res = await fetch('/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...payload, phone }),
+    body: JSON.stringify({
+      ...payload,
+      phone,
+      timestamp: payload.timestamp || new Date().toISOString(),
+    }),
   });
 
   let data: { success?: boolean; orderId?: string; error?: string } = {};

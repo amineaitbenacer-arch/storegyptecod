@@ -77,21 +77,17 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
 
     try {
       const saved = await submitOrderToApi(orderData);
-      const finalOrder = {
-        ...orderData,
-        orderId: String(saved.orderId || orderId),
-        serverOrderId: saved.orderId,
-      };
+      const finalOrder = { ...orderData, orderId, serverOrderId: saved.orderId };
       trackStoreEvent('purchase', {
         productId,
         value: selectedOffer.price,
         contentName: selectedOffer.name,
-        orderId: finalOrder.orderId,
+        orderId,
         numItems: selectedOffer.pieces || 1,
       });
       flushTrackingQueue();
       saveLastOrder(finalOrder);
-      window.location.href = thankYouHref(String(finalOrder.orderId));
+      window.location.assign(thankYouHref(orderId));
     } catch {
       setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة');
       setIsSubmitting(false);

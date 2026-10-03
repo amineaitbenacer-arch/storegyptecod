@@ -218,7 +218,14 @@ export default function StoreCheckoutSheet({
             inputMode="numeric"
             placeholder="📱 رقم الجوال (05XXXXXXXX)"
             value={phone}
-            onChange={(e) => onPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+            onChange={(e) => {
+              const raw = e.target.value
+                .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 1632))
+                .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 1776))
+                .replace(/\D/g, '')
+                .slice(0, 10);
+              onPhone(raw);
+            }}
             autoComplete="tel"
             enterKeyHint="next"
             required
