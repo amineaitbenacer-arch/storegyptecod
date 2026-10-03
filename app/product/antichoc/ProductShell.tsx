@@ -82,7 +82,7 @@ export default function ProductShell() {
       let oldPrice = 399;
       let saveAmount = 220;
       let name = 'طقم قطعتين (سخان واحد)';
-      let subtext = 'عازل مزدوج للماء البارد والساخن • توصيل مجاني';
+      let subtext = 'عازل مزدوج للماء البارد والساخن • توصيل 20 ريال';
       let tag = 'العرض الأساسي';
 
       if (id === 2) {
@@ -148,7 +148,7 @@ export default function ProductShell() {
         el.innerHTML = `توفير ${formatSarHtml(saveAmount)}`;
       });
       $$('.price-save-badge').forEach((el) => {
-        el.innerHTML = `وفّرت ${formatSarHtml(saveAmount)} اليوم مع توصيل مجاني`;
+        el.innerHTML = `وفّرت ${formatSarHtml(saveAmount)} اليوم مع توصيل 20 ريال`;
       });
       $$('.offer-cta-main').forEach((btn) => {
         btn.innerHTML = `<i class="fa-solid fa-cart-shopping"></i> اشترِ الآن — ${formatSarHtml(price)}`;

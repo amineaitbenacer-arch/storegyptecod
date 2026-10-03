@@ -134,7 +134,7 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
               <span className="pl-price-old">{formatSar(offer.oldPrice)}</span>
               <span className="pl-save">توفير {formatSar(save)}</span>
             </div>
-            <div className="pl-save-bar">وفّرت {formatSar(save)} مع توصيل مجاني</div>
+            <div className="pl-save-bar">وفّرت {formatSar(save)} مع توصيل 20 ريال</div>
           </div>
 
           <div className="pl-offers">
@@ -163,7 +163,7 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
           <button type="button" className="pl-cta" onClick={openSheet}>
             {product.ctaLabel} — {formatSar(offer.price)}
           </button>
-          <div className="pl-reassure">🛡️ ضمان الجودة • 🚚 توصيل مجاني • 🤝 معاينة قبل الدفع</div>
+          <div className="pl-reassure">🛡️ ضمان الجودة • 🚚 توصيل 20 ريال • 🤝 معاينة قبل الدفع</div>
 
           <div className="pl-trust-grid">
             {product.trustCards.map((c) => (
@@ -325,7 +325,7 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
             <div className="pl-total">
               <span>المجموع عند الاستلام</span>
               <strong>{formatSar(offer.price)}</strong>
-              <small>🚚 التوصيل مجاني</small>
+              <small>🚚 التوصيل 20 ريال</small>
             </div>
 
             <button type="button" className="pl-cta" disabled={loading} onClick={submit}>

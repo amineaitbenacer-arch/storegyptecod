@@ -250,7 +250,7 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
                 <p style={{ fontSize: 32, fontWeight: 900, color: '#059669' }}>
                   {formatSar(selectedOffer.price)}
                 </p>
-                <p style={{ fontSize: 13, color: '#10B981', marginTop: 4 }}>🚚 التوصيل مجاني</p>
+                <p style={{ fontSize: 13, color: '#10B981', marginTop: 4 }}>🚚 التوصيل 20 ريال</p>
               </div>
 
               <button
@@ -277,7 +277,7 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
 
               <div style={{ display: 'flex', justifyContent: 'center', gap: 14, marginTop: 16, fontSize: 12, color: '#64748B' }}>
                 <span>🔒 معلوماتك محمية</span>
-                <span>🚚 توصيل مجاني</span>
+                <span>🚚 توصيل 20 ريال</span>
                 <span>💳 الدفع عند الاستلام</span>
               </div>
             </div>
