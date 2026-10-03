@@ -2495,6 +2495,7 @@ html {
 
 .atlas-stories {
   display: flex;
+  justify-content: flex-start;
   gap: 0.85rem;
   overflow-x: auto;
   padding: 1rem 0.15rem 0.4rem;
@@ -2514,6 +2515,67 @@ html {
   cursor: pointer;
   font-family: inherit;
   text-align: center;
+}
+
+/* PC: center + spread stories so they don't stick to the RTL edge */
+@media (min-width: 760px) {
+  .store-atlas .store-shell {
+    max-width: 1120px;
+    padding: 0 1.5rem;
+  }
+
+  .atlas-stories {
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: clamp(1.25rem, 3.5vw, 2.75rem);
+    overflow-x: visible;
+    padding: 1.35rem 0 0.55rem;
+  }
+
+  .atlas-story {
+    width: 96px;
+  }
+
+  .atlas-story-ring {
+    width: 84px;
+    height: 84px;
+    margin-bottom: 0.5rem;
+  }
+
+  .atlas-story em {
+    font-size: 0.78rem;
+    max-width: 96px;
+  }
+
+  .store-atlas .atlas-nav {
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .store-atlas .store-search {
+    max-width: 380px;
+  }
+
+  .atlas-hero {
+    padding: 1.75rem 1rem 1.5rem;
+  }
+
+  .atlas-hero .store-lead {
+    max-width: 40rem;
+    font-size: 1.05rem !important;
+  }
+
+  .atlas-trust-list {
+    max-width: 44rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .atlas-trust-list li:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    max-width: calc(50% - 0.325rem);
+    justify-self: center;
+  }
 }
 
 .atlas-story-ring {
