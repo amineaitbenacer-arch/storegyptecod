@@ -125,29 +125,60 @@ export default function ThankYouPage() {
     const root = document.getElementById('ac-ty');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let raf = 0;
-    let lastBurst = 0;
-    const end = Date.now() + 8000;
-    const colors = ['#FFD700', '#F59E0B', '#10B981', '#34D399', '#3B82F6', '#F472B6'];
+    let lastSide = 0;
+    let lastUp = 0;
+    const end = Date.now() + 9000;
+    const colors = ['#FFD700', '#F59E0B', '#10B981', '#34D399', '#3B82F6', '#F472B6', '#FFFFFF'];
     const confettiBase = {
       colors,
-      ticks: 420,
-      gravity: 0.65,
-      decay: 0.91,
-      scalar: 1.15,
+      ticks: 450,
+      gravity: 0.55,
+      decay: 0.9,
+      scalar: 1.2,
       disableForReducedMotion: true as const,
     };
 
+    /** Fireworks that shoot upward then burst in the sky */
+    const shootUp = (x: number) => {
+      confetti({
+        ...confettiBase,
+        particleCount: 55,
+        angle: 90,
+        spread: 55,
+        startVelocity: 75,
+        origin: { x, y: 1 },
+      });
+      window.setTimeout(() => {
+        confetti({
+          ...confettiBase,
+          particleCount: 70,
+          spread: 100,
+          startVelocity: 35,
+          origin: { x, y: 0.25 },
+        });
+      }, 420);
+    };
+
     if (!reduceMotion) {
-      // Big opening burst so celebration stays visible longer
-      confetti({ ...confettiBase, particleCount: 90, spread: 70, origin: { y: 0.55 } });
-      confetti({ ...confettiBase, particleCount: 40, angle: 60, spread: 60, origin: { x: 0, y: 0.65 } });
-      confetti({ ...confettiBase, particleCount: 40, angle: 120, spread: 60, origin: { x: 1, y: 0.65 } });
+      confetti({ ...confettiBase, particleCount: 100, spread: 75, origin: { y: 0.5 } });
+      confetti({ ...confettiBase, particleCount: 45, angle: 60, spread: 60, origin: { x: 0, y: 0.7 } });
+      confetti({ ...confettiBase, particleCount: 45, angle: 120, spread: 60, origin: { x: 1, y: 0.7 } });
+      // Opening sky rockets
+      shootUp(0.25);
+      window.setTimeout(() => shootUp(0.5), 350);
+      window.setTimeout(() => shootUp(0.75), 700);
 
       const frame = (now: number) => {
-        if (now - lastBurst >= 220) {
-          lastBurst = now;
-          confetti({ ...confettiBase, particleCount: 8, angle: 60, spread: 55, origin: { x: 0, y: 0.6 } });
-          confetti({ ...confettiBase, particleCount: 8, angle: 120, spread: 55, origin: { x: 1, y: 0.6 } });
+        if (now - lastSide >= 240) {
+          lastSide = now;
+          confetti({ ...confettiBase, particleCount: 10, angle: 60, spread: 55, origin: { x: 0, y: 0.65 } });
+          confetti({ ...confettiBase, particleCount: 10, angle: 120, spread: 55, origin: { x: 1, y: 0.65 } });
+        }
+        // Keep shooting upward bursts across the screen
+        if (now - lastUp >= 900) {
+          lastUp = now;
+          const x = 0.15 + Math.random() * 0.7;
+          shootUp(x);
         }
         if (Date.now() < end) raf = requestAnimationFrame(frame);
       };
@@ -156,7 +187,7 @@ export default function ThankYouPage() {
 
     const calmTimer = window.setTimeout(() => {
       root?.classList.add('ty-calm');
-    }, 9000);
+    }, 10000);
 
     const price = Number(next.price);
     const orderId = next.id.replace('#', '');
