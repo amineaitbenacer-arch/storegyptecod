@@ -11,6 +11,7 @@ import { saveLastOrder, thankYouHref } from '../../lib/last-order';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 import StoreCheckoutSheet from './StoreCheckoutSheet';
+import ReturnPolicyPanel from '../components/ReturnPolicyPanel';
 import './store.css';
 
 const CART_KEY = 'store_cart_v1';
@@ -137,7 +138,7 @@ const MENU_SECTIONS = [
   {
     icon: 'fa-rotate-left',
     title: 'كيفية الاسترجاع',
-    body: 'يمكنك رفض الاستلام عند المعاينة إن لم يناسبك المنتج. بعد الاستلام، تواصل معنا خلال 48 ساعة لأي مشكلة في الجودة وسنساعدك في الاستبدال أو الحل المناسب.',
+    body: 'استرجاع خلال 3 أيام واستبدال خلال 7 أيام من الاستلام. راسلنا على واتساب بعد تعبئة نموذج الطلب — نرد خلال 48 ساعة وفق سياسة الاستبدال والاسترجاع.',
   },
   {
     icon: 'fa-shield-halved',
@@ -166,8 +167,8 @@ const POLICY_BLOCKS = [
   {
     id: 'policy',
     icon: 'fa-scale-balanced',
-    title: 'سياسة الاسترجاع',
-    body: 'يمكنك معاينة المنتج قبل الدفع ورفضه إن لم يناسبك. بعد الاستلام، إذا ظهرت مشكلة جودة واضحة تواصل معنا خلال 48 ساعة وسنعالج الأمر بالاستبدال أو الحل المناسب وفق سياسة الضمان الذهبي.',
+    title: 'سياسة الاستبدال والاسترجاع',
+    body: 'سياسة كاملة: استرجاع 3 أيام · استبدال 7 أيام · واتساب +966566306804',
   },
   {
     id: 'payment',
@@ -201,7 +202,7 @@ const SOCIAL_PROOF = [
 const TRUST_PILLS = [
   { icon: 'fa-truck-fast', color: '#ea580c', bg: '#fff7ed', text: 'توصيل آمن وسريع لجميع المدن' },
   { icon: 'fa-hand-holding-dollar', color: '#2563eb', bg: '#eff6ff', text: 'الدفع عند الاستلام فقط' },
-  { icon: 'fa-medal', color: '#ca8a04', bg: '#fffbeb', text: 'ضمان ذهبي — إن لم يعجبك أرجعه' },
+  { icon: 'fa-medal', color: '#ca8a04', bg: '#fffbeb', text: 'ضمان ذهبي — استرجاع 3 أيام / استبدال 7 أيام' },
   { icon: 'fa-headset', color: '#0f766e', bg: '#f0fdfa', text: 'تأكيد هاتفي ودعم قبل وبعد الطلب' },
   { icon: 'fa-shield-halved', color: '#b45309', bg: '#fff7ed', text: 'منتجات مختارة لحماية المنزل' },
   { icon: 'fa-box-open', color: '#059669', bg: '#ecfdf5', text: 'معاينة المنتج قبل الدفع' },
@@ -232,7 +233,7 @@ const STORIES: StoryItem[] = [
     ring: '#ca8a04',
     icon: 'fa-medal',
     title: 'الضمان الذهبي',
-    text: 'إن لم يعجبك المنتج يمكنك إرجاعه وفق السياسة. شراء بلا مخاطرة.',
+    text: 'استرجاع 3 أيام واستبدال 7 أيام من الاستلام — سياسة واضحة وواتساب جاهز.',
   },
   {
     id: 's3',
@@ -769,7 +770,9 @@ export default function StoreHome() {
                     <strong>{block.title}</strong>
                     <i className={`fa-solid fa-chevron-down store-policy-chevron`} aria-hidden />
                   </button>
-                  <div className="store-policy-body">{block.body}</div>
+                  <div className={`store-policy-body${block.id === 'policy' ? ' is-rich' : ''}`}>
+                    {block.id === 'policy' ? <ReturnPolicyPanel variant="full" /> : block.body}
+                  </div>
                 </div>
               );
             })}
@@ -794,7 +797,7 @@ export default function StoreHome() {
               </div>
               <div className="store-cvr-row">
                 <i className="fa-solid fa-medal" aria-hidden />
-                <span>ضمان ذهبي: إن لم يعجبك المنتج يمكنك إرجاعه وفق السياسة</span>
+                <span>ضمان ذهبي واضح: استرجاع 3 أيام واستبدال 7 أيام وفق السياسة</span>
               </div>
             </div>
           </div>
@@ -809,10 +812,11 @@ export default function StoreHome() {
               <i className="fa-solid fa-medal" />
             </div>
             <div className="store-gold-titles">
-              <p className="store-gold-kicker">وعد المتجر لكل طلب</p>
-              <h2>الضمان الذهبي</h2>
+              <p className="store-gold-kicker">وعد المتجر لكل طلب — بلا مخاطرة</p>
+              <h2>الضمان الذهبي + سياسة الاسترجاع</h2>
               <p className="store-gold-lead">
-                إن لم يعجبك المنتج، يمكنك إرجاعه. شراء بلا مخاطرة على كل منتجات المتجر.
+                شراء بثقة: استرجاع خلال 3 أيام واستبدال خلال 7 أيام من الاستلام. سياسة واضحة، واتساب جاهز،
+                ورد خلال 48 ساعة.
               </p>
             </div>
           </div>
@@ -820,31 +824,38 @@ export default function StoreHome() {
             <article>
               <span className="store-gold-step">1</span>
               <div className="store-gold-icon" aria-hidden>
-                <i className="fa-solid fa-face-frown-open" />
+                <i className="fa-solid fa-calendar-check" />
               </div>
-              <strong>لم يعجبك؟</strong>
-              <span>حقّك محفوظ إذا لم يناسبك المنتج بعد الاستلام.</span>
+              <strong>3 أيام للاسترجاع</strong>
+              <span>من تاريخ استلام المنتج — حقّك مكتوب وواضح.</span>
             </article>
             <article>
               <span className="store-gold-step">2</span>
               <div className="store-gold-icon" aria-hidden>
-                <i className="fa-solid fa-rotate-left" />
+                <i className="fa-solid fa-right-left" />
               </div>
-              <strong>أرجعه بسهولة</strong>
-              <span>طلب الاسترجاع يتم وفق السياسة دون تعقيد.</span>
+              <strong>7 أيام للاستبدال</strong>
+              <span>بدّل المنتج خلال أسبوع وفق بنود السياسة.</span>
             </article>
             <article>
               <span className="store-gold-step">3</span>
               <div className="store-gold-icon" aria-hidden>
-                <i className="fa-solid fa-box-open" />
+                <i className="fa-brands fa-whatsapp" />
               </div>
-              <strong>معاينة قبل الدفع</strong>
-              <span>افحص عند الباب، ثم ادفع فقط إن اطمأننت.</span>
+              <strong>واتساب + نموذج جاهز</strong>
+              <span>انسخ الرقم والنموذج، راسلنا، ونرد خلال 48 ساعة.</span>
             </article>
+          </div>
+          <div className="store-gold-policy">
+            <ReturnPolicyPanel variant="compact" showTitle={false} />
+            <a href="#policy" className="store-gold-policy-link">
+              اقرأ السياسة كاملة
+              <i className="fa-solid fa-arrow-left" aria-hidden />
+            </a>
           </div>
           <div className="store-gold-ribbon">
             <i className="fa-solid fa-certificate" aria-hidden />
-            <span>لم يعجبك؟ أرجعه — يسري على جميع منتجات المتجر</span>
+            <span>لم يعجبك؟ أرجعه خلال 3 أيام — أو استبدله خلال 7 أيام — يسري على كل منتجات المتجر</span>
           </div>
         </section>
 
@@ -935,7 +946,9 @@ export default function StoreHome() {
                     <strong>{b.title}</strong>
                     <i className="fa-solid fa-chevron-down store-drawer-faq-chevron" aria-hidden />
                   </button>
-                  <div className="store-drawer-faq-body">{b.body}</div>
+                  <div className={`store-drawer-faq-body${b.id === 'policy' ? ' is-rich' : ''}`}>
+                    {b.id === 'policy' ? <ReturnPolicyPanel variant="compact" /> : b.body}
+                  </div>
                 </div>
               );
             })}

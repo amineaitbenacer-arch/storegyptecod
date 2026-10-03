@@ -921,6 +921,17 @@
   color: #92400e;
 }
 
+#ac-ty .ty-policy-wrap {
+  position: relative;
+  z-index: 1;
+  margin-top: 1.25rem;
+  padding: 1.1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1.5px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 14px 32px rgba(120, 53, 15, 0.12);
+}
+
 @keyframes tyGgPulse {
   0%, 100% { transform: scale(1); opacity: 0.85; }
   50% { transform: scale(1.08); opacity: 0.35; }
