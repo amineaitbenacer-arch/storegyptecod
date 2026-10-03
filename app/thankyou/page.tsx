@@ -153,7 +153,7 @@ export default function ThankYouPage() {
         productId: String(data.productId || ''),
         value: Number.isFinite(price) ? price : undefined,
         contentName: String(data.offerName || data.offer || next.offer || ''),
-        orderId: orderId && orderId !== '----' ? orderId : data.orderId,
+        orderId: orderId && orderId !== '----' ? orderId : String(data.orderId || ''),
         numItems: Number(data.pieces) || 1,
       });
       flushTrackingQueue();
