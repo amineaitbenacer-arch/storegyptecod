@@ -66,8 +66,8 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
       price: selectedOffer.price,
       packId: selectedOffer.id,
       timestamp: new Date().toISOString(),
-      productId,
       ...trackingFields(),
+      productId,
     };
 
     localStorage.setItem('lastOrder', JSON.stringify(orderData));

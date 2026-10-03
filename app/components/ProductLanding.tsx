@@ -56,8 +56,8 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
       price: offer.price,
       pieces: offer.id,
       packId: offer.id,
-      productId: product.id,
       ...trackingFields(),
+      productId: product.id,
     };
     localStorage.setItem('lastOrder', JSON.stringify(orderData));
     localStorage.setItem('ac_last_order', JSON.stringify(orderData));

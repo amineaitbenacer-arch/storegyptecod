@@ -202,8 +202,8 @@ export default function ProductShell() {
         pieces: currentBundle.id === 1 ? 2 : currentBundle.id === 2 ? 4 : 6,
         price: currentBundle.price,
         packId: currentBundle.id,
-        productId,
         ...trackingFields(),
+        productId,
       };
 
       localStorage.setItem('ac_last_order', JSON.stringify(orderData));
