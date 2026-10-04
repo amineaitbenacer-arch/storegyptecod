@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { connection } from 'next/server';
+import Script from 'next/script';
 import { Amiri, Tajawal } from 'next/font/google';
 import './globals.css';
 import TrackVisit from './components/TrackVisit';
@@ -54,7 +55,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       </head>
       <body className={tajawal.className}>
         {pixelScript ? (
-          <script id="store-pixels" dangerouslySetInnerHTML={{ __html: pixelScript }} />
+          <Script id="store-pixels" strategy="beforeInteractive">
+            {pixelScript}
+          </Script>
         ) : null}
         <TrackVisit />
         <AdPixels />
