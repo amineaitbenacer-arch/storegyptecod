@@ -1,22 +1,3 @@
-import {
-  trackPixelAddToCart,
-  trackPixelCheckout,
-  trackPixelViewContent,
-} from './pixels';
-import { getProductPage } from './productPages';
-
-/** Default price for a product (first/cheapest offer) — used so ViewContent always has a value. */
-function catalogValue(productId: string): { value?: number; name?: string } {
-  try {
-    const page = productId ? getProductPage(productId) : undefined;
-    const offer = page?.offers?.[0];
-    if (!page || !offer) return {};
-    return { value: Number(offer.price) || undefined, name: page.heroTitle };
-  } catch {
-    return {};
-  }
-}
-
 export const AD_SOURCES = ['meta', 'tiktok', 'snapchat', 'direct'] as const;
 export type AdSource = (typeof AD_SOURCES)[number];
 
@@ -273,29 +254,6 @@ export function trackStoreEvent(
 
     const critical = type === 'purchase' || type === 'checkout' || type === 'addtocart';
     sendBody(body, critical);
-
-    // Ad pixels (Meta / TikTok / Snap) — same moment as internal analytics
-    try {
-      const contentId = productId || undefined;
-      const fallback = opts?.value == null || !opts?.contentName ? catalogValue(productId) : {};
-      const commerce = {
-        content_id: contentId,
-        content_ids: contentId ? [contentId] : undefined,
-        content_name: opts?.contentName ?? fallback.name,
-        currency: 'SAR',
-        value: opts?.value ?? fallback.value,
-        num_items: opts?.numItems ?? 1,
-      };
-      if (type === 'product') {
-        trackPixelViewContent(commerce);
-      } else if (type === 'addtocart') {
-        trackPixelAddToCart(commerce);
-      } else if (type === 'checkout') {
-        trackPixelCheckout(commerce);
-      }
-    } catch {
-      /* ignore pixel errors */
-    }
   } catch {
     /* never break the store */
   }
