@@ -253,11 +253,11 @@ const STORIES: StoryItem[] = [
   },
   {
     id: 's5',
-    label: 'جودة مختارة',
+    label: 'اختيارنا',
     ring: '#0f766e',
-    icon: 'fa-shield-halved',
-    title: 'منتج مطابق للصور',
-    text: 'تفحص الطلب عند الباب، وتدفع فقط إذا أعجبك.',
+    image: '/images/robotdog-kids.jpg',
+    title: 'هدية تبهِر الأطفال',
+    text: 'تحكم صوتي + تطبيق + ريموت — أكثر من 25 حركة تفاعلية.',
   },
 ];
 

@@ -620,12 +620,15 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             <div className="pvd-header text-center">
               <span className="pvd-badge">تفاصيل المنتج بالصور</span>
               <h2 className="section-heading">لماذا العائلات تطلبه اليوم؟</h2>
-              <p className="section-subheading">تفاصيل واضحة وصورة واحدة قبل ما تطلب</p>
+              <p className="section-subheading">كل صورتين شرح… ثم صورة مربعة 1:1 تثبت الكلام</p>
             </div>
 
             {product.storyBeats.map((beat, i) => (
               <div key={beat.imageTitle || beat.image} className="pv-beat">
                 <div className="pv-info-cadre">
+                  <div className="pv-info-cadre-badge">
+                    تفاصيل {i + 1} / {product.storyBeats!.length}
+                  </div>
                   <div className="pv-info-list">
                     {beat.frames.map((frame) => (
                       <div key={frame.title} className="pv-info-row">
@@ -654,6 +657,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
                       {beat.imageText && <span>{beat.imageText}</span>}
                     </figcaption>
                   )}
+                  <span className="pv-beat-num">{i + 1} / {product.storyBeats!.length}</span>
                 </figure>
 
                 {beat.bridge && (
