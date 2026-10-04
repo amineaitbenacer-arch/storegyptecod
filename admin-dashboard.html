@@ -86,6 +86,52 @@
             border-reft: 3px solid var(--gold);
         }
 
+        #orders-view thead th.col-h { font-weight: 900; }
+        #orders-view thead th.col-h::before {
+            content: "";
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 99px;
+            margin-right: 8px;
+            background: currentColor;
+            box-shadow: 0 0 10px currentColor;
+            vertical-align: 1px;
+        }
+        #orders-view .col-name { color: #67e8f9; }
+        #orders-view .col-phone { color: #93c5fd; }
+        #orders-view .col-city { color: #fbbf24; }
+        #orders-view .col-offer { color: #d8b4fe; }
+        #orders-view .col-source { color: #f9a8d4; }
+        #orders-view .col-time { color: #6ee7b7; }
+        #orders-tbody tr:nth-child(6n+1) { background: rgba(34, 211, 238, 0.08); box-shadow: inset 4px 0 0 #22d3ee; }
+        #orders-tbody tr:nth-child(6n+2) { background: rgba(59, 130, 246, 0.1); box-shadow: inset 4px 0 0 #3b82f6; }
+        #orders-tbody tr:nth-child(6n+3) { background: rgba(245, 158, 11, 0.1); box-shadow: inset 4px 0 0 #f59e0b; }
+        #orders-tbody tr:nth-child(6n+4) { background: rgba(168, 85, 247, 0.1); box-shadow: inset 4px 0 0 #a855f7; }
+        #orders-tbody tr:nth-child(6n+5) { background: rgba(16, 185, 129, 0.1); box-shadow: inset 4px 0 0 #10b981; }
+        #orders-tbody tr:nth-child(6n+6) { background: rgba(236, 72, 153, 0.1); box-shadow: inset 4px 0 0 #ec4899; }
+        #orders-tbody tr:hover { filter: brightness(1.18); transform: translateY(-2px); }
+        .field-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 100%;
+            padding: 6px 8px 6px 12px;
+            border-radius: 14px;
+            border: 1px solid transparent;
+        }
+        .field-name { background: rgba(34,211,238,.14); border-color: rgba(34,211,238,.4); }
+        .field-phone { background: rgba(59,130,246,.16); border-color: rgba(59,130,246,.45); }
+        .field-city { background: rgba(245,158,11,.16); border-color: rgba(245,158,11,.5); }
+        .field-offer { background: rgba(168,85,247,.16); border-color: rgba(168,85,247,.45); }
+        .field-time { background: rgba(16,185,129,.14); border-color: rgba(16,185,129,.45); }
+        .copy-bit.tone-name { background: #22d3ee; color: #042f2e; }
+        .copy-bit.tone-phone { background: #3b82f6; color: #fff; }
+        .copy-bit.tone-city { background: #f59e0b; color: #1c1403; }
+        .copy-bit.tone-offer { background: #a855f7; color: #fff; }
+        .copy-bit.tone-source { background: #ec4899; color: #fff; }
+        .copy-bit.tone-time { background: #10b981; color: #022c22; }
+
         td:first-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
         td:last-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
 
@@ -542,12 +588,12 @@
                                 <th class="p-4 font-bold pb-6 w-10 text-center">
                                     <input type="checkbox" id="select-all-orders" class="w-4 h-4 rounded border-gray-600 bg-gray-700 cursor-pointer" onchange="toggleSelectAll(this)">
                                 </th>
-                                <th class="p-4 font-bold pb-6">الاسم</th>
-                                <th class="p-4 font-bold pb-6">الرقم</th>
-                                <th class="p-4 font-bold pb-6">المدينة</th>
-                                <th class="p-4 font-bold pb-6">العرض</th>
-                                <th class="p-4 font-bold pb-6 text-center">منين جا</th>
-                                <th class="p-4 font-bold pb-6">الوقت</th>
+                                <th class="p-4 font-bold pb-6 col-h col-name">الاسم</th>
+                                <th class="p-4 font-bold pb-6 col-h col-phone">الرقم</th>
+                                <th class="p-4 font-bold pb-6 col-h col-city">المدينة</th>
+                                <th class="p-4 font-bold pb-6 col-h col-offer">العرض</th>
+                                <th class="p-4 font-bold pb-6 col-h col-source text-center">منين جا</th>
+                                <th class="p-4 font-bold pb-6 col-h col-time">الوقت</th>
                                 <th class="p-4 font-bold pb-6 w-10"></th>
                             </tr>
                         </thead>
@@ -1346,8 +1392,8 @@
             return Promise.resolve();
         }
 
-        function copyChip(value) {
-            return `<button type="button" data-copy="${escHtml(value)}" onclick="copyBit(this)" title="نسخ هادي بوحدها" class="copy-bit shrink-0 w-8 h-8 rounded-lg bg-yellow-400 text-black hover:bg-yellow-300 flex items-center justify-center transition shadow-[0_0_10px_rgba(250,204,21,0.25)]">
+        function copyChip(value, tone) {
+            return `<button type="button" data-copy="${escHtml(value)}" onclick="copyBit(this)" title="نسخ هادي بوحدها" class="copy-bit tone-${tone} shrink-0 w-8 h-8 rounded-lg hover:brightness-110 flex items-center justify-center transition shadow-[0_0_12px_rgba(0,0,0,0.25)]">
                 <i class="fa-regular fa-copy text-sm"></i>
             </button>`;
         }
@@ -1384,7 +1430,7 @@
             ordersArray.forEach(order => {
                 const t = orderTimeParts(order);
                 const timeText = `${t.day}/${t.month}/${t.year} ${t.hours}:${t.minutes}`;
-                const formattedDate = `<span class="text-gray-300 font-bold">${t.day}/${t.month}/${t.year}</span> <span class="text-gray-500 ml-1"><i class="fa-regular fa-clock"></i> ${t.hours}:${t.minutes}</span>`;
+                const formattedDate = `<span class="text-emerald-100 font-bold">${t.day}/${t.month}/${t.year}</span> <span class="text-emerald-300 ml-1"><i class="fa-regular fa-clock"></i> ${t.hours}:${t.minutes}</span>`;
                 const jsName = String(order.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                 const jsPhone = String(order.phone || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
@@ -1394,39 +1440,39 @@
                         <input type="checkbox" class="order-checkbox w-4 h-4 rounded border-gray-600 bg-gray-700 cursor-pointer" value="${escHtml(order.id)}" onchange="updateBulkDeleteButton()">
                     </td>
                     <td class="p-4 border-r border-gray-700/30">
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold text-white text-base">${escHtml(order.name)}</span>
-                            ${copyChip(order.name)}
+                        <div class="field-pill field-name">
+                            <span class="font-bold text-cyan-100 text-base">${escHtml(order.name)}</span>
+                            ${copyChip(order.name, 'name')}
                         </div>
                     </td>
                     <td class="p-4 border-r border-gray-700/30">
-                        <div class="flex items-center gap-2" dir="ltr">
-                            <span class="font-black text-white en-font text-base tracking-wide">${escHtml(order.phone)}</span>
-                            ${copyChip(order.phone)}
+                        <div class="field-pill field-phone" dir="ltr">
+                            <span class="font-black text-blue-100 en-font text-base tracking-wide">${escHtml(order.phone)}</span>
+                            ${copyChip(order.phone, 'phone')}
                         </div>
                     </td>
                     <td class="p-4 border-r border-gray-700/30">
-                        <div class="flex items-center gap-2">
-                            <span class="text-yellow-500 font-black">${escHtml(order.city)}</span>
-                            ${copyChip(order.city)}
+                        <div class="field-pill field-city">
+                            <span class="text-amber-200 font-black">${escHtml(order.city)}</span>
+                            ${copyChip(order.city, 'city')}
                         </div>
                     </td>
                     <td class="p-4 border-r border-gray-700/30 whitespace-normal min-w-[200px]">
-                        <div class="flex items-center gap-2">
-                            <span class="text-gray-200 font-bold text-sm">${escHtml(order.offer_name)}</span>
-                            ${copyChip(order.offer_name)}
+                        <div class="field-pill field-offer">
+                            <span class="text-purple-100 font-bold text-sm">${escHtml(order.offer_name)}</span>
+                            ${copyChip(order.offer_name, 'offer')}
                         </div>
                     </td>
                     <td class="p-4 border-r border-gray-700/30">
                         <div class="flex items-center justify-center gap-2">
                             ${sourceBadge(order.source)}
-                            ${copyChip(sourceName(order.source))}
+                            ${copyChip(sourceName(order.source), 'source')}
                         </div>
                     </td>
                     <td class="p-4 border-r border-gray-700/30">
-                        <div class="flex items-center gap-2" dir="ltr">
-                            <span class="en-font text-sm">${formattedDate}</span>
-                            ${copyChip(timeText)}
+                        <div class="field-pill field-time" dir="ltr">
+                            <span class="en-font text-sm text-emerald-100">${formattedDate}</span>
+                            ${copyChip(timeText, 'time')}
                         </div>
                     </td>
                     <td class="p-4 text-center">
