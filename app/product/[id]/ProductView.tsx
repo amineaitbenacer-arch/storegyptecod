@@ -568,7 +568,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             <div className="pv-sp-chips">
               <span className="pv-sp-chip live">
                 <i className="pv-sp-dot" aria-hidden="true" />
-                17 يطلبونه الآن
+                ادفع بعد المعاينة
               </span>
               <span className="pv-sp-chip">جودة مضمونة</span>
               <span className="pv-sp-chip">اختيار الأمهات</span>
