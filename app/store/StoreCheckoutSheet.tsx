@@ -186,7 +186,7 @@ export default function StoreCheckoutSheet({
             <span aria-hidden>🚚</span>
             <div>
               <strong>توصيل {formatSar(SHIPPING_FEE_SAR)}</strong>
-              <em>لجميع مدن المملكة 🇸🇦</em>
+              <em>لجميع مدن السعودية 🇸🇦</em>
             </div>
           </div>
           <div className="store-ac-trust-item">

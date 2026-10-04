@@ -342,7 +342,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               <span className="tc-mini-icon">🚚</span>
               <div className="tc-mini-text">
                 <strong>توصيل {formatSar(SHIPPING_FEE_SAR)}</strong>
-                <span>جميع مدن المملكة 🇸🇦</span>
+                <span>جميع مدن السعودية 🇸🇦</span>
               </div>
             </div>
             <div className="tc-mini-item">
