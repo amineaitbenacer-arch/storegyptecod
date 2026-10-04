@@ -523,6 +523,9 @@
 
         <!-- 📦 VIEW 2: ORDERS TABLE -->
         <div id="orders-view" style="display: none;">
+            <div class="mb-4">
+                <p class="text-sm text-gray-400 font-semibold">كل خانة فيها زر <span class="text-yellow-400 font-black">نسخ</span> صغير. كتنسخ غير هاديك المعلومة بوحدها وتلصقها فالموقع الآخر.</p>
+            </div>
             <!-- Bulk Actions Bar (Above the table) -->
             <div id="bulk-actions" class="hidden mb-4 p-4 glass-card bg-red-500/5 border border-red-500/20 rounded-xl flex justify-between items-center shadow-lg">
                 <span class="text-red-400 font-bold"><i class="fa-solid fa-circle-check"></i> تم تحديد <span id="bulk-count">0</span> طلبيات</span>
@@ -533,31 +536,25 @@
             
             <div class="glass-card overflow-hidden p-2 md:p-6 relative">
                 <div class="overflow-x-auto pb-4 mt-2">
-                    <table class="w-full text-left whitespace-nowrap min-w-[1000px]">
+                    <table class="w-full text-left whitespace-nowrap min-w-[860px]">
                         <thead>
                             <tr class="text-gray-400 text-sm uppercase tracking-wider">
                                 <th class="p-4 font-bold pb-6 w-10 text-center">
                                     <input type="checkbox" id="select-all-orders" class="w-4 h-4 rounded border-gray-600 bg-gray-700 cursor-pointer" onchange="toggleSelectAll(this)">
                                 </th>
+                                <th class="p-4 font-bold pb-6">الاسم</th>
+                                <th class="p-4 font-bold pb-6">الرقم</th>
+                                <th class="p-4 font-bold pb-6">المدينة</th>
+                                <th class="p-4 font-bold pb-6">العرض</th>
+                                <th class="p-4 font-bold pb-6 text-center">منين جا</th>
+                                <th class="p-4 font-bold pb-6">الوقت</th>
                                 <th class="p-4 font-bold pb-6 w-10"></th>
-                                <th class="p-4 font-bold pb-6">Order #</th>
-                                <th class="p-4 font-bold pb-6">Date & Time</th>
-                                <th class="p-4 font-bold pb-6">Customer Name</th>
-                                <th class="p-4 font-bold pb-6 text-center">Direct Call</th>
-                                <th class="p-4 font-bold pb-6">City</th>
-                                <th class="p-4 font-bold pb-6 text-center">Adresse</th>
-                                <th class="p-4 font-bold pb-6 text-center">WhatsApp</th>
-                                <th class="p-4 font-bold pb-6">Offer</th>
-                                <th class="p-4 font-bold pb-6 text-center">Source</th>
-                                <th class="p-4 font-bold pb-6">Price</th>
-                                <th class="p-4 font-bold pb-6 text-center">Status</th>
-                                <th class="p-4 font-bold pb-6 text-center">Notes / Raison</th>
                             </tr>
                         </thead>
                         <tbody id="orders-tbody">
                             <!-- Loading State -->
                             <tr>
-                                <td colspan="14" class="p-12 text-center text-gray-400">
+                                <td colspan="8" class="p-12 text-center text-gray-400">
                                     <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-yellow-500"></i>
                                     <div class="text-lg font-bold">جاري جلب Orders الحية...</div>
                                 </td>
@@ -596,7 +593,7 @@
                         <h2 class="text-2xl md:text-3xl font-black text-white glow-text flex items-center gap-3">
                             <i class="fa-solid fa-puzzle-piece text-yellow-500"></i> Pixels · 3 Platforms
                         </h2>
-                        <p class="text-sm text-gray-400 mt-1 font-semibold">حط Pixel ID لأي منصة → Save → كيتفعّل فالموقع أوتوماتيك (PageView · ViewContent · AddToCart · Checkout · Purchase)</p>
+                        <p class="text-sm text-gray-400 mt-1 font-semibold">حط أي Pixel ID، واحد ولا بزاف (فاصلة ولا سطر جديد)، ولا لصق الكود كامل. Save مرة وحدة وكيتسجلوا ويخدموا نيشان: PageView · ViewContent · AddToCart · Checkout · Purchase.</p>
                     </div>
                     <button onclick="lockPixelSettings()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-xl text-xs font-bold border border-gray-700 flex items-center gap-2 transition">
                         <i class="fa-solid fa-lock text-yellow-500"></i> Lock Settings
@@ -617,7 +614,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-blue-200/70 mb-1">Main Pixel ID</label>
-                                <input type="text" id="fb_pixel_1" placeholder="e.g. 1234567890" class="w-full bg-gray-950 border-2 border-blue-500/35 text-white rounded-lg px-4 py-3 focus:border-[#0866FF] outline-none en-font shadow-inner">
+                                <input type="text" id="fb_pixel_1" placeholder="ID ولا بزاف، ولا لصق الكود" class="w-full bg-gray-950 border-2 border-blue-500/35 text-white rounded-lg px-4 py-3 focus:border-[#0866FF] outline-none en-font shadow-inner">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-blue-200/70 mb-1">Main CAPI Token</label>
@@ -625,7 +622,7 @@
                             </div>
                             <div class="pt-2 border-t border-blue-500/20">
                                 <label class="block text-xs font-bold text-blue-200/50 mb-1">Backup Pixel ID (optional)</label>
-                                <input type="text" id="fb_pixel_2" placeholder="e.g. 0987654321" class="w-full bg-gray-950 border-2 border-blue-500/20 text-white rounded-lg px-4 py-2.5 focus:border-[#0866FF] outline-none en-font shadow-inner text-sm">
+                                <input type="text" id="fb_pixel_2" placeholder="Pixel ID آخر (optional)" class="w-full bg-gray-950 border-2 border-blue-500/20 text-white rounded-lg px-4 py-2.5 focus:border-[#0866FF] outline-none en-font shadow-inner text-sm">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-blue-200/50 mb-1">Backup CAPI Token</label>
@@ -647,13 +644,13 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-pink-200/70 mb-1">Pixel ID</label>
-                                <input type="text" id="tiktok_pixel" placeholder="e.g. CXXXXXX" class="w-full bg-gray-950 border-2 border-pink-500/35 text-white rounded-lg px-4 py-3 focus:border-[#FE2C55] outline-none en-font shadow-inner">
+                                <input type="text" id="tiktok_pixel" placeholder="ID ولا بزاف، ولا لصق الكود" class="w-full bg-gray-950 border-2 border-pink-500/35 text-white rounded-lg px-4 py-3 focus:border-[#FE2C55] outline-none en-font shadow-inner">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-pink-200/70 mb-1">Events API Token</label>
                                 <input type="password" id="tiktok_token" placeholder="e.g. 5d12345..." class="w-full bg-gray-950 border-2 border-pink-500/35 text-white rounded-lg px-4 py-3 focus:border-[#FE2C55] outline-none en-font shadow-inner">
                             </div>
-                            <p class="text-[11px] text-gray-500 font-semibold leading-relaxed">كيتفعّل PageView · ViewContent · AddToCart · InitiateCheckout · CompletePayment</p>
+                            <p class="text-[11px] text-gray-500 font-semibold leading-relaxed">تقدر تحط أكثر من TikTok Pixel فهاد الخانة. كيتفعّل PageView · ViewContent · AddToCart · InitiateCheckout · CompletePayment</p>
                         </div>
                     </div>
 
@@ -670,7 +667,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-yellow-200/70 mb-1">Main Pixel ID</label>
-                                <input type="text" id="snapchat_pixel" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" class="w-full bg-gray-950 border-2 border-yellow-400/35 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
+                                <input type="text" id="snapchat_pixel" placeholder="UUID ولا بزاف، ولا لصق الكود" class="w-full bg-gray-950 border-2 border-yellow-400/35 text-white rounded-lg px-4 py-3 focus:border-[#FFFC00] outline-none en-font shadow-inner">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-yellow-200/70 mb-1">Main CAPI Token</label>
@@ -678,7 +675,7 @@
                             </div>
                             <div class="pt-2 border-t border-yellow-400/20">
                                 <label class="block text-xs font-bold text-yellow-200/50 mb-1">Backup Pixel ID (optional)</label>
-                                <input type="text" id="snapchat_pixel_2" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" class="w-full bg-gray-950 border-2 border-yellow-400/20 text-white rounded-lg px-4 py-2.5 focus:border-[#FFFC00] outline-none en-font shadow-inner text-sm">
+                                <input type="text" id="snapchat_pixel_2" placeholder="Pixel ID آخر (optional)" class="w-full bg-gray-950 border-2 border-yellow-400/20 text-white rounded-lg px-4 py-2.5 focus:border-[#FFFC00] outline-none en-font shadow-inner text-sm">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-yellow-200/50 mb-1">Backup CAPI Token</label>
@@ -689,10 +686,10 @@
                 </div>
 
                 <div class="pt-6 border-t border-gray-700/50 flex flex-wrap items-center justify-between gap-4">
-                    <button onclick="saveAllSettings()" class="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-8 py-3.5 rounded-xl font-black flex items-center justify-center gap-2.5 shadow-[0_4px_20px_rgba(255,215,0,0.3)] transition-all text-base">
+                    <button type="button" onclick="saveAllSettings()" class="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-8 py-3.5 rounded-xl font-black flex items-center justify-center gap-2.5 shadow-[0_4px_20px_rgba(255,215,0,0.3)] transition-all text-base">
                         <i class="fa-solid fa-save text-lg"></i> Save All Platforms
                     </button>
-                    <p id="settings-status" class="text-green-400 font-bold hidden flex items-center gap-2"><i class="fa-solid fa-circle-check text-xl"></i> تم الحفظ بنجاح!</p>
+                    <p id="settings-status" class="text-green-400 font-bold hidden flex items-center gap-2"><i class="fa-solid fa-circle-check text-xl"></i> <span id="settings-status-text">تحفظ. البيكسل خدام دابا فالمتجر.</span></p>
                 </div>
             </div>
         </div>
@@ -881,7 +878,7 @@
             
             // Only show full table loading if not forced refresh to keep UX smooth during refresh
             if (!force) {
-                tbody.innerHTML = '<tr><td colspan="14" class="p-12 text-center text-gray-400"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-yellow-500"></i><div class="text-lg font-bold">Loading Data...</div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="p-12 text-center text-gray-400"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-yellow-500"></i><div class="text-lg font-bold">Loading Data...</div></td></tr>';
             }
             
             try {
@@ -933,7 +930,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="14" class="p-12 text-center text-red-400"><i class="fa-solid fa-triangle-exclamation mb-4 text-4xl"></i><div class="text-lg font-bold">حدث خطأ أثناء جلب Orders. تأكد من اتصال السيرفور.</div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="p-12 text-center text-red-400"><i class="fa-solid fa-triangle-exclamation mb-4 text-4xl"></i><div class="text-lg font-bold">حدث خطأ أثناء جلب Orders. تأكد من اتصال السيرفور.</div></td></tr>';
             }
         }
 
@@ -1310,112 +1307,132 @@
             }).join('');
         }
 
+        function escHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function sourceName(source) {
+            const map = { meta: 'Meta', tiktok: 'TikTok', snapchat: 'Snapchat', direct: 'Direct' };
+            return map[source] || source || 'Direct';
+        }
+
+        function orderTimeParts(order) {
+            const dateObj = new Date(order.created_at);
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const year = dateObj.getFullYear();
+            const hours = String(dateObj.getHours()).padStart(2, '0');
+            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+            return { day, month, year, hours, minutes };
+        }
+
+        function writeClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text);
+            }
+            const area = document.createElement('textarea');
+            area.value = text;
+            area.setAttribute('readonly', '');
+            area.style.position = 'fixed';
+            area.style.left = '-9999px';
+            document.body.appendChild(area);
+            area.select();
+            document.execCommand('copy');
+            document.body.removeChild(area);
+            return Promise.resolve();
+        }
+
+        function copyChip(value) {
+            return `<button type="button" data-copy="${escHtml(value)}" onclick="copyBit(this)" title="نسخ هادي بوحدها" class="copy-bit shrink-0 w-8 h-8 rounded-lg bg-yellow-400 text-black hover:bg-yellow-300 flex items-center justify-center transition shadow-[0_0_10px_rgba(250,204,21,0.25)]">
+                <i class="fa-regular fa-copy text-sm"></i>
+            </button>`;
+        }
+
+        function copyBit(btn) {
+            const text = btn.getAttribute('data-copy') || '';
+            writeClipboard(text)
+                .then(() => {
+                    const old = btn.innerHTML;
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    btn.style.background = '#22c55e';
+                    setTimeout(() => {
+                        btn.innerHTML = old;
+                        btn.style.background = '';
+                    }, 900);
+                })
+                .catch(() => alert('ما تنسخش. جرّب مرة أخرى.'));
+        }
+
         function renderOrders(ordersArray) {
             const tbody = document.getElementById('orders-tbody');
+            window.visibleOrders = ordersArray;
             
             // Animate counter
             animateValue("total-orders-count", parseInt(document.getElementById('total-orders-count').innerText), ordersArray.length, 500);
             
             if (ordersArray.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="14" class="p-12 text-center text-gray-500"><i class="fa-solid fa-box-open text-4xl mb-3"></i><div class="text-lg">No orders found for this date.</div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="p-12 text-center text-gray-500"><i class="fa-solid fa-box-open text-4xl mb-3"></i><div class="text-lg">No orders found for this date.</div></td></tr>';
                 return;
             }
 
             tbody.innerHTML = ''; 
             
             ordersArray.forEach(order => {
-                const dateObj = new Date(order.created_at);
-                // Fix date formatting specifically for Moroccan locale (DD/MM/YYYY)
-                const day = String(dateObj.getDate()).padStart(2, '0');
-                const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                const year = dateObj.getFullYear();
-                const hours = String(dateObj.getHours()).padStart(2, '0');
-                const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-                
-                const formattedDate = `<span class="text-gray-300 font-bold">${day}/${month}/${year}</span> <span class="text-gray-500 ml-1"><i class="fa-regular fa-clock"></i> ${hours}:${minutes}</span>`;
-                
-                const cleanPhone = order.phone.replace(/\s+/g, '');
-
-                const currentStatus = order.status || 'Nouveau';
-                const statusOptions = [
-                    { val: 'Nouveau', label: 'Nouveau', cls: 'st-nouveau' },
-                    { val: 'Confirmé', label: 'Confirmé ✔️', cls: 'st-confirme' },
-                    { val: 'Annulé', label: 'Annulé ❌', cls: 'st-annule' },
-                    { val: 'Pas de réponse', label: 'Pas de rep ⏳', cls: 'st-pasreponse' }
-                ];
-                
-                const activeOption = statusOptions.find(o => o.val === currentStatus) || statusOptions[0];
+                const t = orderTimeParts(order);
+                const timeText = `${t.day}/${t.month}/${t.year} ${t.hours}:${t.minutes}`;
+                const formattedDate = `<span class="text-gray-300 font-bold">${t.day}/${t.month}/${t.year}</span> <span class="text-gray-500 ml-1"><i class="fa-regular fa-clock"></i> ${t.hours}:${t.minutes}</span>`;
+                const jsName = String(order.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                const jsPhone = String(order.phone || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="p-4 border-r border-gray-700/30 text-center">
-                        <input type="checkbox" class="order-checkbox w-4 h-4 rounded border-gray-600 bg-gray-700 cursor-pointer" value="${order.id}" onchange="updateBulkDeleteButton()">
+                        <input type="checkbox" class="order-checkbox w-4 h-4 rounded border-gray-600 bg-gray-700 cursor-pointer" value="${escHtml(order.id)}" onchange="updateBulkDeleteButton()">
                     </td>
-                    <td class="p-4 border-r border-gray-700/30 text-center">
-                        <button onclick="deleteOrder('${order.id}', '${(order.name || '').replace(/'/g, "\\'")}', '${(order.phone || '').replace(/'/g, "\\'")}')" title="Supprimer la commande" class="text-red-500 bg-red-500/10 hover:bg-red-500/20 hover:text-red-400 transition-colors w-8 h-8 rounded-lg flex items-center justify-center mx-auto shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+                    <td class="p-4 border-r border-gray-700/30">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-white text-base">${escHtml(order.name)}</span>
+                            ${copyChip(order.name)}
+                        </div>
+                    </td>
+                    <td class="p-4 border-r border-gray-700/30">
+                        <div class="flex items-center gap-2" dir="ltr">
+                            <span class="font-black text-white en-font text-base tracking-wide">${escHtml(order.phone)}</span>
+                            ${copyChip(order.phone)}
+                        </div>
+                    </td>
+                    <td class="p-4 border-r border-gray-700/30">
+                        <div class="flex items-center gap-2">
+                            <span class="text-yellow-500 font-black">${escHtml(order.city)}</span>
+                            ${copyChip(order.city)}
+                        </div>
+                    </td>
+                    <td class="p-4 border-r border-gray-700/30 whitespace-normal min-w-[200px]">
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-200 font-bold text-sm">${escHtml(order.offer_name)}</span>
+                            ${copyChip(order.offer_name)}
+                        </div>
+                    </td>
+                    <td class="p-4 border-r border-gray-700/30">
+                        <div class="flex items-center justify-center gap-2">
+                            ${sourceBadge(order.source)}
+                            ${copyChip(sourceName(order.source))}
+                        </div>
+                    </td>
+                    <td class="p-4 border-r border-gray-700/30">
+                        <div class="flex items-center gap-2" dir="ltr">
+                            <span class="en-font text-sm">${formattedDate}</span>
+                            ${copyChip(timeText)}
+                        </div>
+                    </td>
+                    <td class="p-4 text-center">
+                        <button onclick="deleteOrder('${escHtml(order.id)}', '${jsName}', '${jsPhone}')" title="مسح الطلبية" class="text-red-500 bg-red-500/10 hover:bg-red-500/20 hover:text-red-400 transition-colors w-8 h-8 rounded-lg flex items-center justify-center mx-auto">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
-                    </td>
-                    <td class="p-4 font-black text-gray-500 en-font text-lg border-r border-gray-700/30">#${order.id}</td>
-                    <td class="p-4 en-font text-sm border-r border-gray-700/30" dir="ltr">${formattedDate}</td>
-                    <td class="p-4 font-bold text-white border-r border-gray-700/30 text-base">${order.name}</td>
-                    <td class="p-4 text-center border-r border-gray-700/30">
-                        <a href="tel:${cleanPhone}" class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-4 py-2 rounded-xl font-bold transition shadow-[0_4px_15px_rgba(59,130,246,0.3)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.5)] hover:-translate-y-1">
-                            <i class="fa-solid fa-phone-volume animate-pulse"></i> Appel
-                        </a>
-                        <div class="text-gray-400 text-xs mt-2 en-font font-bold tracking-wide">${order.phone}</div>
-                    </td>
-                    <td class="p-4 text-yellow-500 font-black border-r border-gray-700/30">${order.city}</td>
-                    <td class="p-4 text-center border-r border-gray-700/30 min-w-[240px]">
-                        <div class="flex items-center gap-2 justify-center">
-                            <div class="relative w-full max-w-[200px] group flex items-center bg-gray-900/60 rounded-xl border border-gray-700 hover:border-yellow-500 transition-all shadow-inner overflow-hidden focus-within:border-yellow-500 focus-within:ring-1 focus-within:ring-yellow-500/50">
-                                <span class="pl-3 text-yellow-500 opacity-70 group-hover:opacity-100 transition flex items-center justify-center">
-                                    <i class="fa-solid fa-location-dot text-xs"></i>
-                                </span>
-                                <input type="text"
-                                    id="address-${order.id}"
-                                    value="${String(order.address || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}"
-                                    placeholder="Adresse dyal client..."
-                                    class="w-full bg-transparent text-white text-xs px-2 py-2.5 outline-none placeholder-gray-500 font-bold"
-                                    onchange="updateAddress('${order.id}', this.value, this)"
-                                >
-                            </div>
-                            <button onclick="saveAddressBtn('${order.id}')" class="bg-gray-800 hover:bg-yellow-500 hover:text-black text-gray-400 w-9 h-9 rounded-xl flex items-center justify-center transition shadow-lg border border-gray-700 hover:border-yellow-400 group relative">
-                                <i class="fa-solid fa-check group-hover:scale-110 transition-transform"></i>
-                            </button>
-                        </div>
-                    </td>
-                    <td class="p-4 text-center border-r border-gray-700/30">
-                        <a href="https://wa.me/966${cleanPhone.replace(/^0+/, '').replace(/^966/, '')}" target="_blank" class="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white px-4 py-2 rounded-xl font-bold transition shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.5)] hover:-translate-y-1">
-                            <i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp
-                        </a>
-                    </td>
-                    <td class="p-4 text-gray-300 font-bold text-xs border-r border-gray-700/30">${order.offer_name}</td>
-                    <td class="p-4 text-center border-r border-gray-700/30">${sourceBadge(order.source)}</td>
-                    <td class="p-4 font-black text-green-400 en-font text-lg border-r border-gray-700/30" dir="ltr">${order.price} <span class="text-xs text-green-600">SAR</span><div class="text-xs text-gray-300 mt-1">${usdFromSar(order.price)}</div></td>
-                    <td class="p-4 text-center border-r border-gray-700/30">
-                        <select onchange="updateStatus('${order.id}', this.value, this)" class="status-badge ${activeOption.cls}">
-                            ${statusOptions.map(opt => `<option value="${opt.val}" ${opt.val === currentStatus ? 'selected' : ''} class="bg-gray-900 text-white font-bold">${opt.label}</option>`).join('')}
-                        </select>
-                    </td>
-                    <td class="p-4 text-center border-r border-gray-700/30 min-w-[240px]">
-                        <div class="flex items-center gap-2 justify-center">
-                            <div class="relative w-full max-w-[200px] group flex items-center bg-gray-900/60 rounded-xl border border-gray-700 hover:border-yellow-500 transition-all shadow-inner overflow-hidden focus-within:border-yellow-500 focus-within:ring-1 focus-within:ring-yellow-500/50">
-                                <span class="pl-3 text-yellow-500 opacity-70 group-hover:opacity-100 transition flex items-center justify-center">
-                                    <i class="fa-solid fa-pen text-xs"></i>
-                                </span>
-                                <input type="text" 
-                                    id="note-${order.id}" 
-                                    value="${order.note || ''}"
-                                    placeholder="Raison d'annulation / Autre..."
-                                    class="w-full bg-transparent text-white text-xs px-2 py-2.5 outline-none placeholder-gray-500 font-bold"
-                                    onchange="updateNote('${order.id}', this.value, this)"
-                                >
-                            </div>
-                            <button onclick="saveNoteBtn('${order.id}')" class="bg-gray-800 hover:bg-yellow-500 hover:text-black text-gray-400 w-9 h-9 rounded-xl flex items-center justify-center transition shadow-lg border border-gray-700 hover:border-yellow-400 group relative">
-                                <i class="fa-solid fa-check group-hover:scale-110 transition-transform"></i>
-                            </button>
-                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1641,6 +1658,20 @@
             }
         }
 
+        function isExamplePixel(value) {
+            const text = String(value || '').trim().toLowerCase();
+            if (!text) return true;
+            if ([
+                '1234567890',
+                '0987654321',
+                'cxxxxxx',
+                'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+            ].includes(text)) return true;
+            if (text.startsWith('e.g')) return true;
+            if (/^x+(?:-x+)+$/.test(text) || /^x{6,}$/.test(text)) return true;
+            return false;
+        }
+
         async function saveAllSettings() {
             try {
                 const settings = {
@@ -1669,19 +1700,40 @@
                     body: JSON.stringify({ settings })
                 });
 
-                const data = await res.json();
-                if (data.success) {
-                    const statusEl = document.getElementById('settings-status');
-                    statusEl.classList.remove('hidden');
-                    setTimeout(() => {
-                        statusEl.classList.add('hidden');
-                    }, 3000);
-                } else {
-                    alert("❌ Failed to save settings!");
+                const data = await res.json().catch(() => null);
+                if (!res.ok || !data?.success || !data.settings) {
+                    alert('الحفظ ما تمّش. الخانات بقات كيفما كتبتيها.\n' + (data?.error || 'عاود Save من بعد شوية.'));
+                    return;
                 }
+                const s = data.settings;
+                const missed = [];
+                const applyPixel = (inputId, saved, label) => {
+                    const el = document.getElementById(inputId);
+                    const typed = (el.value || '').trim();
+                    if (saved) el.value = saved;
+                    else if (typed && isExamplePixel(typed)) el.value = '';
+                    else if (typed) missed.push(label);
+                };
+                applyPixel('fb_pixel_1', s.fb_pixel_1, 'Meta');
+                applyPixel('fb_pixel_2', s.fb_pixel_2, 'Meta Backup');
+                applyPixel('tiktok_pixel', s.tiktok_pixel, 'TikTok');
+                applyPixel('snapchat_pixel', s.snapchat_pixel, 'Snapchat');
+                applyPixel('snapchat_pixel_2', s.snapchat_pixel_2, 'Snapchat Backup');
+                const live = [];
+                if (s.fb_pixel_1 || s.fb_pixel_2) live.push('Meta');
+                if (s.tiktok_pixel) live.push('TikTok (' + s.tiktok_pixel.split(',').filter(Boolean).length + ')');
+                if (s.snapchat_pixel || s.snapchat_pixel_2) live.push('Snapchat');
+                const statusEl = document.getElementById('settings-status');
+                const statusText = document.getElementById('settings-status-text');
+                statusText.textContent = live.length
+                    ? 'تحفظ. خدام دابا فالمتجر: ' + live.join(' · ')
+                    : 'تحفظ، ولكن ما لقيتش حتى Pixel ID.';
+                if (missed.length) statusText.textContent += ' — ما تقراش: ' + missed.join(' · ');
+                statusEl.classList.remove('hidden');
+                setTimeout(() => statusEl.classList.add('hidden'), 6000);
             } catch (err) {
                 console.error(err);
-                alert("❌ Error saving settings!");
+                alert('الحفظ ما تمّش. الخانات بقات كيفما كتبتيها. عاود Save.');
             }
         }
     </script>
