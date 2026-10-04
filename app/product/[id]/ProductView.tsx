@@ -574,6 +574,14 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             {offers}
           </div>
 
+          {product.offersPromoImage && (
+            <img
+              className="pv-offers-promo"
+              src={product.offersPromoImage}
+              alt="اختيار الباقة"
+            />
+          )}
+
           <div className="cta-block-wrap">
             <button type="button" className="offer-cta-main" onClick={openSheet}>
               {product.ctaLabel} — {formatSar(offer.price)}
@@ -851,6 +859,13 @@ export default function ProductView({ product }: { product: ProductPageConfig })
         <div className="container offer-container-box">
           <h2 className="section-heading">اختر العرض وأكّد الطلب</h2>
           <div className="hero-offers-wrapper" id="sheet-offers">{offers}</div>
+          {product.offersPromoImage && (
+            <img
+              className="pv-offers-promo"
+              src={product.offersPromoImage}
+              alt="اختيار الباقة"
+            />
+          )}
           <button type="button" className="offer-cta-main" onClick={openSheet}>
             {product.ctaLabel} — {formatSar(offer.price)}
           </button>

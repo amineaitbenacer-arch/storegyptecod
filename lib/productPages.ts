@@ -75,6 +75,8 @@ export type ProductPageConfig = {
   guaranteeText: string;
   guaranteePoints?: string[];
   ctaLabel: string;
+  /** صورة ترويجية بين اختيار الباقة وزر الطلب */
+  offersPromoImage?: string;
   /** يظهر في شبكة المتجر (الافتراضي: نعم) */
   listed?: boolean;
 };
@@ -131,7 +133,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     solutionTitle: 'الحل: رفيق تقني يرقص ويتفاعل ويتعلم مع طفلك',
     solutionText:
       'كلب روبوت بشريحة ذكية، عيون LED زرقاء، ومفاصل قوية. تحكم صوتي، تطبيق، وريموت — مثالي من عمر 6 سنوات فما فوق، وللعائلة كلها.',
-    solutionImage: '/images/robotdog-kids.jpg',
+    solutionImage: '/images/robotdog-solution.jpg',
     stepsTitle: 'يشتغل في 3 دقائق — بدون تركيب معقد',
     steps: [
       'اشحن البطارية عبر USB (مثل شاحن الجوال)',
@@ -146,7 +148,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '📦', title: 'علبة كاملة جاهزة', text: 'روبوت + ريموت + شاحن USB. تفتح وتلعب — ما تحتاج تشتري إكسسوارات زيادة عشان تبدأ.' },
           { icon: '👀', title: 'اللي في الصورة = اللي يوصلك', text: 'نفس التصميم، نفس العيون الزرقاء، نفس الإحساس الفاخر. ما في مفاجأة سيئة بعد الاستلام.' },
         ],
-        image: '/images/robotdog-hero.jpg',
+        image: '/images/robotdog-wasef-1-kit.jpg',
         imageBadge: 'MACHINE',
         imageTitle: 'الروبوت + الريموت + التطبيق في صورة واحدة',
         imageText: 'هذا اللي يستلمه طفلك: تحكم كامل من أول يوم بدون تعقيد ولا تركيب.',
@@ -169,7 +171,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '🎯', title: 'تعلّم بدون ضغط', text: 'مو درس جامد: الطفل يتعلم السبب والنتيجة وهو يضحك. أنت تشوف فائدة، وهو يحس بلعب.' },
           { icon: '🔄', title: 'كل أسبوع تحدّي جديد', text: 'بدل لعبة واحدة مكررة: خلّه يبني عرض كونغ فو، أو روتين رقص، أو مصافحة ثم دوران.' },
         ],
-        image: '/images/robotdog-chip.jpg',
+        image: '/images/robotdog-wasef-2-chip.jpg',
         imageBadge: 'ذكاء اصطناعي',
         imageTitle: 'برمجة بلا حدود… العب قد ما تبي',
         imageText: 'نفس فكرة دروس STEM — لكن بهدية يطلبها كل مساء وما تملّ.',
@@ -192,7 +194,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '🏠', title: 'جو بيت يتغيّر', text: 'مو صمت وشاشات: ضحك، تصفيق، و«شوف يسوي كذا!» — لحظات تبقى في الذاكرة.' },
           { icon: '🎁', title: 'هدية ما تفضح نفسها', text: 'في العيد والنجاح والزيارات: شكل فاخر + تفاعل قوي = هدية تتكلم عن ذوقك.' },
         ],
-        image: '/images/robotdog-kids.jpg',
+        image: '/images/robotdog-wasef-3-kids.jpg',
         imageBadge: 'للعائلة',
         imageTitle: 'ضحك حقيقي… مو شاشات صامتة',
         imageText: 'الأطفال على الأرض، الروبوت يتحرك، وأنت تشوف تركيز وفائدة بدون صراخ.',
@@ -215,7 +217,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '🕹️', title: 'ريموت واضح للأطفال', text: 'أزرار مباشرة للحركات الشهيرة — الطفل الصغير يقدر يلعب من أول يوم بدون شرح طويل.' },
           { icon: '📱', title: 'تطبيق يفتح مستويات أعلى', text: 'لما يكبر حماسه: برمجة، أوضاع إضافية، وتحكم أدق — الهدية تكبر معه.' },
         ],
-        image: '/images/robotdog-speak.jpg',
+        image: '/images/robotdog-wasef-4-control.jpg',
         imageBadge: 'صوت + ريموت',
         imageTitle: 'يتكلم ويرقص ويستجيب',
         imageText: 'مو بس تمشي: رفيق يقدّم عرض كامل ويخلّي البيت مليان طاقة.',
@@ -238,7 +240,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '⚡', title: 'شحن USB بسيط', text: 'مثل شاحن الجوال تقريبًا — بدون شاحن غريب يضيع أو يتعطل الاستخدام.' },
           { icon: '🌟', title: 'يبقى حديث البيت لأيام', text: 'الهدية الناجحة مو اللي تُفتح وتُنسى… هذي اللي تُطلب كل مساء: «خلّه يرقص!».' },
         ],
-        image: '/images/robotdog-dance.jpg',
+        image: '/images/robotdog-wasef-5-gift.jpg',
         imageBadge: 'ترند البيت',
         imageTitle: 'هدية عيد… أو مفاجأة نهاية الأسبوع',
         imageText: 'الهدية اللي تبقى موضوع حديث لأيام، مو في الدرج بعد ساعة.',
@@ -293,6 +295,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
       'في حال منتج خاطئ: المتجر يتكفّل بإعادة الشحن حسب السياسة',
     ],
     ctaLabel: 'اطلب الآن',
+    offersPromoImage: '/images/robotdog-offers-promo.jpg',
   },
   {
     id: 'produit-1',
