@@ -59,6 +59,53 @@
   white-space: nowrap;
 }
 
+#antichoc-root .nav-offer-badge,
+#antichoc-root #nav-offer-badge-bg {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FFD700 0%, #D97706 100%);
+  padding: 6px 14px;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);
+  overflow: hidden;
+  position: relative;
+  width: 148px;
+  height: 34px;
+  transition: background 0.5s ease, box-shadow 0.5s ease;
+}
+
+#antichoc-root .nav-offer-badge.is-hot,
+#antichoc-root #nav-offer-badge-bg.is-hot {
+  background: linear-gradient(135deg, #EF4444 0%, #991B1B 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
+#antichoc-root .nav-offer-item {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0B0F17 !important;
+  white-space: nowrap;
+  position: absolute;
+  inset-inline: 0;
+  text-align: center;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  pointer-events: none;
+}
+
+#antichoc-root .nav-offer-item.is-active {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+#antichoc-root .nav-offer-badge.is-hot .nav-offer-item,
+#antichoc-root #nav-offer-badge-bg.is-hot .nav-offer-item {
+  color: #FFFFFF !important;
+}
+
 #antichoc-root .warning-pill {
   display: flex;
   width: 100%;

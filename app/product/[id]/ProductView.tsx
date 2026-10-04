@@ -23,6 +23,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [reviewPhase, setReviewPhase] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const [navOfferIdx, setNavOfferIdx] = useState(0);
 
   const reviewPages = useMemo(() => {
     const pages: (typeof product.reviews)[] = [];
@@ -47,6 +48,14 @@ export default function ProductView({ product }: { product: ProductPageConfig })
   }, []);
 
   useEffect(() => {
+    if (product.offers.length < 2) return;
+    const timer = setInterval(() => {
+      setNavOfferIdx((i) => (i + 1) % product.offers.length);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [product.offers.length]);
+
+  useEffect(() => {
     document.body.style.overflow = sheetOpen ? 'hidden' : '';
     if (!sheetOpen) {
       document.getElementById('antichoc-root')?.classList.remove('checkout-open');
@@ -57,14 +66,6 @@ export default function ProductView({ product }: { product: ProductPageConfig })
       document.getElementById('antichoc-root')?.classList.remove('checkout-open');
     };
   }, [sheetOpen]);
-
-  const navLabel = useMemo(() => {
-    if (offer.pieces) {
-      const label = offer.pieces === 1 ? 'قطعة' : 'قطع';
-      return `${offer.pieces} ${label} · ${formatSar(offer.price)}`;
-    }
-    return formatSar(offer.price);
-  }, [offer]);
 
   function choose(next: OfferPack) {
     setOffer(next);
@@ -477,9 +478,33 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             </Link>
           </div>
           <div className="nav-actions">
-            <button type="button" className="nav-aov-btn" onClick={goToOffers} aria-label="الانتقال إلى العروض">
-              <span className="aov-text">{navLabel}</span>
-            </button>
+            <div
+              id="nav-offer-badge-bg"
+              role="button"
+              tabIndex={0}
+              className={`nav-offer-badge${navOfferIdx === product.offers.length - 1 ? ' is-hot' : ''}`}
+              onClick={goToOffers}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  goToOffers();
+                }
+              }}
+              aria-label="الانتقال إلى العروض"
+            >
+              {product.offers.map((o, i) => {
+                const pcs = o.pieces ?? o.id;
+                const label = pcs === 1 ? 'قطعة' : 'قطع';
+                return (
+                  <span
+                    key={o.id}
+                    className={`nav-offer-item offer-item-${i + 1}${i === navOfferIdx ? ' is-active' : ''}`}
+                  >
+                    {pcs} {label} · {formatSar(o.price)}
+                  </span>
+                );
+              })}
+            </div>
           </div>
         </div>
       </nav>
@@ -573,14 +598,6 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             </div>
             {offers}
           </div>
-
-          {product.offersPromoImage && (
-            <img
-              className="pv-offers-promo"
-              src={product.offersPromoImage}
-              alt="اختيار الباقة"
-            />
-          )}
 
           <div className="cta-block-wrap">
             <button type="button" className="offer-cta-main" onClick={openSheet}>
