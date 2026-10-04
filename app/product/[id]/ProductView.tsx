@@ -490,9 +490,30 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             <span>{product.warning}</span>
           </div>
 
-          <div className="hero-image-fullbleed">
-            <div className="hero-badge-top-right">{product.heroBadge}</div>
-            <img id="hero-main-img" src={heroSrc} alt={product.heroTitle} />
+          <div className="hero-gallery-stack" id="hero-gallery-stack">
+            {product.images.map((src, i) => (
+              <div
+                key={src}
+                className={`hero-image-fullbleed${imgIdx === i ? ' is-active' : ''}`}
+                onClick={() => setImgIdx(i)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setImgIdx(i);
+                  }
+                }}
+                aria-label={`صورة المنتج ${i + 1}`}
+              >
+                {i === 0 && <div className="hero-badge-top-right">{product.heroBadge}</div>}
+                <img
+                  id={i === 0 ? 'hero-main-img' : undefined}
+                  src={src}
+                  alt={i === 0 ? product.heroTitle : `${product.heroTitle} — ${i + 1}`}
+                />
+              </div>
+            ))}
           </div>
 
           <div className="thumb-gallery">
@@ -502,7 +523,12 @@ export default function ProductView({ product }: { product: ProductPageConfig })
                 src={src}
                 alt=""
                 className={`thumb-img${imgIdx === i ? ' active' : ''}`}
-                onClick={() => setImgIdx(i)}
+                onClick={() => {
+                  setImgIdx(i);
+                  document
+                    .getElementById('hero-gallery-stack')
+                    ?.children[i]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }}
               />
             ))}
           </div>
