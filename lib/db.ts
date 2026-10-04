@@ -30,7 +30,7 @@ export function getSql() {
   const url = getDatabaseUrl();
   if (!url) return null;
   if (cached === undefined) {
-    cached = neon(url);
+    cached = neon(url, { fetchOptions: { cache: 'no-store' } });
   }
   return cached;
 }

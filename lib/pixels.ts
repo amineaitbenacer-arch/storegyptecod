@@ -3,9 +3,11 @@
  * Save in /admin → events fire automatically: PageView, ViewContent, AddToCart, Checkout, Purchase.
  */
 
+import { splitStoredPixelIds } from './pixel-ids';
+
 type PixelIds = {
   fb: string[];
-  tiktok: string;
+  tiktok: string[];
   snap: string[];
 };
 
@@ -41,6 +43,7 @@ declare global {
       queue?: unknown[];
     };
     __sgPixelsReady?: boolean;
+    __sgPixelsBooted?: boolean;
     TiktokAnalyticsObject?: string;
   }
 }
@@ -92,43 +95,54 @@ function ensureMeta() {
   injectScript('https://connect.facebook.net/en_US/fbevents.js');
 }
 
-function ensureTikTok(pixelId: string) {
-  if (window.ttq?.track && (window as Window & { __sgTtLoaded?: string }).__sgTtLoaded === pixelId) {
-    return;
-  }
+function ensureTikTok(pixelIds: string[]) {
+  const ids = pixelIds.filter(Boolean);
+  if (!ids.length) return;
   const w = window as Window & { __sgTtLoaded?: string };
+  const signature = ids.join(',');
+  if (w.ttq?.track && (w.__sgPixelsBooted || w.__sgTtLoaded === signature)) return;
   w.TiktokAnalyticsObject = 'ttq';
-  // Minimal stub matching TikTok base code behavior
-  type TtqStub = {
-    queue: unknown[][];
+  const ttq = (w.ttq || []) as unknown as {
     methods: string[];
-    load: (id: string) => void;
+    setAndDefer: (target: object, name: string) => void;
+    load: (id: string, opts?: Record<string, unknown>) => void;
     page: () => void;
     track: (name: string, payload?: Record<string, unknown>) => void;
-    _i?: Record<string, unknown>;
-    _t?: Record<string, number>;
-    _o?: Record<string, unknown>;
+    instance: (id: string) => unknown;
+    _i: Record<string, { _u?: string } & unknown[]>;
+    _t: Record<string, number>;
+    _o: Record<string, unknown>;
+    push: (item: unknown) => void;
   };
-  const ttq = (w.ttq || { queue: [] }) as unknown as TtqStub;
-  if (!Array.isArray(ttq.queue)) ttq.queue = [];
-  ttq.methods = ['page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready', 'alias', 'group', 'enableCookie', 'disableCookie'];
-  const defer = (name: string) => {
-    (ttq as unknown as Record<string, unknown>)[name] = (...args: unknown[]) => {
-      ttq.queue.push([name, ...args]);
+  ttq.methods = [
+    'page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready',
+    'alias', 'group', 'enableCookie', 'disableCookie', 'holdConsent', 'revokeConsent', 'grantConsent',
+  ];
+  ttq.setAndDefer = (target, name) => {
+    (target as Record<string, unknown>)[name] = (...args: unknown[]) => {
+      (target as { push: (item: unknown) => void }).push([name, ...args]);
     };
   };
-  ttq.methods.forEach(defer);
-  ttq.load = (id: string) => {
+  ttq.methods.forEach((name) => ttq.setAndDefer(ttq, name));
+  ttq.instance = (id: string) => {
+    const inst = ttq._i[id] || [];
+    ttq.methods.forEach((name) => ttq.setAndDefer(inst as object, name));
+    return inst;
+  };
+  ttq.load = (id: string, opts?: Record<string, unknown>) => {
+    const src = 'https://analytics.tiktok.com/i18n/pixel/events.js';
     ttq._i = ttq._i || {};
     ttq._i[id] = [];
+    ttq._i[id]._u = src;
     ttq._t = ttq._t || {};
     ttq._t[id] = Date.now();
     ttq._o = ttq._o || {};
-    injectScript(`https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=${encodeURIComponent(id)}&lib=ttq`);
+    ttq._o[id] = opts || {};
+    injectScript(`${src}?sdkid=${encodeURIComponent(id)}&lib=ttq`);
   };
   w.ttq = ttq as unknown as Window['ttq'];
-  w.ttq?.load(pixelId);
-  w.__sgTtLoaded = pixelId;
+  ids.forEach((id) => w.ttq?.load(id));
+  w.__sgTtLoaded = signature;
 }
 
 function ensureSnap() {
@@ -144,16 +158,16 @@ function ensureSnap() {
 }
 
 async function fetchPixelIds(): Promise<PixelIds> {
-  const empty: PixelIds = { fb: [], tiktok: '', snap: [] };
+  const empty: PixelIds = { fb: [], tiktok: [], snap: [] };
   try {
     const res = await fetch('/api/settings');
     const data = await res.json();
     if (!data?.success || !data.settings) return empty;
     const s = data.settings;
     return {
-      fb: [s.fb_pixel_1, s.fb_pixel_2].map((x: unknown) => String(x || '').trim()).filter(Boolean),
-      tiktok: String(s.tiktok_pixel || '').trim(),
-      snap: [s.snapchat_pixel, s.snapchat_pixel_2].map((x: unknown) => String(x || '').trim()).filter(Boolean),
+      fb: splitStoredPixelIds(String(s.fb_pixel_1 || ''), String(s.fb_pixel_2 || '')),
+      tiktok: splitStoredPixelIds(String(s.tiktok_pixel || '')),
+      snap: splitStoredPixelIds(String(s.snapchat_pixel || ''), String(s.snapchat_pixel_2 || '')),
     };
   } catch {
     return empty;
@@ -168,8 +182,10 @@ function flushQueue() {
 }
 
 function dispatch(ev: QueuedEvent) {
+  if (!ready && typeof window !== 'undefined' && window.__sgPixelsBooted) markBootedReady();
   if (!ready) {
     queue.push(ev);
+    void initAdPixels();
     return;
   }
   try {
@@ -190,7 +206,10 @@ function dispatch(ev: QueuedEvent) {
       content_type: p.content_type || 'product',
     };
     if (value != null) metaBase.value = value;
-    if (contentIds) metaBase.content_ids = contentIds;
+    if (contentIds) {
+      metaBase.content_ids = contentIds;
+      metaBase.contents = contentIds.map((id) => ({ id, quantity: p.num_items || 1 }));
+    }
     if (p.content_name) metaBase.content_name = p.content_name;
     if (p.num_items != null) metaBase.num_items = p.num_items;
 
@@ -242,9 +261,19 @@ function dispatch(ev: QueuedEvent) {
   }
 }
 
+function markBootedReady() {
+  ready = true;
+  window.__sgPixelsReady = true;
+  flushQueue();
+}
+
 export function initAdPixels(): Promise<void> {
   if (typeof window === 'undefined') return Promise.resolve();
   if (ready) return Promise.resolve();
+  if (window.__sgPixelsBooted) {
+    markBootedReady();
+    return Promise.resolve();
+  }
   if (loading) return loading;
 
   loading = (async () => {
@@ -253,7 +282,7 @@ export function initAdPixels(): Promise<void> {
       ensureMeta();
       ids.fb.forEach((id) => window.fbq?.('init', id));
     }
-    if (ids.tiktok) ensureTikTok(ids.tiktok);
+    if (ids.tiktok.length) ensureTikTok(ids.tiktok);
     if (ids.snap.length) {
       ensureSnap();
       ids.snap.forEach((id) => window.snaptr?.('init', id));
@@ -276,6 +305,17 @@ export function trackPixelPageView(path?: string) {
   const p = path || (typeof window !== 'undefined' ? window.location.pathname : '');
   if (p.startsWith('/admin')) return;
   if (p && p === lastPagePath) return;
+  // Thank-you must always show PageView in Pixel Helper after hydration.
+  if (p.startsWith('/thankyou')) {
+    lastPagePath = p;
+    dispatch({ kind: 'pageview' });
+    return;
+  }
+  // The HTML snippet already sent the first PageView.
+  if (!lastPagePath && typeof window !== 'undefined' && window.__sgPixelsBooted) {
+    lastPagePath = p;
+    return;
+  }
   lastPagePath = p;
   dispatch({ kind: 'pageview' });
 }
@@ -305,4 +345,35 @@ export function trackPixelPurchaseWhenReady(payload: CommercePayload, attempts =
     window.setTimeout(() => run(left - 1), 350);
   };
   void initAdPixels().then(() => run(attempts));
+}
+
+let thankYouPurchaseId = '';
+
+/** PageView + Purchase on the confirmation page, after the pixel helper can see them. */
+export function trackThankYouPixels(payload: CommercePayload, attempt = 0) {
+  if (typeof window === 'undefined') return;
+  void initAdPixels().then(() => {
+    const pixelReady =
+      typeof window.fbq === 'function' ||
+      typeof window.ttq?.track === 'function' ||
+      typeof window.snaptr === 'function' ||
+      !window.__sgPixelsBooted;
+    if (!pixelReady && attempt < 20) {
+      window.setTimeout(() => trackThankYouPixels(payload, attempt + 1), 250);
+      return;
+    }
+    const id = String(payload.transaction_id || '').replace(/^#/, '');
+    if (!id || id === '----') {
+      window.fbq?.('track', 'PageView');
+      window.ttq?.page?.();
+      window.snaptr?.('track', 'PAGE_VIEW');
+      return;
+    }
+    if (thankYouPurchaseId === id) return;
+    thankYouPurchaseId = id;
+    window.fbq?.('track', 'PageView');
+    window.ttq?.page?.();
+    window.snaptr?.('track', 'PAGE_VIEW');
+    trackPixelPurchase({ ...payload, transaction_id: id });
+  });
 }

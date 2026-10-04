@@ -1,29 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { readSettings, writeSettings } from '../../../lib/settings-store';
 
-const SETTINGS_FILE = path.join(process.cwd(), 'settings.json');
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-const EMPTY = {
-  fb_pixel_1: '',
-  fb_token_1: '',
-  fb_pixel_2: '',
-  fb_token_2: '',
-  tiktok_pixel: '',
-  tiktok_token: '',
-  snapchat_pixel: '',
-  snapchat_token: '',
-  snapchat_pixel_2: '',
-  snapchat_token_2: '',
-};
-
-async function readSettings() {
-  try {
-    const raw = await fs.readFile(SETTINGS_FILE, 'utf-8');
-    return { ...EMPTY, ...JSON.parse(raw) };
-  } catch {
-    return { ...EMPTY };
+function errorMessage(error: unknown) {
+  if (typeof error === 'string' && error.trim()) return error.trim();
+  if (error && typeof error === 'object') {
+    const record = error as { message?: unknown; code?: unknown; name?: unknown; detail?: unknown };
+    const parts = [record.name, record.code, record.message, record.detail]
+      .map((part) => (typeof part === 'string' ? part.trim() : ''))
+      .filter(Boolean);
+    if (parts.length) return parts.join(' · ').slice(0, 400);
   }
+  if (error instanceof Error && error.message) return error.message;
+  const text = String(error ?? '').trim();
+  return text && text !== '[object Object]' ? text.slice(0, 400) : 'Failed to save settings';
 }
 
 export async function GET(request: NextRequest) {
@@ -32,7 +24,6 @@ export async function GET(request: NextRequest) {
   if (admin) {
     return NextResponse.json({ success: true, settings });
   }
-  // Public: pixel IDs only (never tokens)
   return NextResponse.json({
     success: true,
     settings: {
@@ -49,14 +40,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const incoming = body.settings || body;
-    const current = await readSettings();
-    const next = { ...current };
-    (Object.keys(EMPTY) as (keyof typeof EMPTY)[]).forEach((key) => {
-      if (incoming[key] !== undefined) next[key] = String(incoming[key] ?? '');
-    });
-    await fs.writeFile(SETTINGS_FILE, JSON.stringify(next, null, 2), 'utf-8');
-    return NextResponse.json({ success: true, settings: next });
-  } catch {
-    return NextResponse.json({ success: false, error: 'Failed to save settings' }, { status: 500 });
+    const settings = await writeSettings(incoming);
+    return NextResponse.json({ success: true, settings });
+  } catch (error) {
+    console.error('[settings] save failed', error);
+    const message = errorMessage(error);
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
