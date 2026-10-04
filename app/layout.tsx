@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
+import { connection } from 'next/server';
 import { Amiri, Tajawal } from 'next/font/google';
 import './globals.css';
 import TrackVisit from './components/TrackVisit';
+import AdPixels from './components/AdPixels';
+import { pixelBootScript } from '../lib/pixel-boot';
+import { readSettings } from '../lib/settings-store';
 
 const amiri = Amiri({
   subsets: ['arabic'],
@@ -33,7 +37,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  await connection();
+  const pixelScript = pixelBootScript(await readSettings());
+
   return (
     <html lang="ar" dir="rtl" className={`${amiri.variable} ${tajawal.variable}`}>
       <head>
@@ -46,7 +53,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
       </head>
       <body className={tajawal.className}>
+        {pixelScript ? (
+          <script id="store-pixels" dangerouslySetInnerHTML={{ __html: pixelScript }} />
+        ) : null}
         <TrackVisit />
+        <AdPixels />
         {children}
       </body>
     </html>

@@ -6,6 +6,7 @@ import confetti from 'canvas-confetti';
 import { formatSar } from '../../lib/money';
 import { readLastOrder, saveLastOrder } from '../../lib/last-order';
 import { flushTrackingQueue, trackStoreEvent } from '../../lib/tracking';
+import ThankYouPixels from '../components/ThankYouPixels';
 import { RETURN_POLICY_FAQS } from '../../lib/return-policy';
 import './thankyou.css';
 
@@ -248,6 +249,7 @@ export default function ThankYouPage() {
 
   return (
     <div id="ac-ty">
+      <ThankYouPixels orderId={order.id} price={order.price} offer={order.offer} />
       <nav className="ty-nav">
         <Link href="/" className="ty-brand" dir="ltr">
           <img src="/images/logo-mark.png" alt="Dune Market" width={28} height={28} />
