@@ -543,11 +543,11 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             <div className="pv-sp-chips">
               <span className="pv-sp-chip live">
                 <i className="pv-sp-dot" aria-hidden="true" />
-                ادفع بعد المعاينة
+                17 يطلبونه الآن
               </span>
-              <span className="pv-sp-chip">توصيل لكل المملكة</span>
-              <span className="pv-sp-chip">ضمان استبدال</span>
-              <span className="pv-sp-chip">أكثر من 25 حركة</span>
+              <span className="pv-sp-chip">جودة مضمونة</span>
+              <span className="pv-sp-chip">اختيار الأمهات</span>
+              <span className="pv-sp-chip">هدية تبهِر</span>
             </div>
           </div>
 

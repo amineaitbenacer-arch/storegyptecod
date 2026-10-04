@@ -309,9 +309,9 @@ button.hero-offer-card {
 }
 
 .pv-sp-chip.live {
-  color: #0f172a;
-  background: #fff7ed;
-  border-color: #fdba74;
+  color: #065f46;
+  background: #ecfdf5;
+  border-color: #6ee7b7;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -321,7 +321,21 @@ button.hero-offer-card {
   width: 0.45rem;
   height: 0.45rem;
   border-radius: 50%;
-  background: #f59e0b;
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55);
+  animation: pvLiveDot 1.4s infinite;
+}
+
+@keyframes pvLiveDot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
 
 @media (max-width: 380px) {
@@ -353,8 +367,8 @@ button.hero-offer-card {
   flex-wrap: wrap;
   margin: 0.15rem 0 0.95rem;
   padding: 0.7rem 0.85rem;
-  background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
   border-radius: 14px;
 }
 
@@ -364,17 +378,18 @@ button.hero-offer-card {
   gap: 0.55rem;
 }
 
-.pv-price-now {
+.pv-price-now,
+.pv-price-now .latin-nums,
+.pv-price-now small {
   font-size: 1.55rem;
   font-weight: 900;
-  color: #0f172a;
+  color: #0f172a !important;
   line-height: 1;
 }
 
 .pv-price-now small {
   font-size: 0.9rem;
   font-weight: 800;
-  color: #0f172a;
 }
 
 .pv-price-was {
@@ -387,9 +402,9 @@ button.hero-offer-card {
 .pv-price-save {
   font-size: 0.82rem;
   font-weight: 900;
-  color: #0f172a;
-  background: #fff7ed;
-  border: 1px solid #fdba74;
+  color: #065f46;
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
   border-radius: 999px;
   padding: 0.28rem 0.65rem;
   white-space: nowrap;
@@ -669,25 +684,8 @@ button.hero-offer-card {
 }
 
 /* إطار واحد ثم صورة — يطوّل الصفحة */
-.cta-block-wrap {
-  padding-bottom: 0.5rem;
-}
-
-.cta-block-wrap .cta-reassurance {
-  margin-top: 0.45rem;
-}
-
-.product-visual-description-section.pv-story-section,
 .pv-story-section {
-  padding: 0.25rem 0 1.5rem;
-}
-
-.pv-story-section .pvd-header {
-  margin-bottom: 0.5rem;
-}
-
-.pv-story-section .pvd-badge {
-  margin-bottom: 0.3rem;
+  padding: 0.5rem 0 1.5rem;
 }
 
 .pv-beat {
