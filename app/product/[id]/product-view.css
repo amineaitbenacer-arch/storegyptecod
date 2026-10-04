@@ -397,17 +397,6 @@ button.hero-offer-card {
 
 
 /* ========== كل صور الصفحة مربعة 1:1 ========== */
-#antichoc-root .hero-gallery-stack {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 0.75rem !important;
-  width: 100% !important;
-}
-
-#antichoc-root .hero-gallery-stack .hero-image-fullbleed {
-  cursor: pointer;
-}
-
 #antichoc-root .hero-image-fullbleed {
   aspect-ratio: 1 / 1 !important;
   width: 100% !important;
