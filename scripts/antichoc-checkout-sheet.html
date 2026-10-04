@@ -1,0 +1,146 @@
+<div class="sheet-bg" id="sheetBg" data-ac-click="closeSheet(event)">
+    <div class="sheet" id="sheet">
+      <div class="sheet-handle"></div>
+      
+      <div id="formState">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h2 class="sheet-title" style="margin: 0; font-size: 1.15rem;">🚀 استكمال الطلب</h2>
+          <button type="button" class="close-btn" data-ac-click="closeSheet()">&times;</button>
+        </div>
+        
+        <!-- 📦 ACTIVE SELECTED OFFER CARD (CLICKABLE TO EXPAND CHOICES) -->
+        <div class="sheet-selected-offer-card" id="sheet-offer-trigger" data-ac-click="toggleSheetOfferDrawer()" title="انقر لتغيير العرض أو الترقية">
+          <div class="sheet-offer-live-badge"><span class="sheet-live-dot"></span> 🎁 انقر لتغيير العرض أو اختيار باقة أكبر</div>
+          <div class="sheet-offer-card-top">
+            <img src="/images/hero_father_daughter.jpg" id="sheet-preview-img" alt="AntiChoc Protect" class="sheet-card-thumb" loading="lazy">
+            <div class="sheet-offer-card-info">
+              <div class="sheet-active-tag" id="sheet-active-badge">العرض الأساسي</div>
+              <div class="sheet-active-title" id="sheet-bundle-name">طقم 2 قطع (سخان واحد) 🛡️</div>
+              <div class="sheet-active-sub" id="sheet-bundle-sub">عازل مزدوج (بارد + ساخن) • توصيل 20 ريال 🚚</div>
+            </div>
+            <div class="sheet-active-pricing">
+              <div class="sheet-active-price" id="sheet-preview-price">179 ريال</div>
+              <div class="sheet-active-old" id="sheet-preview-old-price">399 ريال</div>
+            </div>
+          </div>
+          
+          <!-- Interactive Action Pill (High-Contrast Golden Button) -->
+          <div class="sheet-change-cta-bar">
+            <span class="sheet-change-text"><i class="fa-solid fa-arrows-rotate fa-spin-pulse"></i> <strong>اضغط هنا لتبديل العرض أو ترقية طلبك</strong></span>
+            <span class="sheet-chevron-badge"><i class="fa-solid fa-chevron-down" id="sheet-chevron-arrow"></i></span>
+          </div>
+        </div>
+
+        <!-- 🎁 EXPANDABLE HIGH-CONVERTING AOV OFFERS DRAWER -->
+        <div class="sheet-offers-drawer" id="sheet-offers-drawer">
+          <div class="sod-header">
+            <span class="sod-title"><i class="fa-solid fa-layer-group"></i> اختر الباقة المناسبة لمنزلك:</span>
+            <span class="sod-pill">وفر أكثر مع الباقات الأكبر ⚡️</span>
+          </div>
+
+          <div class="sod-grid">
+            <!-- Offer 1 (2 PCS) -->
+            <div class="sod-card selected" id="sod-card-1" data-ac-click="selectModalPack(1, true)" data-pack="1">
+              <div class="sod-radio"><i class="fa-solid fa-check"></i></div>
+              <div class="sod-body">
+                <div class="sod-title-row">
+                  <span class="sod-name">طقم 2 قطع (سخان واحد) 🛡️</span>
+                </div>
+                <div class="sod-desc">عازل مزدوج (ماء بارد + ساخن) لسخان واحد</div>
+                <div class="sod-save-tag">توفير 220 ريال اليوم</div>
+              </div>
+              <div class="sod-prices">
+                <span class="sod-old">399 ريال</span>
+                <span class="sod-new">179 ريال</span>
+              </div>
+            </div>
+
+            <!-- Offer 2 (4 PCS - UPSELL) -->
+            <div class="sod-card" id="sod-card-2" data-ac-click="selectModalPack(2, true)" data-pack="2">
+              <div class="sod-badge gold">⭐ الأكثر طلباً في المملكة</div>
+              <div class="sod-radio"><i class="fa-solid fa-check"></i></div>
+              <div class="sod-body">
+                <div class="sod-title-row">
+                  <span class="sod-name">باك 4 قطع (2 حمامات) ⚡️</span>
+                </div>
+                <div class="sod-desc">حماية شاملة لسخانات المنزل + توفير إضافي 150 ريال</div>
+                <div class="sod-save-tag save-green">وفرت 350 ريال + توصيل 20 ريال</div>
+              </div>
+              <div class="sod-prices">
+                <span class="sod-old">599 ريال</span>
+                <span class="sod-new highlight">249 ريال</span>
+              </div>
+            </div>
+
+            <!-- Offer 3 (6 PCS - HIGHEST AOV) -->
+            <div class="sod-card" id="sod-card-3" data-ac-click="selectModalPack(3, true)" data-pack="3">
+              <div class="sod-badge green">🔥 أفضل قيمة (أقل من 50 ريال للقطعة)</div>
+              <div class="sod-radio"><i class="fa-solid fa-check"></i></div>
+              <div class="sod-body">
+                <div class="sod-title-row">
+                  <span class="sod-name">باك 6 قطع (3 حمامات) 🛡️</span>
+                </div>
+                <div class="sod-desc">حماية قصوى لكل البيت أو هدية للأحباب</div>
+                <div class="sod-save-tag save-gold">وفرت 600 ريال كاش اليوم!</div>
+              </div>
+              <div class="sod-prices">
+                <span class="sod-old">899 ريال</span>
+                <span class="sod-new super-green">299 ريال</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Success / AOV Congratulation Strip -->
+        <div id="sheet-aov-congrats" class="sheet-aov-congrats" style="display: none;">
+          <i class="fa-solid fa-gift"></i> <span id="sheet-aov-msg">مبروك! تم اختيار العرض الأكثر طلباً وتفعيل الخصم 100%.</span>
+        </div>
+
+        <!-- 🚚 🤝 MINI TRUST CADRE -->
+        <div class="trust-cadre-mini">
+          <div class="tc-mini-item">
+            <span class="tc-mini-icon">🚚</span>
+            <div class="tc-mini-text">
+              <strong>توصيل 20 ريال</strong>
+              <span>جميع مدن المملكة 🇸🇦</span>
+            </div>
+          </div>
+          <div class="tc-mini-item">
+            <span class="tc-mini-icon">🤝</span>
+            <div class="tc-mini-text">
+              <strong>المعاينة قبل الدفع</strong>
+              <span>تفحص المنتج قبل الدفع 📦</span>
+            </div>
+          </div>
+        </div>
+
+        <form id="express-order-form" data-ac-submit="handleOrderSubmit(event)">
+          <input type="text" id="inp-name" class="form-inp" placeholder="👤 الاسم الكامل" required autocomplete="name" enterkeyhint="next">
+          <input type="tel" id="inp-phone" class="form-inp" placeholder="📱 رقم الجوال (05XXXXXXXX)" required autocomplete="tel" inputmode="tel" enterkeyhint="next">
+          <p id="phone-error" style="display: none; color: #ef4444; font-size: 0.8rem; font-weight: bold; margin-top: -8px; margin-bottom: 12px; margin-right: 5px;">⚠️ تأكد من رقم الهاتف (يجب أن يحتوي على 10 أرقام على الأقل)</p>
+          <input type="text" id="inp-city" class="form-inp" placeholder="📍 المدينة" required autocomplete="address-level2" enterkeyhint="done">
+          
+          <div class="total-box checkout-sum">
+            <div class="checkout-sum-row">
+              <span>مجموع المنتجات</span>
+              <b id="sheet-subtotal-price">249 ريال</b>
+            </div>
+            <div class="checkout-sum-row">
+              <span>التوصيل</span>
+              <b id="sheet-shipping-price">20 ريال</b>
+            </div>
+            <div class="checkout-sum-total">
+              <span>المجموع عند الاستلام:</span>
+              <strong id="sheet-total-price">269 ريال</strong>
+            </div>
+          </div>
+          
+          <button type="submit" class="submit-btn pulse-btn">
+            🛒 اطلب الآن
+          </button>
+          <div class="privacy">🔒 معلوماتك آمنة ومضمونة 100%</div>
+        </form>
+      </div>
+
+    </div>
+  </div>

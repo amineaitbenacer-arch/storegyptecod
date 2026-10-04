@@ -342,14 +342,14 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               <span className="tc-mini-icon">🚚</span>
               <div className="tc-mini-text">
                 <strong>توصيل {formatSar(SHIPPING_FEE_SAR)}</strong>
-                <span>جميع مدن المملكة 🇲🇦</span>
+                <span>جميع مدن المملكة 🇸🇦</span>
               </div>
             </div>
             <div className="tc-mini-item">
               <span className="tc-mini-icon">🤝</span>
               <div className="tc-mini-text">
                 <strong>المعاينة قبل الدفع</strong>
-                <span>تفحص المنتج قبل الأداء 📦</span>
+                <span>تفحص المنتج قبل الدفع 📦</span>
               </div>
             </div>
           </div>
