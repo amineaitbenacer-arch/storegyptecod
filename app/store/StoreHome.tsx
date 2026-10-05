@@ -224,7 +224,7 @@ const STORIES: StoryItem[] = [
     id: 's0',
     label: 'ترند العائلات',
     ring: '#1d4ed8',
-    image: '/products/nujum-usb/02.jpg',
+    image: '/products/nujum-usb/g01-kids.jpg',
     title: 'سماء الغرفة',
     text: 'جهاز عرض النجوم USB — السقف يصير مجرة بأشكال كثيرة. للعائلات والأطفال.',
   },
