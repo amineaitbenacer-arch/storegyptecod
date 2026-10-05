@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import type { OfferPack, ProductPageConfig } from '../../../lib/productPages';
 import { formatSar } from '../../../lib/money';
-import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../../lib/shipping';
+import { shippingFeeForOrder, orderTotalWithShipping } from '../../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../../lib/last-order';
 import SaPhoneField from '../../components/SaPhoneField';
 import { PHONE_INCOMPLETE_MSG } from '../../../lib/phone';
@@ -41,10 +41,14 @@ export default function ProductView({ product }: { product: ProductPageConfig })
   const [phoneError, setPhoneError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const shippingIncluded = product.shippingIncluded === true;
+  const shippingFee = shippingFeeForOrder(shippingIncluded);
   const save = offer.oldPrice - offer.price;
-  const total = orderTotalWithShipping(offer.price);
+  const total = orderTotalWithShipping(offer.price, shippingIncluded);
   const pieces = offer.pieces ?? offer.id;
   const heroSrc = product.images[imgIdx] || product.images[0];
+  const shippingLabel = shippingIncluded ? 'التوصيل مشمول' : `توصيل ${formatSar(shippingFee)}`;
+  const shippingSubLabel = shippingIncluded ? 'داخل السعر — بدون زيادة' : 'جميع مدن السعودية 🇸🇦';
 
   useEffect(() => {
     setMounted(true);
@@ -82,7 +86,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
   function openSheet() {
     trackStoreEvent('addtocart', {
       productId: product.id,
-      value: orderTotalWithShipping(offer.price),
+      value: orderTotalWithShipping(offer.price, shippingIncluded),
       contentName: offer.name,
     });
     setFormError('');
@@ -115,7 +119,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
     setFormError('');
     setLoading(true);
     const orderId = `pl-${Date.now().toString(36)}`;
-    const payable = orderTotalWithShipping(offer.price);
+    const payable = orderTotalWithShipping(offer.price, shippingIncluded);
     const cityTrim = city.trim();
     trackStoreEvent('checkout', {
       productId: product.id,
@@ -132,7 +136,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
       offerName: `${product.brand} — ${offer.name}`,
       price: payable,
       subtotal: offer.price,
-      shippingFee: SHIPPING_FEE_SAR,
+      shippingFee,
       pieces,
       packId: offer.id,
       timestamp: new Date().toISOString(),
@@ -244,7 +248,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
                   {offer.name}
                 </div>
                 <div className="sheet-active-sub" id="sheet-bundle-sub">
-                  {offer.sub} • توصيل {formatSar(SHIPPING_FEE_SAR)} 🚚
+                  {offer.sub} • {shippingLabel} 🚚
                 </div>
               </div>
               <div className="sheet-active-pricing">
@@ -314,11 +318,17 @@ export default function ProductView({ product }: { product: ProductPageConfig })
                       <div className="sod-desc">{o.sub}</div>
                       {offerSave > 0 && (
                         <div className={`sod-save-tag ${saveClass}`.trim()}>
-                          {o.popular
-                            ? `وفرت ${formatSar(offerSave)} + توصيل ${formatSar(SHIPPING_FEE_SAR)}`
-                            : isLast
-                              ? `وفرت ${formatSar(offerSave)} كاش اليوم!`
-                              : `توفير ${formatSar(offerSave)} اليوم`}
+                          {shippingIncluded
+                            ? o.popular
+                              ? `وفرت ${formatSar(offerSave)} — التوصيل مشمول`
+                              : isLast
+                                ? `وفرت ${formatSar(offerSave)} كاش + توصيل مشمول`
+                                : `توفير ${formatSar(offerSave)} — توصيل مشمول`
+                            : o.popular
+                              ? `وفرت ${formatSar(offerSave)} + توصيل ${formatSar(shippingFee)}`
+                              : isLast
+                                ? `وفرت ${formatSar(offerSave)} كاش اليوم!`
+                                : `توفير ${formatSar(offerSave)} اليوم`}
                         </div>
                       )}
                     </div>
@@ -345,8 +355,8 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             <div className="tc-mini-item">
               <span className="tc-mini-icon">🚚</span>
               <div className="tc-mini-text">
-                <strong>توصيل {formatSar(SHIPPING_FEE_SAR)}</strong>
-                <span>جميع مدن السعودية 🇸🇦</span>
+                <strong>{shippingLabel}</strong>
+                <span>{shippingSubLabel}</span>
               </div>
             </div>
             <div className="tc-mini-item">
@@ -407,7 +417,9 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               </div>
               <div className="checkout-sum-row">
                 <span>التوصيل</span>
-                <b id="sheet-shipping-price">{formatSar(SHIPPING_FEE_SAR)}</b>
+                <b id="sheet-shipping-price">
+                  {shippingIncluded ? 'مشمول ✅' : formatSar(shippingFee)}
+                </b>
               </div>
               <div className="checkout-sum-total">
                 <span>المجموع عند الاستلام:</span>

@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import SaPhoneField from '../components/SaPhoneField';
 import { formatSar } from '../../lib/money';
-import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../lib/shipping';
+import { orderTotalWithShipping } from '../../lib/shipping';
 import './store-checkout-sheet.css';
 
 export type CheckoutCartItem = {
@@ -20,6 +20,8 @@ type Props = {
   open: boolean;
   items: CheckoutCartItem[];
   total: number;
+  shippingFee: number;
+  shippingIncluded?: boolean;
   name: string;
   phone: string;
   city: string;
@@ -36,6 +38,8 @@ export default function StoreCheckoutSheet({
   open,
   items,
   total,
+  shippingFee,
+  shippingIncluded = false,
   name,
   phone,
   city,
@@ -52,7 +56,9 @@ export default function StoreCheckoutSheet({
   const pieces = items.reduce((n, i) => n + i.qty, 0);
   const leadOld =
     lead?.oldPrice && lead.oldPrice > lead.price ? lead.oldPrice * lead.qty : undefined;
-  const grandTotal = orderTotalWithShipping(total);
+  const grandTotal = orderTotalWithShipping(total, shippingIncluded);
+  const shippingLabel = shippingIncluded ? 'التوصيل مشمول' : `توصيل ${formatSar(shippingFee)}`;
+  const shippingValueLabel = shippingIncluded ? 'مشمول ✅' : formatSar(shippingFee);
 
   useEffect(() => {
     if (!open) return;
@@ -155,7 +161,7 @@ export default function StoreCheckoutSheet({
               <div className="store-ac-offer-name">
                 {items.length === 1 ? `${lead.name} × ${lead.qty}` : `${pieces} قطعة في طلبك`}
               </div>
-              <div className="store-ac-offer-sub">الدفع عند الاستلام · توصيل {formatSar(SHIPPING_FEE_SAR)} 🚚</div>
+              <div className="store-ac-offer-sub">الدفع عند الاستلام · {shippingLabel} 🚚</div>
             </div>
             <div className="store-ac-offer-pricing">
               <div className="store-ac-offer-price">{formatSar(grandTotal)}</div>
@@ -186,8 +192,8 @@ export default function StoreCheckoutSheet({
           <div className="store-ac-trust-item">
             <span aria-hidden>🚚</span>
             <div>
-              <strong>توصيل {formatSar(SHIPPING_FEE_SAR)}</strong>
-              <em>لجميع مدن السعودية 🇸🇦</em>
+              <strong>{shippingLabel}</strong>
+              <em>{shippingIncluded ? 'داخل السعر — بدون زيادة' : 'لجميع مدن السعودية 🇸🇦'}</em>
             </div>
           </div>
           <div className="store-ac-trust-item">
@@ -234,7 +240,7 @@ export default function StoreCheckoutSheet({
             </div>
             <div className="store-ac-sum-row">
               <span>التوصيل</span>
-              <b>{formatSar(SHIPPING_FEE_SAR)}</b>
+              <b>{shippingValueLabel}</b>
             </div>
             <div className="store-ac-total">
               <span>المجموع عند الاستلام:</span>

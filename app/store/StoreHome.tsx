@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PRODUCTS, type StoreProduct } from '../../lib/products';
 import { formatSar } from '../../lib/money';
-import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../lib/shipping';
+import { orderTotalWithShipping, shippingFeeForOrder } from '../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
 import { PHONE_INCOMPLETE_MSG } from '../../lib/phone';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
@@ -221,6 +221,14 @@ type StoryItem = {
 
 const STORIES: StoryItem[] = [
   {
+    id: 's0',
+    label: 'ترند العائلات',
+    ring: '#1d4ed8',
+    image: '/products/nujum-usb/g01-kids.jpg',
+    title: 'سماء الغرفة',
+    text: 'جهاز عرض النجوم USB — السقف يصير مجرة بأشكال كثيرة. للعائلات والأطفال.',
+  },
+  {
     id: 's1',
     label: 'الأكثر مبيعًا',
     ring: '#0284c7',
@@ -286,6 +294,11 @@ export default function StoreHome() {
 
   const cartCount = useMemo(() => cart.reduce((n, i) => n + i.qty, 0), [cart]);
   const cartTotal = useMemo(() => cart.reduce((n, i) => n + i.price * i.qty, 0), [cart]);
+  const cartShippingIncluded = useMemo(
+    () => cart.length > 0 && cart.every((i) => PRODUCTS.find((p) => p.id === i.id)?.shippingIncluded),
+    [cart]
+  );
+  const cartShippingFee = shippingFeeForOrder(cartShippingIncluded);
   const activeStory = storyIndex != null ? STORIES[storyIndex] : null;
   const showCartTicket = mounted && !cartOpen && navCartHidden;
 
@@ -456,7 +469,7 @@ export default function StoreHome() {
     }
     trackStoreEvent('checkout', {
       productId: cart[0]?.id || 'cart',
-      value: orderTotalWithShipping(cartTotal),
+      value: orderTotalWithShipping(cartTotal, cartShippingIncluded),
       contentName: cart.map((i) => i.name).join(' + '),
     });
     setCartStep('checkout');
@@ -481,7 +494,7 @@ export default function StoreHome() {
         : cart.map((i) => `${i.name} × ${i.qty}`).join(' · ');
     const orderId = `st-${Date.now().toString(36)}`;
     const productId = cart[0]?.id || 'cart';
-    const payableTotal = orderTotalWithShipping(cartTotal);
+    const payableTotal = orderTotalWithShipping(cartTotal, cartShippingIncluded);
     const orderData = {
       orderId,
       name: name.trim(),
@@ -491,7 +504,7 @@ export default function StoreHome() {
       offer: offerLabel,
       offerName: offerLabel,
       subtotal: cartTotal,
-      shippingFee: SHIPPING_FEE_SAR,
+      shippingFee: cartShippingFee,
       price: payableTotal,
       pieces: cartCount,
       packId: 0,
@@ -1096,6 +1109,8 @@ export default function StoreHome() {
                   oldPrice: PRODUCTS.find((p) => p.id === i.id)?.oldPrice,
                 }))}
                 total={cartTotal}
+                shippingFee={cartShippingFee}
+                shippingIncluded={cartShippingIncluded}
                 name={name}
                 phone={phone}
                 city={city}

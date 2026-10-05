@@ -23,4 +23,5 @@ export type StoreProduct = {
   tags: string[];
   href: string;
   featured?: boolean;
+  shippingIncluded?: boolean;
 };

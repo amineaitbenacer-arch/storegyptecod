@@ -1,0 +1,107 @@
+{
+  "corrected": true,
+  "sourceOfTruth": {
+    "url": "https://www.alibaba.com/product-detail/2-in-1-Mini-Galaxy-Star_1601764324786.html",
+    "mirror": "https://www.alibaba.co.uk/product-detail/2-in-1-Mini-Galaxy-Star_1601764324786.html",
+    "productId": "1601764324786",
+    "title": "2-in-1 Mini Galaxy Star Projector Night Light Starry Sky Ambient Lamp Modern Minimalist Design USB Powered for Bedroom Sleep",
+    "supplier": "Shanghai Heyi Trading Co., Ltd.",
+    "brandOnListing": "TOBY'S",
+    "modelOnListing": "0063",
+    "note": "بعض حقول الـ attributes في Alibaba مشوشة (قالب بائع). الشكل الحقيقي من الصور: كبسولة بيضاء + رقبة USB مرنة + ضوء ليلي دافئ + عرض نجوم/أقراص."
+  },
+  "previousMistake": {
+    "what": "خلطت مع موديلات قريبة (BL-USB03/04 من MyTrendyPhone وأقراص 13 RGBWW، وصور Clarendale بفيشة حائط، وصور عشوائية من جاليري البائعين).",
+    "fix": "المصدر الرسمي الآن هو رابط Alibaba اللي عطيتيه. الصور الغلط اتحذفت من official/. المجلد lp/ تنظّف للمنتج الصحيح فقط."
+  },
+  "identity": {
+    "confirmed": true,
+    "confidence": "100%",
+    "nameAr": "جهاز عرض النجوم USB — 2 في 1",
+    "nameEn": "2-in-1 Mini Galaxy Star Projector Night Light",
+    "matchKeys": [
+      "كبسولة بيضاء capsule",
+      "رقبة مرنة gooseneck تنتهي بـ USB-A",
+      "زر باور على الوجه",
+      "ضوء ليلي دافئ أصفر في قاعدة الرأس",
+      "عرض سماء نجوم / قمر / مجرة على السقف",
+      "أقراص أفلام قابلة للتبديل (حسب الدفعة 6/12/24)"
+    ],
+    "sisterListings": [
+      {
+        "url": "https://www.alibaba.it/product-detail/Mini-USB-2-in-1-Galaxy_1601788921401.html",
+        "model": "YC-DJ085",
+        "usefulSpecs": "DC 5V, ABS, Touch, Warm White 2700K, Room & Car, USB"
+      }
+    ],
+    "NOT": [
+      "Astronaut dual-lens nebula + laser projector",
+      "Sunset lamp RGB",
+      "Car thin laser USB tube",
+      "Clarendale wall-plug variant",
+      "Emergency bulb / headlamp / tensegrity lamp (صور خاطئة داخل جاليري بعض البائعين)"
+    ]
+  },
+  "specs": {
+    "power": "USB 5V (شارجر / باور بانك / لابتوب / سيارة)",
+    "modes": "2-in-1: عرض سماوي + ضوء ليلي دافئ",
+    "neck": "رقبة مرنة 360°",
+    "films": "أقراص قابلة للتبديل — الدفعات الشائعة 6 أو 12 أو 24 مشهد",
+    "material": "ABS + سيليكون (الرقبة)",
+    "control": "زر/لمس على الجسم",
+    "dimmer": "نعم (حسب الدفعة)",
+    "bestUse": ["غرفة أطفال", "نوم هادئ", "سيارة", "تخييم", "هدية"],
+    "adPriceSAR": 159,
+    "packageHintSister": "تقريبًا 8×8×12 سم للدفعة الشقيقة — تأكد من دفعتك"
+  },
+  "photos": {
+    "official": "public/products/usb-star-projector/official/",
+    "officialFiles": [
+      "product-usb-gooseneck.jpg — المنتج واضح USB-A + رقبة مرنة (من listing شقيق)",
+      "hero-lifestyle.jpg — من رابطك Alibaba (عرض قمر/نجوم + ضوء دافئ)",
+      "01.jpg / 05-it.jpg — نفس الملفين"
+    ],
+    "lp": "public/products/usb-star-projector/lp/ — 18 صورة مرتبة للـ LP",
+    "lpPreferred": ["01-product.jpg", "02-lifestyle.jpg", "03-ad.png"],
+    "warning": "جاليري بعض بائعي Alibaba فيه صور منتجات ثانية — لا تستخدم أي صورة ما فيهاش الكبسولة + USB المرن"
+  },
+  "marketingReady": {
+    "id": "nujum-usb-2in1",
+    "brand": "سماء الغرفة",
+    "emoji": "🌌",
+    "type": "إضاءة أطفال",
+    "badge": "2 في 1 — عرض + ضوء ليلي",
+    "badgeColor": "#1D4ED8",
+    "marquee": "الدفع عند الاستلام بعد المعاينة | تجهيز سريع لجميع مدن المملكة",
+    "warning": "الظلام يخوّف… والنور القوي يصحّي البيت. تبي سقف يتحوّل لمنظر يهدّي الولد وينوّمه بدون صراع.",
+    "heroTitle": "جهاز عرض النجوم USB — السماء تنزل على سقف غرفته",
+    "heroSubtitle": "كبسولة صغيرة، رقبة مرنة، وضوء ليلي دافئ. وصّله… وارفع رأسك. الغرفة تصير مجرة في ثواني.",
+    "heroBadge": "منظر يذيّب الخوف",
+    "shortDesc": "USB 2 في 1: عرض نجوم بأقراص قابلة للتبديل + ضوء ليلي دافئ لغرفة الأطفال",
+    "offers": [
+      { "id": 1, "name": "قطعة واحدة", "sub": "لغرفة ولد أو بنت", "price": 159, "oldPrice": 299, "pieces": 1 },
+      { "id": 2, "name": "قطعتان", "sub": "غرفتان أو هدية مزدوجة", "price": 279, "oldPrice": 598, "pieces": 2, "popular": true, "badge": "الأكثر طلبًا" },
+      { "id": 3, "name": "ثلاث قطع", "sub": "هدايا جاهزة — أعلى توفير", "price": 369, "oldPrice": 897, "pieces": 3, "badge": "توفير ضخم" }
+    ],
+    "emotionalAngles": [
+      { "id": "kids-wow", "title": "لحظة واو قبل النوم", "text": "يطفي النور، يشغّل السماء، ويرفع رأسه. الخوف يصير فضول… والنوم أقرب." },
+      { "id": "warm-night", "title": "ضوء دافئ لما يقوم بالليل", "text": "مو بس مجرة. فيه ضوء ليلي ناعم — يشرب ماء ويرجع ينام بدون ما يصحّي البيت." },
+      { "id": "disc-stories", "title": "كل ليلة مشهد جديد", "text": "بدّل القرص: قمر، مجرة، محيط… الولد يختار حكاية يومه." },
+      { "id": "usb-anywhere", "title": "السحر يمشي معكم", "text": "شارجر، باور بانك، لابتوب، أو USB السيارة. نفس المنظر في البيت والبر." },
+      { "id": "gift", "title": "هدية تبان من أول ثانية", "text": "يفتح، يوصل USB، والسقف يتغيّر قدام المندوب." }
+    ],
+    "featureStrip": [
+      { "icon": "🌌", "title": "عرض سماوي", "text": "نجوم وقمر ومشاهد تتبدّل بالأقراص" },
+      { "icon": "💡", "title": "ضوء ليلي دافئ", "text": "ناعم للعين — مثالي لغرف الأطفال" },
+      { "icon": "🦢", "title": "رقبة 360°", "text": "وجّه العرض للسقف أو الجدار بسهولة" },
+      { "icon": "🔌", "title": "USB في أي مكان", "text": "بدون فيشة خاصة — شغّاله وين ما كان فيه USB" }
+    ],
+    "steps": [
+      "وصّل USB في شارجر أو باور بانك",
+      "اختر قرص المشهد وحطّه في الجهاز",
+      "اثنِ الرقبة نحو السقف وعدّل الزاوية",
+      "بدّل بين وضع العرض والضوء الليلي من الزر"
+    ],
+    "ctaLabel": "اطلب سماء الغرفة الآن"
+  }
+}
