@@ -560,7 +560,6 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
         },
       },
     ],
-    ],
     reviews: [
       {
         name: 'أم ليان — الرياض',
