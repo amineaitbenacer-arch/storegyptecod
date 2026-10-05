@@ -570,9 +570,11 @@ export default function ProductView({ product }: { product: ProductPageConfig })
                 <i className="pv-sp-dot" aria-hidden="true" />
                 ادفع بعد المعاينة
               </span>
-              <span className="pv-sp-chip">جودة مضمونة</span>
-              <span className="pv-sp-chip">اختيار الأمهات</span>
-              <span className="pv-sp-chip">هدية تبهِر</span>
+              {(product.proofChips ?? ['جودة مضمونة', 'اختيار الأمهات', 'هدية تبهِر']).map((chip) => (
+                <span key={chip} className="pv-sp-chip">
+                  {chip}
+                </span>
+              ))}
             </div>
           </div>
 
@@ -619,8 +621,10 @@ export default function ProductView({ product }: { product: ProductPageConfig })
           <div className="container">
             <div className="pvd-header text-center">
               <span className="pvd-badge">تفاصيل المنتج بالصور</span>
-              <h2 className="section-heading">لماذا العائلات تطلبه اليوم؟</h2>
-              <p className="section-subheading">كل صورتين شرح… ثم صورة مربعة 1:1 تثبت الكلام</p>
+              <h2 className="section-heading">{product.storyTitle || 'لماذا العائلات تطلبه اليوم؟'}</h2>
+              <p className="section-subheading">
+                {product.storySub || 'كل صورتين شرح… ثم صورة مربعة 1:1 تثبت الكلام'}
+              </p>
             </div>
 
             {product.storyBeats.map((beat, i) => (

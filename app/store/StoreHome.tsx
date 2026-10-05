@@ -223,9 +223,9 @@ const STORIES: StoryItem[] = [
     id: 's1',
     label: 'الأكثر مبيعًا',
     ring: '#0284c7',
-    image: '/images/robotdog-hero.jpg',
-    title: 'كلب روبوت بالذكاء الاصطناعي',
-    text: 'يرقص ويمارس الكونغ فو — هدية STEM الأكثر طلبًا في المتجر.',
+    image: '/products/moon-lamp/01.jpg',
+    title: 'هلال 3 في 1',
+    text: 'سبيكر، لمبة RGB، وشاحن لاسلكي 15 واط — ديكور الغرفة الأكثر طلبًا.',
   },
   {
     id: 's2',
@@ -255,9 +255,9 @@ const STORIES: StoryItem[] = [
     id: 's5',
     label: 'اختيارنا',
     ring: '#0f766e',
-    image: '/images/robotdog-kids.jpg',
-    title: 'هدية تبهِر الأطفال',
-    text: 'تحكم صوتي + تطبيق + ريموت — أكثر من 25 حركة تفاعلية.',
+    image: '/products/moon-lamp/05.jpg',
+    title: 'الغرفة تصير أهدى',
+    text: 'ضوء يتبدل، موسيقى قريبة، وجوالك يشحن وأنت نايم.',
   },
 ];
 
