@@ -113,6 +113,42 @@
         #orders-tbody tr:nth-child(6n+5) { background: rgba(16, 185, 129, 0.1); box-shadow: inset 4px 0 0 #10b981; }
         #orders-tbody tr:nth-child(6n+6) { background: rgba(236, 72, 153, 0.1); box-shadow: inset 4px 0 0 #ec4899; }
         #orders-tbody tr:hover { filter: brightness(1.18); transform: translateY(-2px); }
+        #orders-tbody tr.order-seen {
+            background: rgba(15, 23, 42, 0.72) !important;
+            box-shadow: inset 3px 0 0 #334155 !important;
+        }
+        #orders-tbody tr.order-seen:hover { filter: none; transform: none; }
+        #orders-tbody tr.order-seen > td:not(.seen-cell) {
+            filter: grayscale(1);
+            opacity: 0.48;
+        }
+        .seen-box {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            border: 1.5px solid rgba(251, 191, 36, 0.85);
+            background: transparent;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.12);
+            padding: 0;
+        }
+        .seen-box:hover { border-color: #fde68a; }
+        tr.order-seen .seen-box {
+            border-color: #64748b;
+            background: #1e293b;
+            box-shadow: none;
+        }
+        tr.order-seen .seen-box::after {
+            content: "✓";
+            color: #f8fafc;
+            font-size: 16px;
+            font-weight: 900;
+            line-height: 1;
+        }
         .field-pill {
             display: inline-flex;
             align-items: center;
@@ -624,6 +660,7 @@
                     <table class="w-full text-left whitespace-nowrap min-w-[1100px]">
                         <thead>
                             <tr class="text-gray-400 text-sm uppercase tracking-wider">
+                                <th class="p-4 font-bold pb-6 w-12"></th>
                                 <th class="p-4 font-bold pb-6 w-10 text-center">
                                     <input type="checkbox" id="select-all-orders" class="w-4 h-4 rounded border-gray-600 bg-gray-700 cursor-pointer" onchange="toggleSelectAll(this)">
                                 </th>
@@ -641,7 +678,7 @@
                         <tbody id="orders-tbody">
                             <!-- Loading State -->
                             <tr>
-                                <td colspan="10" class="p-12 text-center text-gray-400">
+                                <td colspan="11" class="p-12 text-center text-gray-400">
                                     <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-yellow-500"></i>
                                     <div class="text-lg font-bold">جاري جلب Orders الحية...</div>
                                 </td>
@@ -965,7 +1002,7 @@
             
             // Only show full table loading if not forced refresh to keep UX smooth during refresh
             if (!force) {
-                tbody.innerHTML = '<tr><td colspan="10" class="p-12 text-center text-gray-400"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-yellow-500"></i><div class="text-lg font-bold">Loading Data...</div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" class="p-12 text-center text-gray-400"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-yellow-500"></i><div class="text-lg font-bold">Loading Data...</div></td></tr>';
             }
             
             try {
@@ -1017,7 +1054,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="10" class="p-12 text-center text-red-400"><i class="fa-solid fa-triangle-exclamation mb-4 text-4xl"></i><div class="text-lg font-bold">حدث خطأ أثناء جلب Orders. تأكد من اتصال السيرفور.</div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" class="p-12 text-center text-red-400"><i class="fa-solid fa-triangle-exclamation mb-4 text-4xl"></i><div class="text-lg font-bold">حدث خطأ أثناء جلب Orders. تأكد من اتصال السيرفور.</div></td></tr>';
             }
         }
 
@@ -1470,6 +1507,37 @@
                 .catch(() => alert('ما تنسخش. جرّب مرة أخرى.'));
         }
 
+        const SEEN_ORDERS_KEY = 'dune_admin_seen_orders';
+
+        function readSeenOrders() {
+            try {
+                const raw = JSON.parse(localStorage.getItem(SEEN_ORDERS_KEY) || '[]');
+                return new Set(Array.isArray(raw) ? raw.map(String) : []);
+            } catch {
+                return new Set();
+            }
+        }
+
+        function writeSeenOrders(seen) {
+            localStorage.setItem(SEEN_ORDERS_KEY, JSON.stringify([...seen]));
+        }
+
+        function toggleOrderSeen(orderId, btn) {
+            const seen = readSeenOrders();
+            const id = String(orderId);
+            const tr = btn.closest('tr');
+            if (seen.has(id)) {
+                seen.delete(id);
+                tr.classList.remove('order-seen');
+                btn.setAttribute('aria-pressed', 'false');
+            } else {
+                seen.add(id);
+                tr.classList.add('order-seen');
+                btn.setAttribute('aria-pressed', 'true');
+            }
+            writeSeenOrders(seen);
+        }
+
         function renderOrders(ordersArray) {
             const tbody = document.getElementById('orders-tbody');
             window.visibleOrders = ordersArray;
@@ -1478,11 +1546,12 @@
             animateValue("total-orders-count", parseInt(document.getElementById('total-orders-count').innerText), ordersArray.length, 500);
             
             if (ordersArray.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" class="p-12 text-center text-gray-500"><i class="fa-solid fa-box-open text-4xl mb-3"></i><div class="text-lg">No orders found for this date.</div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" class="p-12 text-center text-gray-500"><i class="fa-solid fa-box-open text-4xl mb-3"></i><div class="text-lg">No orders found for this date.</div></td></tr>';
                 return;
             }
 
-            tbody.innerHTML = ''; 
+            tbody.innerHTML = '';
+            const seenOrders = readSeenOrders();
             
             ordersArray.forEach(order => {
                 const t = orderTimeParts(order);
@@ -1496,8 +1565,13 @@
                 const montageVisual = montage.image
                     ? `<img class="montage-thumb" src="${escHtml(montage.image)}" alt="${escHtml(montage.label)}" loading="lazy" />`
                     : `<div class="montage-thumb montage-missing"><i class="fa-regular fa-image"></i></div>`;
+                const seen = seenOrders.has(String(order.id));
                 const tr = document.createElement('tr');
+                if (seen) tr.className = 'order-seen';
                 tr.innerHTML = `
+                    <td class="p-3 text-center seen-cell">
+                        <button type="button" class="seen-box" aria-label="تعليم الطلب كمراجع" aria-pressed="${seen ? 'true' : 'false'}" onclick="toggleOrderSeen('${escHtml(order.id)}', this)"></button>
+                    </td>
                     <td class="p-4 border-r border-gray-700/30 text-center">
                         <input type="checkbox" class="order-checkbox w-4 h-4 rounded border-gray-600 bg-gray-700 cursor-pointer" value="${escHtml(order.id)}" onchange="updateBulkDeleteButton()">
                     </td>
