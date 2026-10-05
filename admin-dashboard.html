@@ -198,12 +198,36 @@
         .field-city { background: rgba(245,158,11,.16); border-color: rgba(245,158,11,.5); }
         .field-offer { background: rgba(168,85,247,.16); border-color: rgba(168,85,247,.45); }
         .field-price { background: rgba(250,204,21,.16); border-color: rgba(250,204,21,.5); }
+        .field-net { background: rgba(251,191,36,.1); border-color: rgba(251,191,36,.4); }
+        .price-head {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            line-height: 1.25;
+            vertical-align: middle;
+        }
+        .price-head em {
+            font-style: normal;
+            font-size: 11px;
+            font-weight: 800;
+            opacity: 0.9;
+        }
+        .price-pair { display: flex; align-items: center; gap: 8px; }
+        .price-kind {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            line-height: 1.2;
+            opacity: 0.85;
+        }
         .field-time { background: rgba(16,185,129,.14); border-color: rgba(16,185,129,.45); }
         .copy-bit.tone-name { background: #22d3ee; color: #042f2e; }
         .copy-bit.tone-phone { background: #3b82f6; color: #fff; }
         .copy-bit.tone-city { background: #f59e0b; color: #1c1403; }
         .copy-bit.tone-offer { background: #a855f7; color: #fff; }
         .copy-bit.tone-price { background: #eab308; color: #1c1403; }
+        .copy-bit.tone-net { background: #d97706; color: #fff; }
         .copy-bit.tone-source { background: #ec4899; color: #fff; }
         .copy-bit.tone-time { background: #10b981; color: #022c22; }
 
@@ -669,7 +693,9 @@
                                 <th class="p-4 font-bold pb-6 col-h col-phone">الرقم</th>
                                 <th class="p-4 font-bold pb-6 col-h col-city">المدينة</th>
                                 <th class="p-4 font-bold pb-6 col-h col-offer">العرض</th>
-                                <th class="p-4 font-bold pb-6 col-h col-price">الثمن</th>
+                                <th class="p-4 font-bold pb-6 col-h col-price">
+                                    <span class="price-head">الثمن<em>الأول مع التوصيل · الثاني بلا التوصيل</em></span>
+                                </th>
                                 <th class="p-4 font-bold pb-6 col-h col-source text-center">منين جا</th>
                                 <th class="p-4 font-bold pb-6 col-h col-time">الوقت</th>
                                 <th class="p-4 font-bold pb-6 w-10"></th>
@@ -1156,11 +1182,21 @@
                 label: found.brand || found.name || '—',
             };
         }
-        function orderTotalText(order) {
+        const SHIPPING_SAR = 20;
+        function orderMoney(order) {
             const raw = order && order.price;
-            const n = Number(raw && typeof raw === 'object' ? (raw.total ?? raw.price) : raw);
-            if (!Number.isFinite(n)) return '';
-            return String(Math.round(n));
+            let total = NaN;
+            let net = NaN;
+            if (raw && typeof raw === 'object') {
+                total = Number(raw.total ?? raw.price);
+                net = Number(raw.subtotal ?? raw.net);
+            } else {
+                total = Number(raw);
+            }
+            if (!Number.isFinite(net) && Number.isFinite(total)) net = total - SHIPPING_SAR;
+            if (!Number.isFinite(total) && Number.isFinite(net)) total = net + SHIPPING_SAR;
+            const round = (n) => (Number.isFinite(n) && n >= 0 ? String(Math.round(n)) : '');
+            return { total: round(total), net: round(net) };
         }
         function eventsInFilter() {
             return allEvents.filter(event => {
@@ -1560,7 +1596,9 @@
                 const jsName = String(order.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                 const jsPhone = String(order.phone || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
-                const totalText = orderTotalText(order) || '—';
+                const money = orderMoney(order);
+                const totalText = money.total || '—';
+                const netText = money.net || '—';
                 const montage = montageForOrder(order);
                 const montageVisual = montage.image
                     ? `<img class="montage-thumb" src="${escHtml(montage.image)}" alt="${escHtml(montage.label)}" loading="lazy" />`
@@ -1606,9 +1644,21 @@
                         </div>
                     </td>
                     <td class="p-4 border-r border-gray-700/30">
-                        <div class="field-pill field-price" dir="ltr">
-                            <span class="font-black text-yellow-100 en-font text-base tracking-wide">${escHtml(totalText)} <span class="text-xs font-bold text-yellow-300">ر.س</span></span>
-                            ${copyChip(totalText, 'price')}
+                        <div class="price-pair">
+                            <div class="field-pill field-price" dir="ltr">
+                                <span>
+                                    <span class="price-kind">مع التوصيل</span>
+                                    <span class="font-black text-yellow-100 en-font text-base tracking-wide">${escHtml(totalText)} <span class="text-xs font-bold text-yellow-300">ر.س</span></span>
+                                </span>
+                                ${copyChip(totalText, 'price')}
+                            </div>
+                            <div class="field-pill field-net" dir="ltr">
+                                <span>
+                                    <span class="price-kind">بلا التوصيل</span>
+                                    <span class="font-black text-amber-100 en-font text-base tracking-wide">${escHtml(netText)} <span class="text-xs font-bold text-amber-300">ر.س</span></span>
+                                </span>
+                                ${copyChip(netText, 'net')}
+                            </div>
                         </div>
                     </td>
                     <td class="p-4 border-r border-gray-700/30">
