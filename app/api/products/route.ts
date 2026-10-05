@@ -1,15 +1,17 @@
 import { NextResponse } from 'next/server';
-import { PRODUCTS } from '../../../lib/productPages';
+import { PRODUCT_PAGES } from '../../../lib/productPages';
 
 export async function GET() {
   return NextResponse.json({
     success: true,
-    products: PRODUCTS.map((p) => ({
+    products: PRODUCT_PAGES.map((p) => ({
       id: p.id,
-      name: p.name,
+      name: p.heroTitle,
+      brand: p.brand,
       emoji: p.emoji,
       type: p.type,
-      href: p.href,
+      image: p.catalogImage,
+      href: p.id === 'produit-1' ? '/product/antichoc' : `/product/${p.id}`,
     })),
   });
 }
