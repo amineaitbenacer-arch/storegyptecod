@@ -1,0 +1,85 @@
+.sa-phone-wrap {
+  margin-bottom: 0.65rem;
+}
+
+.sa-phone {
+  display: flex;
+  align-items: center;
+  direction: ltr;
+  width: 100%;
+  background: #121826;
+  border: 1.5px solid rgba(148, 163, 184, 0.32);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.sa-phone.product {
+  background: #131a26;
+  border-color: #334155;
+}
+
+.sa-phone:focus-within {
+  border-color: rgba(45, 212, 191, 0.55);
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.12);
+}
+
+.sa-phone.product:focus-within {
+  border-color: #f59e0b;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.3);
+}
+
+.sa-phone.error,
+.sa-phone.error:focus-within {
+  border: 2px solid #ef4444;
+  background: #2a1216;
+  box-shadow:
+    inset 6px 0 0 #ef4444,
+    inset -6px 0 0 #ef4444,
+    0 0 0 3px rgba(239, 68, 68, 0.35);
+}
+
+.sa-phone-prefix {
+  flex: 0 0 auto;
+  padding: 0.75rem 0.05rem 0.75rem 0.9rem;
+  font-size: 16px;
+  font-weight: 900;
+  color: #f8fafc;
+  letter-spacing: 0.04em;
+  user-select: none;
+  cursor: text;
+}
+
+.sa-phone.error .sa-phone-prefix {
+  color: #fecaca;
+}
+
+.sa-phone-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 0.75rem 0.9rem 0.75rem 0.15rem;
+  letter-spacing: 0.06em;
+}
+
+.sa-phone-input::placeholder {
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.sa-phone-err {
+  color: #ef4444;
+  font-size: 0.84rem;
+  font-weight: 900;
+  line-height: 1.45;
+  margin: 0.4rem 0 0;
+  text-align: right;
+  direction: rtl;
+}

@@ -7,7 +7,7 @@ import {
   updateOrderFields,
   type StoreOrder,
 } from '../../../lib/orders-store';
-import { normalizePhone } from '../../../lib/phone';
+import { isValidOrderPhone, normalizePhone } from '../../../lib/phone';
 import { isAdSource, sourceFromClick, type AdSource } from '../../../lib/tracking';
 
 export async function POST(request: NextRequest) {
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    if (!/^\d{10}$/.test(cleanPhone)) {
+    if (!isValidOrderPhone(cleanPhone)) {
       return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
     }
 

@@ -8,6 +8,7 @@ import { PRODUCTS, type StoreProduct } from '../../lib/products';
 import { formatSar } from '../../lib/money';
 import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
+import { PHONE_INCOMPLETE_MSG } from '../../lib/phone';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 import StoreCheckoutSheet from './StoreCheckoutSheet';
@@ -271,7 +272,7 @@ export default function StoreHome() {
   const [openPolicy, setOpenPolicy] = useState<string | null>('payment');
   const [openDrawerFaq, setOpenDrawerFaq] = useState<string | null>(null);
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('05');
   const [city, setCity] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -467,8 +468,8 @@ export default function StoreHome() {
       setPhoneError('⚠️ كمّل الاسم والمدينة');
       return;
     }
-    if (!isValidOrderPhone(clean)) {
-      setPhoneError('⚠️ تأكد من رقم الهاتف (10 أرقام، مثال 0612345678)');
+    if (phone.length > 10 || !isValidOrderPhone(clean)) {
+      setPhoneError(phone.length > 10 ? '' : PHONE_INCOMPLETE_MSG);
       return;
     }
     setPhoneError('');
@@ -1104,11 +1105,7 @@ export default function StoreHome() {
                 onName={setName}
                 onPhone={(v) => {
                   setPhone(v);
-                  setPhoneError(
-                    v.length > 0 && v.length < 10
-                      ? '⚠️ تأكد من رقم الهاتف (يجب أن يحتوي على 10 أرقام)'
-                      : ''
-                  );
+                  if (v.length <= 10) setPhoneError('');
                 }}
                 onCity={setCity}
                 onSubmit={submitOrder}

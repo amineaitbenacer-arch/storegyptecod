@@ -7,6 +7,8 @@ import type { OfferPack, ProductPageConfig } from '../../../lib/productPages';
 import { formatSar } from '../../../lib/money';
 import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../../lib/last-order';
+import SaPhoneField from '../../components/SaPhoneField';
+import { PHONE_INCOMPLETE_MSG } from '../../../lib/phone';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../../lib/tracking';
 
@@ -33,9 +35,10 @@ export default function ProductView({ product }: { product: ProductPageConfig })
     return pages.length ? pages : [[]];
   }, [product.reviews]);
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('05');
   const [city, setCity] = useState('');
   const [formError, setFormError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const save = offer.oldPrice - offer.price;
@@ -103,10 +106,12 @@ export default function ProductView({ product }: { product: ProductPageConfig })
       setFormError('عافاك كمل جميع المعلومات (الاسم، الهاتف والمدينة).');
       return;
     }
-    if (!isValidOrderPhone(clean)) {
-      setFormError('⚠️ تأكد من رقم الهاتف (يجب أن يحتوي على 10 أرقام على الأقل)');
+    if (phone.length > 10 || !isValidOrderPhone(clean)) {
+      setPhoneError(phone.length > 10 ? '' : PHONE_INCOMPLETE_MSG);
+      setFormError('');
       return;
     }
+    setPhoneError('');
     setFormError('');
     setLoading(true);
     const orderId = `pl-${Date.now().toString(36)}`;
@@ -185,8 +190,6 @@ export default function ProductView({ product }: { product: ProductPageConfig })
   const aovMsg = offer.popular
     ? `مبروك! تم اختيار العرض الأكثر طلبًا وتفعيل الخصم — وفّرت ${formatSar(save)}.`
     : `أقوى توفير. وفّرت ${formatSar(save)} وحصلت على أفضل قيمة.`;
-  const phoneInvalid = Boolean(formError && formError.includes('الهاتف'));
-
   const sheet = (
     <div
       className={`sheet-bg${sheetOpen ? ' open' : ''}`}
@@ -373,36 +376,16 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-            <input
-              type="tel"
+            <SaPhoneField
               id="inp-phone"
-              className="form-inp"
-              placeholder="📱 رقم الجوال (05XXXXXXXX)"
-              required
-              autoComplete="tel"
-              inputMode="tel"
-              enterKeyHint="next"
+              variant="product"
               value={phone}
-              onChange={(e) => {
-                setPhone(e.target.value.replace(/\D/g, '').slice(0, 10));
-                if (formError) setFormError('');
+              error={phoneError}
+              onChange={(next) => {
+                setPhone(next);
+                if (phoneError) setPhoneError('');
               }}
-              style={phoneInvalid ? { border: '2px solid #ef4444' } : undefined}
             />
-            <p
-              id="phone-error"
-              style={{
-                display: phoneInvalid ? 'block' : 'none',
-                color: '#ef4444',
-                fontSize: '0.8rem',
-                fontWeight: 'bold',
-                marginTop: '-8px',
-                marginBottom: '12px',
-                marginRight: '5px',
-              }}
-            >
-              ⚠️ تأكد من رقم الهاتف (يجب أن يحتوي على 10 أرقام على الأقل)
-            </p>
             <input
               type="text"
               id="inp-city"
@@ -415,7 +398,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               onChange={(e) => setCity(e.target.value)}
             />
 
-            {formError && !phoneInvalid && <p className="pv-form-error">{formError}</p>}
+            {formError ? <p className="pv-form-error">{formError}</p> : null}
 
             <div className="total-box checkout-sum">
               <div className="checkout-sum-row">

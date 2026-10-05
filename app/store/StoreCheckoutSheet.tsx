@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import SaPhoneField from '../components/SaPhoneField';
 import { formatSar } from '../../lib/money';
 import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../lib/shipping';
 import './store-checkout-sheet.css';
@@ -214,25 +215,7 @@ export default function StoreCheckoutSheet({
             enterKeyHint="next"
             required
           />
-          <input
-            className={`store-ac-inp${phoneError ? ' error' : ''}`}
-            type="tel"
-            inputMode="numeric"
-            placeholder="📱 رقم الجوال (05XXXXXXXX)"
-            value={phone}
-            onChange={(e) => {
-              const raw = e.target.value
-                .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 1632))
-                .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 1776))
-                .replace(/\D/g, '')
-                .slice(0, 10);
-              onPhone(raw);
-            }}
-            autoComplete="tel"
-            enterKeyHint="next"
-            required
-          />
-          {phoneError ? <p className="store-ac-err">{phoneError}</p> : null}
+          <SaPhoneField variant="store" value={phone} error={phoneError} onChange={onPhone} />
           <input
             className="store-ac-inp"
             type="text"
