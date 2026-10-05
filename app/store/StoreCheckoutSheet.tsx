@@ -206,7 +206,7 @@ export default function StoreCheckoutSheet({
           }}
         >
           <input
-            className="store-ac-inp"
+            className={`store-ac-inp${name.trim() ? ' field-ready' : ''}`}
             type="text"
             placeholder="👤 الاسم الكامل"
             value={name}
@@ -217,7 +217,7 @@ export default function StoreCheckoutSheet({
           />
           <SaPhoneField variant="store" value={phone} error={phoneError} onChange={onPhone} />
           <input
-            className="store-ac-inp"
+            className={`store-ac-inp${city.trim() ? ' field-ready' : ''}`}
             type="text"
             placeholder="📍 المدينة"
             value={city}

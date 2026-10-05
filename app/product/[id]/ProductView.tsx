@@ -103,7 +103,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
   async function submit() {
     const clean = normalizePhone(phone);
     if (!name.trim() || !city.trim()) {
-      setFormError('عافاك كمل جميع المعلومات (الاسم، الهاتف والمدينة).');
+      setFormError('يرجى إكمال الاسم ورقم الجوال والمدينة.');
       return;
     }
     if (phone.length > 10 || !isValidOrderPhone(clean)) {
@@ -368,7 +368,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             <input
               type="text"
               id="inp-name"
-              className="form-inp"
+              className={`form-inp${name.trim() ? ' field-ready' : ''}`}
               placeholder="👤 الاسم الكامل"
               required
               autoComplete="name"
@@ -389,7 +389,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             <input
               type="text"
               id="inp-city"
-              className="form-inp"
+              className={`form-inp${city.trim() ? ' field-ready' : ''}`}
               placeholder="📍 المدينة"
               required
               autoComplete="address-level2"

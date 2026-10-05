@@ -50,8 +50,20 @@
   cursor: text;
 }
 
+.sa-phone.ready,
+.sa-phone.ready:focus-within,
+.sa-phone.product.ready,
+.sa-phone.product.ready:focus-within {
+  border: 1.5px solid #34d399;
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.22);
+}
+
 .sa-phone.error .sa-phone-prefix {
   color: #fecaca;
+}
+
+.sa-phone.ready .sa-phone-prefix {
+  color: #86efac;
 }
 
 .sa-phone-input {
@@ -75,9 +87,9 @@
 }
 
 .sa-phone-err {
-  color: #ef4444;
+  color: #f87171;
   font-size: 0.84rem;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.45;
   margin: 0.4rem 0 0;
   text-align: right;

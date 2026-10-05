@@ -465,7 +465,7 @@ export default function StoreHome() {
   async function submitOrder() {
     const clean = normalizePhone(phone);
     if (!name.trim() || !city.trim()) {
-      setPhoneError('⚠️ كمّل الاسم والمدينة');
+      setPhoneError('يرجى إدخال الاسم والمدينة.');
       return;
     }
     if (phone.length > 10 || !isValidOrderPhone(clean)) {

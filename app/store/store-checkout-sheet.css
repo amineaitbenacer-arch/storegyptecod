@@ -314,6 +314,13 @@
   color: #f8fafc;
 }
 
+.store-ac-inp.field-ready,
+.store-ac-inp.field-ready:focus {
+  border: 1.5px solid #34d399;
+  background: #121826;
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.22);
+}
+
 .store-ac-inp.error {
   border-color: #ef4444;
 }

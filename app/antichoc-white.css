@@ -633,6 +633,13 @@ body:has(.sheet-bg.open) .buy-bar,
   background: #131A26 !important;
 }
 
+.sheet .form-inp.field-ready,
+.sheet .form-inp.field-ready:focus {
+  border: 1.5px solid #34d399 !important;
+  background: #131a26 !important;
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.22) !important;
+}
+
 .sheet .form-inp::placeholder {
   color: #64748B !important;
 }

@@ -18,6 +18,7 @@ export default function SaPhoneField({ id, value, onChange, error, variant = 'st
   const tail = full.slice(2);
   const tooLong = full.length > 10;
   const message = tooLong ? PHONE_TOO_LONG_MSG : error || '';
+  const ready = !message && full.length === 10;
 
   function focusTail() {
     const el = inputRef.current;
@@ -29,7 +30,7 @@ export default function SaPhoneField({ id, value, onChange, error, variant = 'st
 
   return (
     <div className="sa-phone-wrap">
-      <div className={`sa-phone ${variant}${message ? ' error' : ''}`}>
+      <div className={`sa-phone ${variant}${message ? ' error' : ready ? ' ready' : ''}`}>
         <span className="sa-phone-prefix" onMouseDown={(e) => e.preventDefault()} onClick={focusTail}>
           05
         </span>

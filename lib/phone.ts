@@ -59,5 +59,5 @@ export function draftFromPhoneTail(tail: string): string {
   return draftSaPhone(pastedFull ? digits : `05${digits}`);
 }
 
-export const PHONE_TOO_LONG_MSG = '⚠️ الرقم فات 10 أرقام — صحّح رقم الجوال، راه غالط';
-export const PHONE_INCOMPLETE_MSG = '⚠️ كمّل رقم الجوال: 10 أرقام، ويبدا بـ 05';
+export const PHONE_TOO_LONG_MSG = 'يرجى تعديل رقم الجوال ليكون 10 أرقام فقط.';
+export const PHONE_INCOMPLETE_MSG = 'يرجى إدخال رقم الجوال كاملًا، من 10 أرقام تبدأ بـ 05.';
