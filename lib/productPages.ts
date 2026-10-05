@@ -915,7 +915,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     type: 'أمان منزلي',
     badge: 'الأكثر مبيعاً',
     badgeColor: '#D97706',
-    listed: true,
+    listed: false,
     marquee: 'توصيل آمن إلى جميع مدن المملكة | الدفع عند الاستلام',
     warning: 'الكهرباء في أثناء الاستحمام لا تمنح فرصة ثانية. احمِ أطفالك وعائلتك اليوم.',
     heroTitle: 'عازل السخان المائي الأصلي المزدوج من AntiChoc',
