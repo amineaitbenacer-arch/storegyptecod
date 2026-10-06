@@ -647,9 +647,11 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
                 <figure className="pv-beat-photo">
                   {beat.imageBadge && <span className="pv-story-badge">{beat.imageBadge}</span>}
-                  <div className="pv-square">
-                    <img src={beat.image} alt={beat.imageTitle || product.heroTitle} />
-                  </div>
+                  {beat.image && (
+                    <div className="pv-square">
+                      <img src={beat.image} alt={beat.imageTitle || product.heroTitle} />
+                    </div>
+                  )}
                   {(beat.imageTitle || beat.imageText) && (
                     <figcaption>
                       {beat.imageTitle && <strong>{beat.imageTitle}</strong>}
@@ -754,7 +756,9 @@ export default function ProductView({ product }: { product: ProductPageConfig })
         <div className="container">
           <h2 className="section-heading">{product.solutionTitle}</h2>
           <p className="section-subheading">{product.solutionText}</p>
-          <img className="pv-solution-img" src={product.solutionImage} alt={product.solutionTitle} />
+          {product.solutionImage && (
+            <img className="pv-solution-img" src={product.solutionImage} alt={product.solutionTitle} />
+          )}
           <h3 className="section-heading pv-steps-title">{product.stepsTitle}</h3>
           <div className="steps-wrapper">
             {product.steps.map((step, i) => (

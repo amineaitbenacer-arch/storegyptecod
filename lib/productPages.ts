@@ -25,7 +25,7 @@ export type StoryBlock = {
 /** نمط التحويل: إطارات تسويق ثم صورة 1:1 ثم جسر تسويقي */
 export type StoryBeat = {
   frames: { icon?: string; title: string; text: string }[];
-  image: string;
+  image?: string;
   imageBadge?: string;
   imageTitle?: string;
   imageText?: string;
@@ -62,7 +62,7 @@ export type ProductPageConfig = {
   painItems: { icon: string; title: string; text: string }[];
   solutionTitle: string;
   solutionText: string;
-  solutionImage: string;
+  solutionImage?: string;
   stepsTitle: string;
   steps: string[];
   /** 5 صور تسويقية بعد العروض حتى أسفل الصفحة */
@@ -325,13 +325,11 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
       'كبسولة صغيرة، رقبة مرنة، وأقراص كثيرة بأشكال مختلفة. وصّله بشارجر أو باور بانك… والسقف يصير قمر، مجرة، أو مشهد جديد كل ليلة.',
     heroBadge: 'منظر يذيّب الخوف',
     images: [
-      '/products/nujum-usb/g05-family.jpg',
-      '/products/nujum-usb/g04-discs.jpg',
-      '/products/nujum-usb/g03-moon.jpg',
-      '/products/nujum-usb/g02-product.jpg',
-      '/products/nujum-usb/g01-kids.jpg',
+      '/products/usb-star-projector/lp/01-new-hero.jpg',
+      '/products/usb-star-projector/lp/02-new-kids.jpg',
+      '/products/usb-star-projector/lp/03-new-features.jpg',
     ],
-    catalogImage: '/products/nujum-usb/g05-family.jpg',
+    catalogImage: '/products/usb-star-projector/lp/01-product.jpg',
     shortDesc: 'USB 2 في 1: عرض نجوم بأقراص كثيرة قابلة للتبديل + ضوء ليلي دافئ',
     offers: [
       {
@@ -389,7 +387,6 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     solutionTitle: 'وصّله… وارفع رأسك',
     solutionText:
       'كبسولة بيضاء صغيرة، رقبة تثنيها وين ما تبين، وأقراص كثيرة بأشكال مختلفة: قمر، مجرة، كواكب، مشاهد فضائية وأكثر. العرض على السقف، والضوء الليلي لوحده إذا قام بالليل.',
-    solutionImage: '/products/nujum-usb/g01-kids.jpg',
     stepsTitle: 'يشتغل في دقيقة — بدون تطبيق',
     steps: [
       'وصّل USB في شارجر الجوال أو باور بانك',
@@ -405,7 +402,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '👩‍👧', title: 'الأم ترتاح أسرع', text: 'لحظة هدوء بدل صراع النور. تشغّلينه، تهدّين الصوت، وهو يغرق في المنظر بدون جوال.' },
           { icon: '👀', title: 'اللي في الصورة = اللي يوصلك', text: 'نفس الكبسولة البيضاء، نفس الرقبة المرنة، نفس عرض السماء. تفتح وتجرب قدام المندوب.' },
         ],
-        image: '/products/nujum-usb/g01-kids.jpg',
+        image: '/products/usb-star-projector/lp/08-cinematic.jpg',
         imageBadge: 'زاوية الأطفال',
         imageTitle: 'غرفته تصير سينما نجوم',
         imageText: 'في ثواني السقف والجدران ياخذون لون السماء. المنظر هو اللي يبيع نفسه قبل أي كلام.',
@@ -428,7 +425,6 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '🧸', title: 'غرفته تصير مكان آمن', text: 'الظلام ما عاد وحش. صار سماء قريبة منه على السرير.' },
           { icon: '🌙', title: 'روتين ينتظرونه كل ليلة', text: '«شغّلي النجوم» — جملة صغيرة تقفل اليوم بهدوء على البيت كله.' },
         ],
-        image: '/products/nujum-usb/s-kid-wonder.jpg',
         imageBadge: 'عاطفة الطفل',
         imageTitle: 'مرتاح… ويتفرّج على سماء غرفته',
         imageText: 'مو خوف ولا صدمة — هدوء وابتسامة والسقف يصير مجرة قدام عينه.',
@@ -451,7 +447,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '😌', title: 'أقل توتر لآخر الليل', text: 'لما الطفل يهدى أسرع، الأم والأب يرجعون لنومهم بدون استنزاف.' },
           { icon: '🎁', title: 'هدية تفهمها كل أم', text: 'تفتح العلبة وتشغّله موصول… والمنظر يقول كل شيء بدون شرح طويل.' },
         ],
-        image: '/products/nujum-usb/s-mom-bedtime.jpg',
+        image: '/products/usb-star-projector/lp/07-couple.jpg',
         imageBadge: 'زاوية الأم',
         imageTitle: 'دقيقة حنان… تغيّر روتين النوم',
         imageText: 'مو بس جهاز على الطاولة — لحظة بينك وبين ولدك وهو يطالع السقف بهدوء.',
@@ -474,7 +470,6 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '🔋', title: 'على باور بانك', text: 'ما تحتاج فيشة جنب السرير. وصّله وخلّيه يشتغل من أي زاوية.' },
           { icon: '✨', title: 'منظر يفهمونه من صورة', text: 'هدية عيد أو زيارة: يفتحون العلبة ويشغّلونه… والسقف يرد عليهم.' },
         ],
-        image: '/products/nujum-usb/g05-family.jpg',
         imageBadge: 'زاوية العائلة',
         imageTitle: 'السقف يصير مكانكم المفضل',
         imageText: 'جلسة هادية، ضوء سينما، وقطعة صغيرة تغيّر جو البيت كله.',
@@ -497,7 +492,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '🌙', title: 'القمر واضح على السقف', text: 'مو نقط ضعيفة. عرض بأقراص أفلام يبين تفاصيل القمر والمجرة بوضوح.' },
           { icon: '📦', title: 'الأقراص مع الجهاز', text: 'تفتح العلبة وتلقى المشاهد جاهزة. تبدّل المزاج بدون ما تشتري شيء زيادة.' },
         ],
-        image: '/products/nujum-usb/g04-discs.jpg',
+        image: '/products/usb-star-projector/lp/05-discs.jpg',
         imageBadge: 'أقراص كثيرة',
         imageTitle: 'كل قرص = شكل جديد للغرفة',
         imageText: 'مجموعة أقراص تخلي الغرفة تتغيّر كل أسبوع. الملل ما له مكان.',
@@ -520,7 +515,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '🛏️', title: 'جنب السرير مباشرة', text: 'حجمه صغير على الكومودينو. ما يسرق مكان ولا يحتاج تركيب.' },
           { icon: '🌟', title: 'كل شكل له جو', text: 'ليلة هادية بالقمر، ليلة مغامرة بالمجرة، ليلة هدية بشكل جديد.' },
         ],
-        image: '/products/nujum-usb/s-shapes.jpg',
+        image: '/products/usb-star-projector/lp/11-maps.jpg',
         imageBadge: 'أشكال على السقف',
         imageTitle: 'منظر يملأ الغرفة… مو نقطة ضوء',
         imageText: 'نفس الكبسولة، ومشاهد كثيرة تظهر بوضوح على السقف الليلي.',
@@ -543,7 +538,6 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '👁️', title: 'يرفّق على العين', text: 'مو نور أبيض قاسي. دافئ ومرتب لغرفة نوم أطفال.' },
           { icon: '😌', title: 'راحة الأهل', text: 'أقل صراع على النور = نوم أعمق للطفل وهدوء أكثر للبيت.' },
         ],
-        image: '/products/nujum-usb/s-warm.jpg',
         imageBadge: '2 في 1',
         imageTitle: 'مجرة… أو ضوء هادي',
         imageText: 'نفس القطعة لروتين النوم وللقيام الخفيف بالليل.',
@@ -566,7 +560,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '⛺', title: 'خيمة البر والسفر', text: 'صغير ويتنقل. حقيبة، فندق، خيمة — نفس السحر وين ما رحتوا.' },
           { icon: '🦢', title: 'رقبة تثنيها 360°', text: 'وجّهي العرض للسقف أو الجدار. الزاوية تنضبط بيدك في ثانية.' },
         ],
-        image: '/products/nujum-usb/s-laptop.jpg',
+        image: '/products/usb-star-projector/lp/14-usb-desk.jpg',
         imageBadge: 'USB مرن',
         imageTitle: 'يشتغل وين ما فيه منفذ',
         imageText: 'الرقبة المرنة + USB = تضعينه في المكان الصح بدون فوضى أسلاك.',
@@ -589,7 +583,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           { icon: '🛣️', title: 'بر، زيارة، أو طريق طويل', text: 'ما يحتاج تركيب دائم. حطه للرحلة وهو موصول، وفكّه لما توصلون.' },
           { icon: '✨', title: 'نفس السحر… خارج البيت', text: 'غرفة، صالة، سيارة، خيمة. قطعة واحدة تمشي مع العيلة وين ما رحتوا.' },
         ],
-        image: '/products/nujum-usb/s-car.jpg',
+        image: '/products/usb-star-projector/lp/15.webp',
         imageBadge: 'زاوية السيارة',
         imageTitle: 'موصول في الطبلون… والسماء تنزل',
         imageText: 'USB السيارة + رقبة مرنة = رحلة ليلية أهدى للأطفال وللسائق.',
@@ -760,7 +754,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
       'المنتج لازم يكون بحالته الأصلية مع الملحقات والتغليف',
     ],
     ctaLabel: 'اطلب سماء الغرفة الآن',
-    offersPromoImage: '/products/nujum-usb/g04-discs.jpg',
+
   },
   {
     id: 'kalb-robot-ai',
