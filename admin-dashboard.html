@@ -1010,7 +1010,8 @@
             } catch (err) {
                 console.log('Analytics request failed.');
             }
-            renderAnalytics(allOrders);
+            // Keep the selected day/month filter — never overwrite with all-time stats
+            filterByDate();
         }
 
         async function refreshAllData(btnElement) {
@@ -1019,6 +1020,8 @@
             
             await fetchOrders(true);
             await fetchAnalyticsStats(true);
+            // filterByDate already applied inside both fetchers; call once more for safety
+            filterByDate();
             
             if (btnElement) btnElement.innerHTML = originalHtml;
         }
@@ -1086,45 +1089,78 @@
 
         let filterMode = 'exact';
         let filterMonthValue = '';
+        // Store operates in Saudi Arabia — always filter by Riyadh calendar day
+        const STORE_TZ = 'Asia/Riyadh';
+
+        function pad2(n) { return String(n).padStart(2, '0'); }
+
+        function dayInStoreTz(ts) {
+            const d = new Date(ts);
+            if (Number.isNaN(d.getTime())) return '';
+            try {
+                return new Intl.DateTimeFormat('en-CA', {
+                    timeZone: STORE_TZ,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).format(d); // YYYY-MM-DD
+            } catch {
+                return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+            }
+        }
+
+        function monthInStoreTz(ts) {
+            return dayInStoreTz(ts).slice(0, 7); // YYYY-MM
+        }
+
+        function todayInStoreTz() {
+            return dayInStoreTz(Date.now());
+        }
+
+        function shiftYmd(ymd, deltaDays) {
+            const parts = String(ymd || '').split('-').map(Number);
+            if (parts.length !== 3 || parts.some(n => !Number.isFinite(n))) return todayInStoreTz();
+            const dt = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], 12, 0, 0));
+            dt.setUTCDate(dt.getUTCDate() + deltaDays);
+            return `${dt.getUTCFullYear()}-${pad2(dt.getUTCMonth() + 1)}-${pad2(dt.getUTCDate())}`;
+        }
 
         function clearDateFilter() {
             setQuickDate('total');
         }
 
         function setQuickDate(type) {
-            const date = new Date();
             filterMode = 'exact';
             
             if (type === 'yesterday') {
-                date.setDate(date.getDate() - 1);
-            } else if (type === 'month') {
-                filterMode = 'month';
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                filterMonthValue = `${year}-${month}`;
-                document.getElementById('date-filter').value = ''; // clear exact date input
+                document.getElementById('date-filter').value = shiftYmd(todayInStoreTz(), -1);
                 filterByDate();
                 return;
-            } else if (type === 'total') {
+            }
+            if (type === 'month') {
+                filterMode = 'month';
+                filterMonthValue = todayInStoreTz().slice(0, 7);
+                document.getElementById('date-filter').value = '';
+                filterByDate();
+                return;
+            }
+            if (type === 'total') {
                 filterMode = 'total';
-                document.getElementById('date-filter').value = ''; // clear exact date input
+                document.getElementById('date-filter').value = '';
                 filterByDate();
                 return;
             }
             
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            
-            document.getElementById('date-filter').value = `${year}-${month}-${day}`;
+            // today (default)
+            document.getElementById('date-filter').value = todayInStoreTz();
             filterByDate();
         }
 
         function filterByDate() {
             const selectedDate = document.getElementById('date-filter').value;
             
-            // If user manually selected a date from input, force 'exact' mode
-            if (selectedDate && filterMode !== 'exact') {
+            // Manual date pick always means exact day in store timezone
+            if (selectedDate) {
                 filterMode = 'exact';
             }
             
@@ -1132,23 +1168,15 @@
             
             if (filterMode === 'exact' && selectedDate) {
                 filtered = allOrders.filter(order => {
-                    const d = new Date(order.created_at);
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-                    const localDateStr = `${year}-${month}-${day}`;
-                    return localDateStr === selectedDate;
+                    const ts = order.created_at || order.timestamp;
+                    return dayInStoreTz(ts) === selectedDate;
                 });
             } else if (filterMode === 'month' && filterMonthValue) {
                 filtered = allOrders.filter(order => {
-                    const d = new Date(order.created_at);
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const localMonthStr = `${year}-${month}`;
-                    return localMonthStr === filterMonthValue;
+                    const ts = order.created_at || order.timestamp;
+                    return monthInStoreTz(ts) === filterMonthValue;
                 });
             } else {
-                // total / no filter
                 filtered = allOrders;
             }
             
@@ -1156,13 +1184,8 @@
             renderAnalytics(filtered);
         }
 
-        function pad2(n) { return String(n).padStart(2, '0'); }
-        function localDay(ts) {
-            const d = new Date(ts);
-            if (Number.isNaN(d.getTime())) return '';
-            return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-        }
-        function isSameLocalDay(ts, date) { return localDay(ts) === localDay(date); }
+        function localDay(ts) { return dayInStoreTz(ts); }
+        function isSameLocalDay(ts, date) { return dayInStoreTz(ts) === dayInStoreTz(date); }
         function eventProductId(event) {
             if (event && event.productId) return String(event.productId);
             const match = String(event && event.path || '').match(/^\/product\/([^/?#]+)/);
@@ -1203,11 +1226,10 @@
                 if (selectedProductId !== 'all' && eventProductId(event) !== selectedProductId) return false;
                 if (filterMode === 'exact') {
                     const selected = document.getElementById('date-filter').value;
-                    return selected ? localDay(event.ts) === selected : true;
+                    return selected ? dayInStoreTz(event.ts) === selected : true;
                 }
                 if (filterMode === 'month' && filterMonthValue) {
-                    const d = new Date(event.ts);
-                    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}` === filterMonthValue;
+                    return monthInStoreTz(event.ts) === filterMonthValue;
                 }
                 return true;
             });
@@ -1419,7 +1441,7 @@
             const visitors = uniqueVisitors(events, 'pageview');
             const baseVisitors = visitors;
             document.getElementById('stat-visitors').innerText = baseVisitors.toLocaleString();
-            const todayVisitors = uniqueVisitors(allEvents.filter(event => isSameLocalDay(event.ts, new Date())), 'pageview');
+            const todayVisitors = uniqueVisitors(allEvents.filter(event => dayInStoreTz(event.ts) === todayInStoreTz()), 'pageview');
             document.getElementById('stat-visitors-sub').innerHTML = `<i class="fa-solid fa-bolt text-yellow-500"></i> ${todayVisitors} Active Today`;
 
             // 3. Orders & Confirmation
