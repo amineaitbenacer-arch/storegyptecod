@@ -197,9 +197,11 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
         <section className="pl-block pl-solution">
           <h2>{product.solutionTitle}</h2>
           <p>{product.solutionText}</p>
-          <div className="pl-solution-img">
-            <Image src={product.solutionImage} alt="" fill sizes="560px" style={{ objectFit: 'contain' }} />
-          </div>
+          {product.solutionImage && (
+            <div className="pl-solution-img">
+              <Image src={product.solutionImage} alt="" fill sizes="560px" style={{ objectFit: 'contain' }} />
+            </div>
+          )}
         </section>
 
         <section className="pl-block">
