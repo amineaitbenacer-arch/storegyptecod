@@ -46,7 +46,7 @@ export default function ReturnPolicyPanel({
             <p className="rp-kicker">اشترِ بثقة — حقّك محفوظ</p>
             <h3>الضمان الذهبي</h3>
             <p className="rp-lead">
-              معاينة قبل الدفع، ودعم سريع، وضمان واضح — تشتري وقلبك مرتاح.
+              دفع عند الاستلام، ودعم سريع، وضمان واضح — تشتري وقلبك مرتاح.
             </p>
           </div>
         </header>
@@ -85,7 +85,7 @@ export default function ReturnPolicyPanel({
         </div>
       ) : (
         <ul className="rp-compact-list">
-          <li>معاينة المنتج عند الباب قبل الدفع</li>
+          <li>الدفع عند الاستلام — بدون تحويل مسبق</li>
           <li>استرجاع 3 أيام · استبدال 7 أيام إن احتجت</li>
           <li>منتج خاطئ؟ الشحن علينا ونصلّح الوضع فورًا</li>
           <li>دعم سريع خلال 48 ساعة — تشتري بقلب مرتاح</li>

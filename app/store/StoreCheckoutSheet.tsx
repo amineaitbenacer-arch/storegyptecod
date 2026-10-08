@@ -185,7 +185,7 @@ export default function StoreCheckoutSheet({
 
         <div className="store-ac-congrats">
           <i className="fa-solid fa-gift" aria-hidden />
-          <span>اختيار ذكي — طلبك جاهز للإرسال مع المعاينة قبل الدفع</span>
+          <span>اختيار ذكي — طلبك جاهز للإرسال · الدفع عند الاستلام</span>
         </div>
 
         <div className="store-ac-trust">
@@ -197,10 +197,10 @@ export default function StoreCheckoutSheet({
             </div>
           </div>
           <div className="store-ac-trust-item">
-            <span aria-hidden>🤝</span>
+            <span aria-hidden>💳</span>
             <div>
-              <strong>المعاينة قبل الدفع</strong>
-              <em>تفحص المنتج قبل الدفع</em>
+              <strong>الدفع عند الاستلام</strong>
+              <em>تدفع للمندوب عند باب المنزل</em>
             </div>
           </div>
         </div>

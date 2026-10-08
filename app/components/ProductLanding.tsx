@@ -163,7 +163,7 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
           <button type="button" className="pl-cta" onClick={openSheet}>
             {product.ctaLabel} — {formatSar(offer.price)}
           </button>
-          <div className="pl-reassure">🛡️ ضمان الجودة • 🚚 توصيل 20 ريال • 🤝 معاينة قبل الدفع</div>
+          <div className="pl-reassure">🛡️ ضمان الجودة • 🚚 توصيل 20 ريال • 💳 الدفع عند الاستلام</div>
 
           <div className="pl-trust-grid">
             {product.trustCards.map((c) => (

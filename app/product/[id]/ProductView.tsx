@@ -360,10 +360,10 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               </div>
             </div>
             <div className="tc-mini-item">
-              <span className="tc-mini-icon">🤝</span>
+              <span className="tc-mini-icon">💳</span>
               <div className="tc-mini-text">
-                <strong>المعاينة قبل الدفع</strong>
-                <span>تفحص المنتج قبل الدفع 📦</span>
+                <strong>الدفع عند الاستلام</strong>
+                <span>تدفع للمندوب عند باب المنزل 📦</span>
               </div>
             </div>
           </div>
@@ -563,7 +563,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             <div className="pv-sp-chips">
               <span className="pv-sp-chip live">
                 <i className="pv-sp-dot" aria-hidden="true" />
-                ادفع بعد المعاينة
+                الدفع عند الاستلام
               </span>
               {(product.proofChips ?? ['جودة مضمونة', 'اختيار الأمهات', 'هدية تبهِر']).map((chip) => (
                 <span key={chip} className="pv-sp-chip">
@@ -603,7 +603,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             <div className="cta-reassurance">
               <span>ضمان ذهبي</span>
               <span className="dot">•</span>
-              <span>معاينة قبل الدفع</span>
+              <span>تأكيد هاتفي</span>
               <span className="dot">•</span>
               <span>الدفع عند الاستلام</span>
             </div>
