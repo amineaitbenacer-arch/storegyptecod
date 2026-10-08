@@ -118,7 +118,8 @@ export async function GET() {
 
 const STATUSES = [
   'Nouveau',
-  'Confirmé',
+  'Validé',
+  'Confirmé', // legacy alias — kept so old rows still update
   'Annulé',
   'Pas de réponse',
   'pending',

@@ -417,7 +417,7 @@
                 <img src="/images/logo-mark.png" alt="Dune Market" width="80" height="80" style="width:80px;height:80px;object-fit:contain;display:block;background:transparent;" />
             </div>
             <h2 class="text-3xl font-black text-white mb-2 glow-text">Dune Market</h2>
-            <p class="text-sm text-gray-400 mb-8">النظام الآمن لإدارة المبيعات والتأكيدات</p>
+            <p class="text-sm text-gray-400 mb-8">النظام الآمن لإدارة المبيعات والطلبات</p>
             
             <form onsubmit="handleLogin(event)">
                 <div class="relative mb-6">
@@ -445,7 +445,7 @@
                 </div>
                 <div>
                     <h1 class="text-2xl md:text-3xl font-black text-white glow-text mb-1">Dune Market</h1>
-                    <p class="text-sm text-gray-400 font-semibold">إدارة Orders، التأكيد، والإحصائيات الحية<br><span class="text-yellow-400 en-font text-xs">KSA · 1 USD = 3.75 SAR</span></p>
+                    <p class="text-sm text-gray-400 font-semibold">إدارة Orders، المتابعة، والإحصائيات الحية<br><span class="text-yellow-400 en-font text-xs">KSA · 1 USD = 3.75 SAR</span></p>
                 </div>
             </div>
             
@@ -550,19 +550,19 @@
                         </span>
                     </div>
                     <div class="text-2xl font-black text-yellow-400 en-font" id="stat-orders">0</div>
-                    <div class="text-[11px] text-gray-500 font-semibold mt-1" id="stat-confirmed-badge">0 Confirmed Orders</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1" id="stat-confirmed-badge">0 Validated Orders</div>
                 </div>
 
-                <!-- NEW: Total Confirmed -->
+                <!-- Total Validated -->
                 <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-emerald-500">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-gray-400">Total Confirmed</span>
+                        <span class="text-xs font-bold text-gray-400">Total Validated</span>
                         <span class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-sm">
                             <i class="fa-solid fa-check-double"></i>
                         </span>
                     </div>
                     <div class="text-2xl font-black text-emerald-400 en-font" id="stat-total-confirmed">0</div>
-                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Successfully Verified</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Accepted Orders</div>
                 </div>
 
                 <!-- 4. Conversion Rate -->
@@ -622,19 +622,115 @@
                         </span>
                     </div>
                     <div class="text-2xl font-black text-cyan-400 en-font" id="stat-speed">0.72s</div>
-                    <div class="text-[11px] text-green-400 font-semibold mt-1">🚀 Excellent Score</div>
+                    <div class="text-[11px] text-green-400 font-semibold mt-1" id="stat-speed-label">🚀 Excellent Score</div>
+                </div>
+
+                <!-- CA Validé — argent réellement accepté -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-lime-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">CA Validé</span>
+                        <span class="w-8 h-8 rounded-lg bg-lime-500/20 flex items-center justify-center text-lime-400 text-sm">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-lime-400 en-font" id="stat-validated-revenue">0 <span class="text-xs">SAR</span></div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Revenue des commandes Validé</div>
+                </div>
+
+                <!-- Taux Validation -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-teal-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Taux Validation</span>
+                        <span class="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center text-teal-400 text-sm">
+                            <i class="fa-solid fa-percent"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-teal-300 en-font" id="stat-validation-rate">0%</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1" id="stat-validation-sub">Validé / Orders</div>
+                </div>
+
+                <!-- Taux Annulation -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-rose-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Taux Annulation</span>
+                        <span class="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center text-rose-400 text-sm">
+                            <i class="fa-solid fa-ban"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-rose-400 en-font" id="stat-cancel-rate">0%</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1" id="stat-cancel-sub">Annulé / Orders</div>
+                </div>
+
+                <!-- En attente (Nouveau) -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-sky-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">En Attente</span>
+                        <span class="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center text-sky-400 text-sm">
+                            <i class="fa-solid fa-clock"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-sky-300 en-font" id="stat-pending">0</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Nouveau — à traiter</div>
+                </div>
+
+                <!-- Checkout -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-violet-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Checkout</span>
+                        <span class="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center text-violet-400 text-sm">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-violet-300 en-font" id="stat-checkout">0</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Ouvertures du formulaire</div>
+                </div>
+
+                <!-- Panier → Order -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-fuchsia-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Panier → Order</span>
+                        <span class="w-8 h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-400 text-sm">
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-fuchsia-300 en-font" id="stat-cart-order-rate">0%</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Add to Cart → Order</div>
+                </div>
+
+                <!-- CA Net (sans livraison) -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-orange-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">CA Net</span>
+                        <span class="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400 text-sm">
+                            <i class="fa-solid fa-receipt"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-orange-300 en-font" id="stat-net-revenue">0 <span class="text-xs">SAR</span></div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1">Sans frais de livraison</div>
+                </div>
+
+                <!-- Pas de réponse -->
+                <div class="glass-card kpi-card p-5 relative overflow-hidden border-t-2 border-yellow-600">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Sans Réponse</span>
+                        <span class="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center text-yellow-400 text-sm">
+                            <i class="fa-solid fa-phone-slash"></i>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-yellow-300 en-font" id="stat-no-response">0</div>
+                    <div class="text-[11px] text-gray-500 font-semibold mt-1" id="stat-no-response-sub">À rappeler</div>
                 </div>
             </div>
 
             <!-- Detailed Insights Grid -->
-            <div class="grid grid-cols-1 max-w-2xl mx-auto gap-8 mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <!-- Status Distribution & Funnel Card -->
                 <div class="glass-card p-6 rounded-2xl">
                     <div class="flex items-center justify-between mb-6 pb-3 border-b border-gray-700/50">
                         <h3 class="text-lg font-bold text-white flex items-center gap-2">
                             <i class="fa-solid fa-pie-chart text-pink-500"></i> Order Status Distribution
                         </h3>
-                        <span class="text-xs text-gray-400 font-bold">Call Center Tracking</span>
+                        <span class="text-xs text-gray-400 font-bold">Order Tracking</span>
                     </div>
                     
                     <div id="status-distribution-container" class="space-y-4">
@@ -647,18 +743,86 @@
                             <span>Conversion Funnel</span>
                             <span class="text-green-400 font-bold" id="funnel-rate-badge">0% Conversion</span>
                         </div>
-                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
                             <div class="bg-blue-500/10 border border-blue-500/20 p-2 rounded-xl">
                                 <div class="text-gray-400 font-semibold mb-1">Visitors</div>
                                 <div class="font-black text-white en-font" id="funnel-visitors">0</div>
+                            </div>
+                            <div class="bg-pink-500/10 border border-pink-500/20 p-2 rounded-xl">
+                                <div class="text-gray-400 font-semibold mb-1">Cart</div>
+                                <div class="font-black text-pink-300 en-font" id="funnel-cart">0</div>
                             </div>
                             <div class="bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl">
                                 <div class="text-gray-400 font-semibold mb-1">Orders</div>
                                 <div class="font-black text-yellow-400 en-font" id="funnel-orders">0</div>
                             </div>
                             <div class="bg-green-500/10 border border-green-500/20 p-2 rounded-xl">
-                                <div class="text-gray-400 font-semibold mb-1">Confirmed</div>
+                                <div class="text-gray-400 font-semibold mb-1">Validated</div>
                                 <div class="font-black text-green-400 en-font" id="funnel-confirmed">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Insights -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <div class="flex items-center justify-between mb-6 pb-3 border-b border-gray-700/50">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-yellow-400"></i> Insights Clés
+                        </h3>
+                        <span class="text-xs text-gray-400 font-bold">Top Performers</span>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-300 shrink-0"><i class="fa-solid fa-city"></i></span>
+                                <div class="min-w-0">
+                                    <div class="text-[11px] text-gray-400 font-bold">Top Ville</div>
+                                    <div class="text-sm font-black text-white truncate" id="insight-top-city">—</div>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <div class="text-lg font-black text-amber-300 en-font" id="insight-top-city-count">0</div>
+                                <div class="text-[10px] text-gray-500 font-semibold">orders</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="w-9 h-9 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-300 shrink-0"><i class="fa-solid fa-box"></i></span>
+                                <div class="min-w-0">
+                                    <div class="text-[11px] text-gray-400 font-bold">Top Offre</div>
+                                    <div class="text-sm font-black text-white truncate" id="insight-top-offer">—</div>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <div class="text-lg font-black text-purple-300 en-font" id="insight-top-offer-count">0</div>
+                                <div class="text-[10px] text-gray-500 font-semibold">orders</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-300 shrink-0"><i class="fa-solid fa-bullseye"></i></span>
+                                <div class="min-w-0">
+                                    <div class="text-[11px] text-gray-400 font-bold">Top Source</div>
+                                    <div class="text-sm font-black text-white truncate" id="insight-top-source">—</div>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <div class="text-lg font-black text-blue-300 en-font" id="insight-top-source-count">0</div>
+                                <div class="text-[10px] text-gray-500 font-semibold">orders</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="w-9 h-9 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-300 shrink-0"><i class="fa-solid fa-user-check"></i></span>
+                                <div class="min-w-0">
+                                    <div class="text-[11px] text-gray-400 font-bold">Clients Uniques</div>
+                                    <div class="text-sm font-black text-white truncate" id="insight-unique-customers">0 numéros</div>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <div class="text-lg font-black text-emerald-300 en-font" id="insight-repeat-count">0</div>
+                                <div class="text-[10px] text-gray-500 font-semibold">réachats</div>
                             </div>
                         </div>
                     </div>
@@ -1046,7 +1210,7 @@
                     allOrders.forEach(o => {
                         o.created_at = o.created_at || o.timestamp || new Date().toISOString();
                         if (!o.offer_name) o.offer_name = o.offer || o.offerName || '';
-                        const statusMap = { pending: 'Nouveau', confirmed: 'Confirmé', cancelled: 'Annulé', shipped: 'Pas de réponse', delivered: 'Confirmé' };
+                        const statusMap = { pending: 'Nouveau', confirmed: 'Validé', Confirmé: 'Validé', cancelled: 'Annulé', shipped: 'Pas de réponse', delivered: 'Validé' };
                         if (statusMap[o.status]) o.status = statusMap[o.status];
                         if (!o.status) o.status = 'Nouveau';
 
@@ -1425,14 +1589,43 @@
             }).join('');
         }
 
+        function orderTotalSar(order) {
+            const money = orderMoney(order);
+            return Number(money.total) || 0;
+        }
+        function orderNetSar(order) {
+            const money = orderMoney(order);
+            return Number(money.net) || 0;
+        }
+        function topCount(list, keyFn) {
+            const map = new Map();
+            for (const item of list) {
+                const key = String(keyFn(item) || '').trim();
+                if (!key) continue;
+                map.set(key, (map.get(key) || 0) + 1);
+            }
+            let best = null;
+            let bestCount = 0;
+            for (const [key, count] of map) {
+                if (count > bestCount) {
+                    best = key;
+                    bestCount = count;
+                }
+            }
+            return { key: best, count: bestCount };
+        }
+
         // 📊 RENDER EXECUTIVE ANALYTICS DASHBOARD
         function renderAnalytics(ordersList) {
             const totalOrders = ordersList.length;
-            const totalRevenue = ordersList.reduce((sum, o) => sum + (Number(o.price) || 0), 0);
-            const confirmedOrders = ordersList.filter(o => o.status === 'Confirmé').length;
+            const totalRevenue = ordersList.reduce((sum, o) => sum + orderTotalSar(o), 0);
+            const netRevenue = ordersList.reduce((sum, o) => sum + orderNetSar(o), 0);
+            const validatedList = ordersList.filter(o => o.status === 'Validé' || o.status === 'Confirmé');
+            const confirmedOrders = validatedList.length;
             const cancelledOrders = ordersList.filter(o => o.status === 'Annulé').length;
             const noResponseOrders = ordersList.filter(o => o.status === 'Pas de réponse').length;
             const newOrders = ordersList.filter(o => !o.status || o.status === 'Nouveau').length;
+            const validatedRevenue = validatedList.reduce((sum, o) => sum + orderTotalSar(o), 0);
 
             // 1. Revenue
             document.getElementById('stat-revenue').innerHTML = `${totalRevenue.toLocaleString()} <span class="text-xs text-green-600">SAR</span><div class="text-sm text-gray-300 font-bold mt-1">${usdFromSar(totalRevenue)}</div>`;
@@ -1444,9 +1637,9 @@
             const todayVisitors = uniqueVisitors(allEvents.filter(event => dayInStoreTz(event.ts) === todayInStoreTz()), 'pageview');
             document.getElementById('stat-visitors-sub').innerHTML = `<i class="fa-solid fa-bolt text-yellow-500"></i> ${todayVisitors} Active Today`;
 
-            // 3. Orders & Confirmation
+            // 3. Orders & Validation
             document.getElementById('stat-orders').innerText = totalOrders;
-            document.getElementById('stat-confirmed-badge').innerText = `${confirmedOrders} Confirmed (${totalOrders > 0 ? Math.round((confirmedOrders / totalOrders) * 100) : 0}%)`;
+            document.getElementById('stat-confirmed-badge').innerText = `${confirmedOrders} Validated (${totalOrders > 0 ? Math.round((confirmedOrders / totalOrders) * 100) : 0}%)`;
             const statTotalConfirmed = document.getElementById('stat-total-confirmed');
             if(statTotalConfirmed) statTotalConfirmed.innerText = confirmedOrders;
 
@@ -1459,12 +1652,21 @@
             document.getElementById('stat-aov').innerHTML = `${aov} <span class="text-xs">SAR</span><div class="text-sm text-gray-300 font-bold mt-1">${usdFromSar(aov)}</div>`;
 
             const loads = events.filter(event => event.type === 'pageview' && Number(event.loadMs) > 0).map(event => Number(event.loadMs));
-            document.getElementById('stat-speed').innerText = loads.length
-                ? `${(loads.reduce((sum, ms) => sum + ms, 0) / loads.length / 1000).toFixed(2)}s`
-                : '—';
+            const avgSpeedSec = loads.length
+                ? (loads.reduce((sum, ms) => sum + ms, 0) / loads.length / 1000)
+                : null;
+            document.getElementById('stat-speed').innerText = avgSpeedSec != null ? `${avgSpeedSec.toFixed(2)}s` : '—';
+            const speedLabel = document.getElementById('stat-speed-label');
+            if (speedLabel) {
+                if (avgSpeedSec == null) speedLabel.textContent = 'Pas assez de données';
+                else if (avgSpeedSec <= 2.5) speedLabel.textContent = '🚀 Excellent Score';
+                else if (avgSpeedSec <= 4) speedLabel.textContent = '⚡ Bon Score';
+                else speedLabel.textContent = '🐢 À améliorer';
+            }
 
             const pageViews = events.filter(event => event.type === 'pageview').length;
             const addToCarts = uniqueVisitors(events, 'addtocart');
+            const checkouts = uniqueVisitors(events, 'checkout');
             
             const statPageviews = document.getElementById('stat-pageviews');
             if(statPageviews) statPageviews.innerText = pageViews.toLocaleString();
@@ -1472,8 +1674,57 @@
             const statAddtocart = document.getElementById('stat-addtocart');
             if(statAddtocart) statAddtocart.innerText = addToCarts.toLocaleString();
 
+            // COD / ops KPIs
+            const validationRate = totalOrders > 0 ? Math.round((confirmedOrders / totalOrders) * 100) : 0;
+            const cancelRate = totalOrders > 0 ? Math.round((cancelledOrders / totalOrders) * 100) : 0;
+            const noResponseRate = totalOrders > 0 ? Math.round((noResponseOrders / totalOrders) * 100) : 0;
+            const cartOrderRate = addToCarts > 0 ? ((totalOrders / addToCarts) * 100).toFixed(1) : '0.0';
+
+            const setText = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = value;
+            };
+            const setHtml = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = value;
+            };
+
+            setHtml('stat-validated-revenue', `${validatedRevenue.toLocaleString()} <span class="text-xs">SAR</span><div class="text-sm text-gray-300 font-bold mt-1">${usdFromSar(validatedRevenue)}</div>`);
+            setText('stat-validation-rate', `${validationRate}%`);
+            setText('stat-validation-sub', `${confirmedOrders} Validé / ${totalOrders} Orders`);
+            setText('stat-cancel-rate', `${cancelRate}%`);
+            setText('stat-cancel-sub', `${cancelledOrders} Annulé / ${totalOrders} Orders`);
+            setText('stat-pending', String(newOrders));
+            setText('stat-checkout', checkouts.toLocaleString());
+            setText('stat-cart-order-rate', `${cartOrderRate}%`);
+            setHtml('stat-net-revenue', `${Math.round(netRevenue).toLocaleString()} <span class="text-xs">SAR</span><div class="text-sm text-gray-300 font-bold mt-1">${usdFromSar(netRevenue)}</div>`);
+            setText('stat-no-response', String(noResponseOrders));
+            setText('stat-no-response-sub', `${noResponseRate}% des orders`);
+
+            // Insights: top city / offer / source + unique phones
+            const topCity = topCount(ordersList, o => o.city);
+            const topOffer = topCount(ordersList, o => o.offer_name || o.product_name || o.productId);
+            const topSource = topCount(ordersList, o => sourceName(o.source));
+            const phones = ordersList.map(o => String(o.phone || '').replace(/\D/g, '')).filter(Boolean);
+            const uniquePhones = new Set(phones).size;
+            const phoneCounts = new Map();
+            for (const p of phones) phoneCounts.set(p, (phoneCounts.get(p) || 0) + 1);
+            let repeatBuyers = 0;
+            for (const c of phoneCounts.values()) if (c > 1) repeatBuyers += 1;
+
+            setText('insight-top-city', topCity.key || '—');
+            setText('insight-top-city-count', String(topCity.count || 0));
+            setText('insight-top-offer', topOffer.key || '—');
+            setText('insight-top-offer-count', String(topOffer.count || 0));
+            setText('insight-top-source', topSource.key || '—');
+            setText('insight-top-source-count', String(topSource.count || 0));
+            setText('insight-unique-customers', `${uniquePhones} numéros`);
+            setText('insight-repeat-count', String(repeatBuyers));
+
             // 7. Funnel
             document.getElementById('funnel-visitors').innerText = baseVisitors;
+            const funnelCart = document.getElementById('funnel-cart');
+            if (funnelCart) funnelCart.innerText = addToCarts;
             document.getElementById('funnel-orders').innerText = totalOrders;
             document.getElementById('funnel-confirmed').innerText = confirmedOrders;
             document.getElementById('funnel-rate-badge').innerText = `${convRate}% Conversion`;
@@ -1481,7 +1732,7 @@
             // 8. Status Distribution Bars
             const statusContainer = document.getElementById('status-distribution-container');
             const statuses = [
-                { name: 'Confirmé', count: confirmedOrders, color: 'from-green-500 to-emerald-600', text: 'text-green-400' },
+                { name: 'Validé', count: confirmedOrders, color: 'from-green-500 to-emerald-600', text: 'text-green-400' },
                 { name: 'Nouveau', count: newOrders, color: 'from-blue-500 to-cyan-600', text: 'text-blue-400' },
                 { name: 'Pas de réponse', count: noResponseOrders, color: 'from-amber-500 to-yellow-600', text: 'text-yellow-400' },
                 { name: 'Annulé', count: cancelledOrders, color: 'from-red-500 to-rose-600', text: 'text-red-400' }
@@ -1707,7 +1958,7 @@
 
         async function updateStatus(orderId, newStatus, selectElement) {
             selectElement.className = 'status-badge'; 
-            if (newStatus === 'Confirmé') selectElement.classList.add('st-confirme');
+            if (newStatus === 'Validé' || newStatus === 'Confirmé') selectElement.classList.add('st-confirme');
             else if (newStatus === 'Annulé') selectElement.classList.add('st-annule');
             else if (newStatus === 'Pas de réponse') selectElement.classList.add('st-pasreponse');
             else selectElement.classList.add('st-nouveau');
