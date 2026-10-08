@@ -10,6 +10,7 @@ import { saveLastOrder, thankYouHref } from '../../lib/last-order';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 import './product-landing.css';
+import LivePurchaseToast from './LivePurchaseToast';
 
 export default function ProductLanding({ product }: { product: ProductPageConfig }) {
   const [mainIdx, setMainIdx] = useState(0);
@@ -336,6 +337,8 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
           </div>
         </div>
       )}
+
+      <LivePurchaseToast hidden={sheetOpen} />
     </div>
   );
 }

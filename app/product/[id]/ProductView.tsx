@@ -11,6 +11,7 @@ import SaPhoneField from '../../components/SaPhoneField';
 import { PHONE_INCOMPLETE_MSG } from '../../../lib/phone';
 import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../../lib/tracking';
+import LivePurchaseToast from '../../components/LivePurchaseToast';
 
 function pickOffer(product: ProductPageConfig) {
   // أول عرض = الأرخص — يظهر محددًا عند دخول الصفحة
@@ -910,6 +911,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
       {mounted && sheetOpen && createPortal(sheet, document.body)}
       {mounted && createPortal(buyBar, document.body)}
+      {mounted ? <LivePurchaseToast hidden={sheetOpen} /> : null}
     </div>
   );
 }
