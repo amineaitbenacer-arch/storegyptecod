@@ -510,8 +510,12 @@
                     <i class="fa-solid fa-chart-pie text-lg"></i> Analytics Dashboard
                 </button>
                 <!-- Tab 2: Orders -->
-                <button id="tab-orders-btn" onclick="switchAdminTab('orders')" class="px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all text-gray-300 hover:text-white hover:bg-gray-800/80">
-                    <i class="fa-solid fa-box-archive text-lg"></i> Orders Management
+                <button id="tab-orders-btn" onclick="switchAdminTab('orders')" class="relative px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all text-gray-300 hover:text-white hover:bg-gray-800/80">
+                    <span class="relative inline-flex">
+                        <i class="fa-solid fa-box-archive text-lg"></i>
+                        <span id="orders-new-dot" class="hidden absolute -top-0.5 -right-1.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-gray-900" aria-hidden="true"></span>
+                    </span>
+                    Orders Management
                     <span id="tab-orders-badge" class="bg-gray-800 text-yellow-500 text-xs px-2.5 py-0.5 rounded-full font-black border border-yellow-500/30">0</span>
                 </button>
                 <!-- Tab 3: Protected Pixels -->
@@ -1095,7 +1099,8 @@
                 renderAnalytics(scopedOrders);
             } else if (tabName === 'orders') {
                 ordersView.style.display = 'block';
-                ordersBtn.className = "px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-yellow-500 text-black shadow-[0_0_20px_rgba(255,215,0,0.3)]";
+                ordersBtn.className = "relative px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-yellow-500 text-black shadow-[0_0_20px_rgba(255,215,0,0.3)]";
+                clearFaviconAlert();
                 renderOrders(scopedOrders);
             } else if (tabName === 'settings') {
                 settingsView.style.display = 'block';
@@ -1143,7 +1148,8 @@
         }
 
         // ── Live refresh MAX (battery-friendly + KSA clocks) ──
-        // NO background polling — only manual / WiFi reconnect / tab focus (saves battery)
+        // NO heavy background polling — only manual / WiFi reconnect / tab focus (saves battery)
+        // Light hidden-tab watch only for green favicon badge on new orders
         // stale-while-revalidate · refetchOnReconnect · refetchOnWindowFocus
         // cancelRefetch · staleTime · watchdog · atomic apply
         const REFRESH_TIMEOUT_MS = 10000;
@@ -1153,6 +1159,10 @@
         const WATCHDOG_MS = REFRESH_TIMEOUT_MS + 2500;
         const MAX_AUTO_RETRIES = 1;
         const RELATIVE_CLOCK_MS = 30000;           // label tick — slow = less CPU/battery
+        const HIDDEN_ORDER_WATCH_MS = 40000;       // favicon badge while tab is in background
+        const ADMIN_TITLE = 'Dashboard | Dune Market';
+        const FAVICON_BASE = '/images/logo-mark.png';
+        const FAVICON_ALERT_KEY = 'ac_admin_favicon_alert';
 
         let lastSuccessfulRefreshAt = null;
         let refreshGeneration = 0;
@@ -1165,6 +1175,11 @@
         let reconnectTimer = null;
         let liveRefreshWired = false;
         let lastSeenKsaDay = '';
+        let knownOrderIds = null;            // Set after first orders load
+        let faviconAlertActive = false;
+        let faviconPaintToken = 0;
+        let hiddenOrderWatchTimer = null;
+        let faviconBaseDataUrl = null;
 
         function getRefreshBtnEls() {
             return {
@@ -1341,12 +1356,178 @@
             allOrders = normalizeOrdersList(orders);
             const badge = document.getElementById('tab-orders-badge');
             if (badge) badge.innerText = allOrders.length;
+            syncFaviconAlertFromOrders(allOrders);
             if (!applyFilters) return;
             if (!window.initialDateSet) {
                 window.initialDateSet = true;
                 setQuickDate('today');
             } else {
                 filterByDate();
+            }
+        }
+
+        function getFaviconLink() {
+            let link = document.querySelector("link[rel='icon'][data-admin-dynamic='1']");
+            if (link) return link;
+            link = document.createElement('link');
+            link.rel = 'icon';
+            link.type = 'image/png';
+            link.setAttribute('data-admin-dynamic', '1');
+            document.head.appendChild(link);
+            return link;
+        }
+
+        function loadFaviconBase() {
+            if (faviconBaseDataUrl) return Promise.resolve(faviconBaseDataUrl);
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.decoding = 'async';
+                img.onload = () => {
+                    try {
+                        const size = 64;
+                        const canvas = document.createElement('canvas');
+                        canvas.width = size;
+                        canvas.height = size;
+                        const ctx = canvas.getContext('2d');
+                        ctx.clearRect(0, 0, size, size);
+                        ctx.drawImage(img, 0, 0, size, size);
+                        faviconBaseDataUrl = canvas.toDataURL('image/png');
+                        resolve(faviconBaseDataUrl);
+                    } catch (_) {
+                        resolve(null);
+                    }
+                };
+                img.onerror = () => resolve(null);
+                img.src = FAVICON_BASE;
+            });
+        }
+
+        function paintFaviconWithGreenDot(baseDataUrl) {
+            const size = 64;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            return new Promise((resolve) => {
+                img.onload = () => {
+                    ctx.clearRect(0, 0, size, size);
+                    ctx.drawImage(img, 0, 0, size, size);
+                    const r = size * 0.16;
+                    const x = size - r - 1;
+                    const y = r + 1;
+                    ctx.beginPath();
+                    ctx.arc(x, y, r + 2.2, 0, Math.PI * 2);
+                    ctx.fillStyle = '#070b14';
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(x, y, r, 0, Math.PI * 2);
+                    ctx.fillStyle = '#22c55e';
+                    ctx.fill();
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = () => resolve(null);
+                img.src = baseDataUrl;
+            });
+        }
+
+        function setOrdersTabDot(active) {
+            const ordersDot = document.getElementById('orders-new-dot');
+            if (ordersDot) ordersDot.classList.toggle('hidden', !active);
+        }
+
+        async function setFaviconAlert(active) {
+            faviconAlertActive = !!active;
+            try {
+                if (faviconAlertActive) sessionStorage.setItem(FAVICON_ALERT_KEY, '1');
+                else sessionStorage.removeItem(FAVICON_ALERT_KEY);
+            } catch (_) {}
+
+            setOrdersTabDot(faviconAlertActive);
+
+            // Browser favicon/title badge only useful when the tab is in the background
+            const showBrowserBadge = faviconAlertActive && document.visibilityState === 'hidden';
+            document.title = showBrowserBadge ? `● ${ADMIN_TITLE}` : ADMIN_TITLE;
+
+            const token = ++faviconPaintToken;
+            const link = getFaviconLink();
+            if (!showBrowserBadge) {
+                link.href = FAVICON_BASE;
+                return;
+            }
+            const base = await loadFaviconBase();
+            if (!base || token !== faviconPaintToken) return;
+            const badged = await paintFaviconWithGreenDot(base);
+            if (!badged || token !== faviconPaintToken || !faviconAlertActive) return;
+            if (document.visibilityState !== 'hidden') {
+                link.href = FAVICON_BASE;
+                return;
+            }
+            link.href = badged;
+        }
+
+        /** Clear browser-tab badge only (user is looking at admin). Keep Orders tab green dot. */
+        function dimFaviconAlertForFocus() {
+            if (!faviconAlertActive) return;
+            document.title = ADMIN_TITLE;
+            faviconPaintToken += 1;
+            const link = getFaviconLink();
+            link.href = FAVICON_BASE;
+        }
+
+        /** Full clear — user opened Orders (or dismissed alert). */
+        function clearFaviconAlert() {
+            let pending = false;
+            try { pending = sessionStorage.getItem(FAVICON_ALERT_KEY) === '1'; } catch (_) {}
+            if (!faviconAlertActive && !pending) {
+                setOrdersTabDot(false);
+                return;
+            }
+            setFaviconAlert(false);
+        }
+
+        function syncFaviconAlertFromOrders(orders) {
+            const ids = (orders || []).map((o) => String(o.id));
+            if (knownOrderIds === null) {
+                knownOrderIds = new Set(ids);
+                let pending = false;
+                try { pending = sessionStorage.getItem(FAVICON_ALERT_KEY) === '1'; } catch (_) {}
+                if (pending) setFaviconAlert(true);
+                else setFaviconAlert(false);
+                return;
+            }
+            let foundNew = false;
+            for (const id of ids) {
+                if (!knownOrderIds.has(id)) {
+                    knownOrderIds.add(id);
+                    foundNew = true;
+                }
+            }
+            if (!foundNew) return;
+            // Already reading Orders on a visible tab — no need to flash the badge
+            if (currentTab === 'orders' && document.visibilityState === 'visible') return;
+            setFaviconAlert(true);
+        }
+
+        async function watchOrdersForFaviconBadge() {
+            if (!navigator.onLine || refreshBusy) return;
+            try {
+                const result = await loadOrdersPayload(null);
+                if (!result.ok || !result.orders) return;
+                // Quiet apply — do NOT markRefreshSuccess (keeps focus-refresh eligible)
+                applyOrdersToUi(result.orders, { applyFilters: false });
+            } catch (_) {}
+        }
+
+        function syncHiddenOrderWatch() {
+            if (hiddenOrderWatchTimer) {
+                clearInterval(hiddenOrderWatchTimer);
+                hiddenOrderWatchTimer = null;
+            }
+            if (document.visibilityState === 'hidden') {
+                hiddenOrderWatchTimer = setInterval(() => {
+                    watchOrdersForFaviconBadge();
+                }, HIDDEN_ORDER_WATCH_MS);
             }
         }
 
@@ -1595,9 +1776,19 @@
                 paintRefreshButton('offline');
             });
 
-            // refetchOnWindowFocus — only when returning to the tab (no background polling)
+            // refetchOnWindowFocus — only when returning to the tab (no heavy background polling)
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState !== 'visible') return;
+                syncHiddenOrderWatch();
+
+                if (document.visibilityState !== 'visible') {
+                    // Tab went to background — restore green favicon if alert still pending
+                    if (faviconAlertActive) setFaviconAlert(true);
+                    return;
+                }
+
+                // Looking at admin — hide tab badge; Orders tab keeps its green dot
+                dimFaviconAlertForFocus();
+                try { if (allOrders.length) filterByDate(); } catch (_) {}
 
                 // New KSA calendar day while tab was away → snap filter to اليوم
                 try {
@@ -1623,6 +1814,7 @@
             });
             window.addEventListener('focus', () => {
                 if (document.visibilityState !== 'visible') return;
+                dimFaviconAlertForFocus();
                 if (!navigator.onLine) return;
                 if (dataAgeMs() >= VISIBILITY_MIN_AGE_MS) {
                     refreshAllData(null, { reason: 'focus' });
@@ -1636,7 +1828,8 @@
                 }
             });
 
-            // Intentionally NO setInterval poll — saves battery / CPU
+            // Light watch only while tab is hidden — powers green favicon badge
+            syncHiddenOrderWatch();
             try { lastSeenKsaDay = todayInStoreTz(); } catch (_) { lastSeenKsaDay = ''; }
         }
 
