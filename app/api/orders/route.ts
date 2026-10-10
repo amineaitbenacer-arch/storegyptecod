@@ -106,13 +106,24 @@ export async function POST(request: NextRequest) {
   }
 }
 
+const NO_STORE = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+  Pragma: 'no-cache',
+};
+
 export async function GET() {
   try {
     const orders = await listOrders();
-    return NextResponse.json({ success: true, orders, total: orders.length });
+    return NextResponse.json(
+      { success: true, orders, total: orders.length },
+      { headers: NO_STORE }
+    );
   } catch (error) {
     console.error('[orders] GET failed', error);
-    return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch orders' },
+      { status: 500, headers: NO_STORE }
+    );
   }
 }
 
