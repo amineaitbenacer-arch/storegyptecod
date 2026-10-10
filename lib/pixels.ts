@@ -348,6 +348,25 @@ export function trackPixelPurchaseWhenReady(payload: CommercePayload, attempts =
 }
 
 let thankYouPurchaseId = '';
+const PURCHASE_PIXEL_KEY = 'sg_ty_purchase_';
+
+function alreadyFiredThankYouPurchase(id: string) {
+  if (thankYouPurchaseId === id) return true;
+  try {
+    return window.sessionStorage.getItem(PURCHASE_PIXEL_KEY + id) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function markThankYouPurchaseFired(id: string) {
+  thankYouPurchaseId = id;
+  try {
+    window.sessionStorage.setItem(PURCHASE_PIXEL_KEY + id, '1');
+  } catch {
+    /* private mode */
+  }
+}
 
 /** PageView + Purchase on the confirmation page, after the pixel helper can see them. */
 export function trackThankYouPixels(payload: CommercePayload, attempt = 0) {
@@ -369,8 +388,8 @@ export function trackThankYouPixels(payload: CommercePayload, attempt = 0) {
       window.snaptr?.('track', 'PAGE_VIEW');
       return;
     }
-    if (thankYouPurchaseId === id) return;
-    thankYouPurchaseId = id;
+    if (alreadyFiredThankYouPurchase(id)) return;
+    markThankYouPurchaseFired(id);
     window.fbq?.('track', 'PageView');
     window.ttq?.page?.();
     window.snaptr?.('track', 'PAGE_VIEW');

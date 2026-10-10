@@ -221,6 +221,22 @@ type StoryItem = {
 
 const STORIES: StoryItem[] = [
   {
+    id: 's-game-stick',
+    label: 'ألعاب الطيبين',
+    ring: '#65A30D',
+    image: '/products/game-stick-lite/lp/01-hero-kit-1x1.png',
+    title: 'جهاز ألعاب الطيبين',
+    text: '+10,000 لعبة كلاسيكية على التلفزيون — يدين لاسلكيتين والتوصيل مشمول.',
+  },
+  {
+    id: 's-ipl',
+    label: 'نعومة البنات',
+    ring: '#B76E79',
+    image: '/products/ipl-aybel/lp/01-hero-lifestyle.jpg',
+    title: 'ليزر ايبل IPL',
+    text: 'خلاص من روتين الواكس والحلاقة — نعومة وثقة من البيت.',
+  },
+  {
     id: 's0',
     label: 'ترند العائلات',
     ring: '#1d4ed8',

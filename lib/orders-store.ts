@@ -104,6 +104,17 @@ async function writeFileOrders(orders: StoreOrder[]) {
   await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf-8');
 }
 
+function mergeOrdersById(primary: StoreOrder[], extra: StoreOrder[]): StoreOrder[] {
+  const seen = new Set(primary.map((order) => String(order.id)));
+  const merged = [...primary];
+  for (const order of extra) {
+    if (seen.has(String(order.id))) continue;
+    seen.add(String(order.id));
+    merged.push(order);
+  }
+  return merged.sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
+}
+
 export async function listOrders(): Promise<StoreOrder[]> {
   if (hasDatabase()) {
     try {
@@ -114,7 +125,9 @@ export async function listOrders(): Promise<StoreOrder[]> {
           FROM orders
           ORDER BY timestamp DESC
         `) as OrderRow[];
-        return rows.map(rowToOrder);
+        // Surface any orders that landed in the local file during a past DB outage.
+        const fileOrders = await readFileOrders();
+        return mergeOrdersById(rows.map(rowToOrder), fileOrders);
       }
     } catch (error) {
       console.error('[orders] neon list failed, using file', error);
@@ -128,41 +141,40 @@ export async function listOrders(): Promise<StoreOrder[]> {
 
 export async function insertOrder(order: StoreOrder): Promise<void> {
   if (hasDatabase()) {
-    try {
-      const sql = getSql();
-      if (sql) {
-        await sql`
-          INSERT INTO orders (
-            id, name, phone, city, address, offer, pieces, price,
-            timestamp, status, note, source, fbclid, ttclid, sccid,
-            utm_source, product_id, client_order_id, visitor_id
-          ) VALUES (
-            ${order.id},
-            ${order.name},
-            ${order.phone},
-            ${order.city},
-            ${order.address || ''},
-            ${order.offer},
-            ${encodeField(order.pieces)},
-            ${encodeField(order.price)},
-            ${order.timestamp},
-            ${order.status || 'Nouveau'},
-            ${order.note || ''},
-            ${order.source || 'direct'},
-            ${order.fbclid || ''},
-            ${order.ttclid || ''},
-            ${order.sccid || ''},
-            ${order.utm_source || ''},
-            ${order.productId || ''},
-            ${order.clientOrderId || ''},
-            ${order.visitorId || ''}
-          )
-        `;
-        return;
-      }
-    } catch (error) {
-      console.error('[orders] neon insert failed, using file', error);
+    const sql = getSql();
+    if (!sql) {
+      throw new Error('DATABASE_URL is set but SQL client is unavailable');
     }
+    // Never fall back to the local file when Neon is configured: that made
+    // checkout succeed + Purchase pixel fire while /admin (Neon) missed the row.
+    await sql`
+      INSERT INTO orders (
+        id, name, phone, city, address, offer, pieces, price,
+        timestamp, status, note, source, fbclid, ttclid, sccid,
+        utm_source, product_id, client_order_id, visitor_id
+      ) VALUES (
+        ${order.id},
+        ${order.name},
+        ${order.phone},
+        ${order.city},
+        ${order.address || ''},
+        ${order.offer},
+        ${encodeField(order.pieces)},
+        ${encodeField(order.price)},
+        ${order.timestamp},
+        ${order.status || 'Nouveau'},
+        ${order.note || ''},
+        ${order.source || 'direct'},
+        ${order.fbclid || ''},
+        ${order.ttclid || ''},
+        ${order.sccid || ''},
+        ${order.utm_source || ''},
+        ${order.productId || ''},
+        ${order.clientOrderId || ''},
+        ${order.visitorId || ''}
+      )
+    `;
+    return;
   }
 
   const orders = await readFileOrders();
