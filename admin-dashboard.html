@@ -1080,10 +1080,13 @@
             const settingsView = document.getElementById('settings-view');
             const sourcesView = document.getElementById('sources-view');
 
-            // Reset all tab button styles
-            [statsBtn, ordersBtn, settingsBtn, sourcesBtn].forEach(btn => {
+            // Reset all tab button styles (keep relative on Orders for the green new-dot)
+            [statsBtn, settingsBtn, sourcesBtn].forEach(btn => {
                 if (btn) btn.className = "px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all text-gray-300 hover:text-white hover:bg-gray-800/80";
             });
+            if (ordersBtn) {
+                ordersBtn.className = "relative px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all text-gray-300 hover:text-white hover:bg-gray-800/80";
+            }
 
             // Hide all views
             statsView.style.display = 'none';
@@ -1159,7 +1162,8 @@
         const WATCHDOG_MS = REFRESH_TIMEOUT_MS + 2500;
         const MAX_AUTO_RETRIES = 1;
         const RELATIVE_CLOCK_MS = 30000;           // label tick — slow = less CPU/battery
-        const HIDDEN_ORDER_WATCH_MS = 40000;       // favicon badge while tab is in background
+        const HIDDEN_ORDER_WATCH_MS = 30000;       // favicon badge while tab is in background
+        const HIDDEN_ORDER_WATCH_FIRST_MS = 5000;  // first check soon after leaving the tab
         const ADMIN_TITLE = 'Dashboard | Dune Market';
         const FAVICON_BASE = '/images/logo-mark.png';
         const FAVICON_ALERT_KEY = 'ac_admin_favicon_alert';
@@ -1178,7 +1182,8 @@
         let knownOrderIds = null;            // Set after first orders load
         let faviconAlertActive = false;
         let faviconPaintToken = 0;
-        let hiddenOrderWatchTimer = null;
+        let hiddenOrderWatchInterval = null;
+        let hiddenOrderWatchFirstTimer = null;
         let faviconBaseDataUrl = null;
 
         function getRefreshBtnEls() {
@@ -1377,6 +1382,24 @@
             return link;
         }
 
+        function makePlainFaviconDataUrl() {
+            const size = 64;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#111827';
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#FBBF24';
+            ctx.font = 'bold 34px Tajawal, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('D', size / 2, size / 2 + 1);
+            return canvas.toDataURL('image/png');
+        }
+
         function loadFaviconBase() {
             if (faviconBaseDataUrl) return Promise.resolve(faviconBaseDataUrl);
             return new Promise((resolve) => {
@@ -1394,10 +1417,14 @@
                         faviconBaseDataUrl = canvas.toDataURL('image/png');
                         resolve(faviconBaseDataUrl);
                     } catch (_) {
-                        resolve(null);
+                        faviconBaseDataUrl = makePlainFaviconDataUrl();
+                        resolve(faviconBaseDataUrl);
                     }
                 };
-                img.onerror = () => resolve(null);
+                img.onerror = () => {
+                    faviconBaseDataUrl = makePlainFaviconDataUrl();
+                    resolve(faviconBaseDataUrl);
+                };
                 img.src = FAVICON_BASE;
             });
         }
@@ -1519,16 +1546,30 @@
             } catch (_) {}
         }
 
+        function stopHiddenOrderWatch() {
+            if (hiddenOrderWatchInterval) {
+                clearInterval(hiddenOrderWatchInterval);
+                hiddenOrderWatchInterval = null;
+            }
+            if (hiddenOrderWatchFirstTimer) {
+                clearTimeout(hiddenOrderWatchFirstTimer);
+                hiddenOrderWatchFirstTimer = null;
+            }
+        }
+
         function syncHiddenOrderWatch() {
-            if (hiddenOrderWatchTimer) {
-                clearInterval(hiddenOrderWatchTimer);
-                hiddenOrderWatchTimer = null;
-            }
-            if (document.visibilityState === 'hidden') {
-                hiddenOrderWatchTimer = setInterval(() => {
-                    watchOrdersForFaviconBadge();
-                }, HIDDEN_ORDER_WATCH_MS);
-            }
+            stopHiddenOrderWatch();
+            if (document.visibilityState !== 'hidden') return;
+
+            // Immediate check + another soon after hide, then steady interval
+            watchOrdersForFaviconBadge();
+            hiddenOrderWatchFirstTimer = setTimeout(() => {
+                hiddenOrderWatchFirstTimer = null;
+                if (document.visibilityState === 'hidden') watchOrdersForFaviconBadge();
+            }, HIDDEN_ORDER_WATCH_FIRST_MS);
+            hiddenOrderWatchInterval = setInterval(() => {
+                watchOrdersForFaviconBadge();
+            }, HIDDEN_ORDER_WATCH_MS);
         }
 
         async function unlockDashboard() {
