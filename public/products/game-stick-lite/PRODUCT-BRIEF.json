@@ -1,0 +1,67 @@
+{
+  "corrected": true,
+  "identity": {
+    "confirmed": true,
+    "confidence": "95%",
+    "nameAr": "جهاز ألعاب الطيبين — قيم ستيك لايت",
+    "nameEn": "Game Stick Lite 4K",
+    "matchKeys": [
+      "عصا HDMI سوداء GAME STICK LITE + 4K",
+      "يدين DualShock-style سوداوين بأزرار Y/X/A/B ملونة",
+      "علبة سوداء بأخضر فسفوري 2.4G WIRELESS CONTROLLER GAMEPAD",
+      "مستقبل USB + كابل USB + تمديد HDMI + بطاقة 64GB"
+    ],
+    "NOT": [
+      "Game Stick X2 شفاف",
+      "يد Xbox / Nintendo Switch clone",
+      "علب حمراء/موديلات G99 فقط بدون مطابقة بصرية",
+      "ادعاء بطارية 5 ساعات للعصا (العصا USB / اليدين AAA)"
+    ]
+  },
+  "specs": {
+    "storage": "64GB TF card (typical Arabic COD kits)",
+    "games": "10000+ classic on 64GB (~3500 on 32GB variants)",
+    "emulators": "Usually 9: MAME, FC, GB, GBA, GBC, MD, SFC, ATARI2600, ATARI7800 (+ sometimes PS1)",
+    "output": "HDMI up to 4K signal (games remain retro resolution)",
+    "controllers": "2x 2.4GHz wireless + USB receiver",
+    "powerStick": "USB 5V",
+    "powerPads": "2x AAA per pad (often not included)",
+    "save": "SELECT+START quick save/load (MODE on some builds)",
+    "internet": "not required"
+  },
+  "photos": {
+    "fromUser": "public/products/game-stick-lite/from-user/kit-packshot-official.png",
+    "lp": "public/products/game-stick-lite/lp/",
+    "official": "public/products/game-stick-lite/official/",
+    "refs": "public/products/game-stick-lite/refs/",
+    "catalogImage": "lp/01-hero-kit-packshot.png",
+    "galleryPreferred": [
+      "01-hero-kit-packshot.png",
+      "02-kit-podium-render.png",
+      "04-kit-with-64gb-card.png",
+      "07-lifestyle-two-players.webp",
+      "08-lifestyle-10000-games.jpg",
+      "03-kit-white-bg.png"
+    ]
+  },
+  "marketingReady": {
+    "id": "game-stick-lite",
+    "brand": "ألعاب الطيبين",
+    "emoji": "🎮",
+    "badge": "أكثر من 10,000 لعبة كلاسيكية",
+    "heroTitle": "جهاز ألعاب الطيبين — رجّع الضحك لصالة البيت",
+    "heroSubtitle": "عصا HDMI + يدين لاسلكيتين + 64 جيجا. وصّلها بالتلفزيون… والعبوا سوا بدون نت وبدون تعقيد.",
+    "heroBadge": "ليلة عائلة… مو شاشة وحدها",
+    "ctaLabel": "أبي ليلة عائلة الحين",
+    "warning": "الجوال سرق وقت البيت. تبغى لحظة حقيقية: أب يضحك مع ابنه… أم تلعب مع بنتها… وذكريات زمان ترجع على الشاشة الكبيرة.",
+    "brief": "public/products/game-stick-lite/MARKETING-BRIEF.md"
+  },
+  "sources": [
+    "https://www.jumia.com.eg/generic-4k-wireless-tv-game-stick-64gb-10000-built-in-games-9-emulators-with-2-wireless-controllers-135050195.html",
+    "https://reloadretro.com/blog/game-stick-lite-4k-review/",
+    "https://manuals.plus/game-force/4k-game-stick-lite-2-4g-wireless-game-console-manual",
+    "https://otzovik.com/review_17072116.html",
+    "https://www.mychoice.qa/products/4k-game-stick-lite-2-4g-wireless-controller-gamepad-black",
+    "https://saamaan.pk/products/2-4g-wireless-controller-gaming"
+  ]
+}
