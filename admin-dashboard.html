@@ -8,11 +8,11 @@
     <link rel="icon" href="/images/logo-mark.png" type="image/png" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #070b14;
-            --panel-bg: rgba(17, 24, 39, 0.6);
+            --panel-bg: #111827;
             --gold: #FFD700;
             --gold-glow: rgba(255, 215, 0, 0.4);
             --danger: #EF4444;
@@ -20,42 +20,39 @@
             --info: #3B82F6;
         }
 
-        html, body, body * {
-            font-variant-numeric: lining-nums tabular-nums !important;
-            font-feature-settings: "locl" 0, "lnum" 1, "tnum" 1 !important;
-            -webkit-font-feature-settings: "locl" 0, "lnum" 1, "tnum" 1 !important;
-        }
-
         body {
             font-family: 'Tajawal', 'Inter', sans-serif !important;
-            background: linear-gradient(135deg, #050914 0%, #0a1128 100%);
+            background: #070b14;
             color: #E2E8F0;
             min-height: 100vh;
-            background-attachment: fixed;
+            background-attachment: scroll;
+            font-variant-numeric: lining-nums tabular-nums;
         }
-
         i.fa-solid, i.fas, i.fa-regular, i.far {
             font-family: "Font Awesome 6 Free" !important;
             font-style: normal !important;
             font-weight: 900 !important;
         }
 
-        .en-font { font-family: 'Outfit', sans-serif !important; }
+        .en-font {
+            font-family: 'Outfit', sans-serif !important;
+            font-variant-numeric: lining-nums tabular-nums;
+        }
 
-        /* Premium Glassmorphism */
+        /* Solid panels — no backdrop-blur (heavy on phone GPU) */
         .glass-card {
             background: var(--panel-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+            contain: layout paint;
         }
         .kpi-card {
             position: relative; overflow: hidden;
             border: 1.5px solid rgba(255,255,255,.12);
-            background: linear-gradient(180deg, rgba(15,23,42,.9), rgba(2,6,23,.95));
-            box-shadow: 0 16px 36px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.04);
+            background: #0f172a;
+            box-shadow: 0 8px 18px rgba(0,0,0,.28);
+            contain: layout paint;
         }
         .kpi-card::after {
             content: ""; position: absolute; left: 12px; right: 12px; bottom: 0; height: 1px;
@@ -75,15 +72,13 @@
 
         tbody tr {
             background: rgba(30, 41, 59, 0.4);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            content-visibility: auto;
+            contain-intrinsic-size: auto 96px;
         }
         
         tbody tr:hover {
             background: rgba(30, 41, 59, 0.8);
-            transform: translateY(-2px) scale(1.005);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            border-reft: 3px solid var(--gold);
         }
 
         #orders-view thead th.col-h { font-weight: 900; }
@@ -112,14 +107,13 @@
         #orders-tbody tr:nth-child(6n+4) { background: rgba(168, 85, 247, 0.1); box-shadow: inset 4px 0 0 #a855f7; }
         #orders-tbody tr:nth-child(6n+5) { background: rgba(16, 185, 129, 0.1); box-shadow: inset 4px 0 0 #10b981; }
         #orders-tbody tr:nth-child(6n+6) { background: rgba(236, 72, 153, 0.1); box-shadow: inset 4px 0 0 #ec4899; }
-        #orders-tbody tr:hover { filter: brightness(1.18); transform: translateY(-2px); }
+        #orders-tbody tr:hover { background: rgba(51, 65, 85, 0.75); }
         #orders-tbody tr.order-seen {
             background: rgba(15, 23, 42, 0.72) !important;
             box-shadow: inset 3px 0 0 #334155 !important;
         }
-        #orders-tbody tr.order-seen:hover { filter: none; transform: none; }
+        #orders-tbody tr.order-seen:hover { background: rgba(15, 23, 42, 0.8) !important; }
         #orders-tbody tr.order-seen > td:not(.seen-cell) {
-            filter: grayscale(1);
             opacity: 0.48;
         }
         .seen-box {
@@ -246,28 +240,24 @@
             box-shadow: 0 8px 25px var(--gold-glow);
         }
 
-        /* Live refresh — green moving gradient */
+        /* Live refresh — solid green (no infinite GPU animation) */
         .btn-refresh-live {
-            background: linear-gradient(120deg, #047857, #16a34a, #22c55e, #4ade80, #059669, #047857);
-            background-size: 320% 320%;
+            background: linear-gradient(135deg, #15803d, #22c55e);
             color: #fff;
-            box-shadow: 0 4px 22px rgba(16, 185, 129, 0.5);
-            animation: refreshGreenMove 2.8s ease-in-out infinite;
-            transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            transition: transform 0.2s ease, opacity 0.2s ease;
         }
         .btn-refresh-live:hover:not(:disabled) {
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 8px 30px rgba(52, 211, 153, 0.65);
-            filter: brightness(1.06);
+            transform: translateY(-1px);
+            opacity: 0.95;
         }
-        .btn-refresh-live:disabled {
-            animation: refreshGreenMove 1.1s linear infinite;
-            filter: saturate(1.15);
+        .btn-refresh-live.is-loading {
+            opacity: 0.88;
         }
-        @keyframes refreshGreenMove {
-            0% { background-position: 0% 50%; box-shadow: 0 4px 18px rgba(16, 185, 129, 0.42); }
-            50% { background-position: 100% 50%; box-shadow: 0 7px 28px rgba(74, 222, 128, 0.7); }
-            100% { background-position: 0% 50%; box-shadow: 0 4px 18px rgba(16, 185, 129, 0.42); }
+        @media (prefers-reduced-motion: reduce) {
+            .btn-refresh-live,
+            .btn-refresh-live:hover:not(:disabled) { transition: none; transform: none; }
+            #refresh-btn-icon.fa-spin { animation: none !important; }
         }
 
         /* Custom Status Select Dropdown */
@@ -461,7 +451,6 @@
         
         <!-- Premium Header -->
         <header class="flex flex-col lg:flex-row justify-between items-center mb-10 glass-card p-6 md:p-8 relative overflow-hidden">
-            <div class="absolute -right-20 -top-20 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl"></div>
             
             <div class="flex items-center gap-5 mb-6 lg:mb-0 relative z-10 w-full lg:w-auto">
                 <div class="w-16 h-16 rounded-2xl flex shrink-0 items-center justify-center">
@@ -469,7 +458,7 @@
                 </div>
                 <div>
                     <h1 class="text-2xl md:text-3xl font-black text-white glow-text mb-1">Dune Market</h1>
-                    <p class="text-sm text-gray-400 font-semibold">إدارة Orders، المتابعة، والإحصائيات الحية<br><span class="text-yellow-400 en-font text-xs">KSA · 1 USD = 3.75 SAR</span></p>
+                    <p class="text-sm text-gray-400 font-semibold">إدارة Orders، المتابعة، والإحصائيات الحية<br><span class="text-yellow-400 en-font text-xs">KSA · توقيت الرياض · 1 USD = 3.75 SAR</span></p>
                 </div>
             </div>
             
@@ -485,7 +474,7 @@
                         <button onclick="setQuickDate('total')" class="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-lg border border-amber-400"><i class="fa-solid fa-globe mr-1"></i> Total</button>
                     </div>
 
-                    <!-- Date Filter (Premium UI) -->
+                    <!-- Date Filter (Premium UI) — always KSA / Asia/Riyadh calendar day -->
                     <div class="bg-gray-900/80 rounded-xl border border-gray-700/80 flex items-center px-4 py-3 w-full shadow-inner transition hover:border-yellow-500/50">
                         <i class="fa-regular fa-calendar-days text-yellow-500 ml-3 text-lg"></i>
                         <input type="date" id="date-filter" onchange="filterByDate()" class="bg-transparent text-white text-sm font-bold outline-none cursor-pointer w-full en-font">
@@ -493,6 +482,7 @@
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
+                    <div class="text-[10px] text-emerald-400/90 font-bold text-left en-font tracking-wide">🇸🇦 Date & time = KSA (Asia/Riyadh)</div>
                 </div>
 
                 <!-- Total Count -->
@@ -513,7 +503,7 @@
         </header>
 
         <!-- Navigation Tabs Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-8 bg-gray-900/80 p-2.5 rounded-2xl border border-gray-800 backdrop-blur-xl shadow-2xl">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8 bg-gray-900 p-2.5 rounded-2xl border border-gray-800 shadow-lg">
             <div class="flex flex-wrap items-center gap-2">
                 <!-- Tab 1: Analytics -->
                 <button id="tab-stats-btn" onclick="switchAdminTab('stats')" class="px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-gradient-to-r from-yellow-500 to-amber-500 text-black shadow-[0_0_25px_rgba(255,215,0,0.35)]">
@@ -566,7 +556,7 @@
                         </span>
                     </div>
                     <div class="text-2xl font-black text-white en-font" id="stat-visitors">0</div>
-                    <div class="text-[11px] text-blue-400 font-semibold mt-1" id="stat-visitors-sub"><i class="fa-solid fa-circle text-[7px] animate-pulse"></i> Active Today</div>
+                    <div class="text-[11px] text-blue-400 font-semibold mt-1" id="stat-visitors-sub"><i class="fa-solid fa-circle text-[7px]"></i> Active Today</div>
                 </div>
 
                 <!-- 3. Total Orders -->
@@ -1097,13 +1087,16 @@
             settingsView.style.display = 'none';
             if (sourcesView) sourcesView.style.display = 'none';
 
+            const scopedOrders = window.filteredOrders || allOrders;
+
             if (tabName === 'stats') {
                 statsView.style.display = 'block';
                 statsBtn.className = "px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-gradient-to-r from-yellow-500 to-amber-500 text-black shadow-[0_0_25px_rgba(255,215,0,0.35)]";
-                renderAnalytics(allOrders);
+                renderAnalytics(scopedOrders);
             } else if (tabName === 'orders') {
                 ordersView.style.display = 'block';
                 ordersBtn.className = "px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-yellow-500 text-black shadow-[0_0_20px_rgba(255,215,0,0.3)]";
+                renderOrders(scopedOrders);
             } else if (tabName === 'settings') {
                 settingsView.style.display = 'block';
                 settingsBtn.className = "px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 text-white shadow-[0_0_25px_rgba(59,130,246,0.4)]";
@@ -1124,7 +1117,7 @@
             } else if (tabName === 'sources') {
                 if (sourcesView) sourcesView.style.display = 'block';
                 sourcesBtn.className = "px-5 md:px-7 py-3 rounded-xl font-black text-sm md:text-base flex items-center gap-2.5 transition-all bg-gradient-to-r from-cyan-400 to-blue-500 text-black shadow-[0_0_25px_rgba(34,211,238,0.35)]";
-                renderSources(window.filteredOrders || allOrders);
+                renderSources(scopedOrders);
             }
         }
 
@@ -1149,16 +1142,17 @@
             document.getElementById('pixel-unlocked-panel').style.display = 'none';
         }
 
-        // ── Live refresh MAX (TanStack Query + FB + SWR patterns) ──
+        // ── Live refresh MAX (battery-friendly + KSA clocks) ──
+        // NO background polling — only manual / WiFi reconnect / tab focus (saves battery)
         // stale-while-revalidate · refetchOnReconnect · refetchOnWindowFocus
-        // cancelRefetch · staleTime · silent background sync · watchdog · atomic apply
+        // cancelRefetch · staleTime · watchdog · atomic apply
         const REFRESH_TIMEOUT_MS = 10000;
-        const SOFT_POLL_MS = 30000;
-        const STALE_TIME_MS = 15000;          // like TanStack staleTime — skip soft refetch if fresh
-        const VISIBILITY_MIN_AGE_MS = 15000;
-        const RECONNECT_SETTLE_MS = 450;      // WiFi needs a beat before sockets work
+        const STALE_TIME_MS = 2 * 60 * 1000;       // skip auto refetch if data fresher than 2 min
+        const VISIBILITY_MIN_AGE_MS = 2 * 60 * 1000;
+        const RECONNECT_SETTLE_MS = 450;
         const WATCHDOG_MS = REFRESH_TIMEOUT_MS + 2500;
         const MAX_AUTO_RETRIES = 1;
+        const RELATIVE_CLOCK_MS = 30000;           // label tick — slow = less CPU/battery
 
         let lastSuccessfulRefreshAt = null;
         let refreshGeneration = 0;
@@ -1167,10 +1161,10 @@
         let refreshInteractive = false;      // full spinner only for manual/boot
         let lastRefreshError = null;
         let relativeTimeTimer = null;
-        let softPollTimer = null;
         let refreshWatchdogTimer = null;
         let reconnectTimer = null;
         let liveRefreshWired = false;
+        let lastSeenKsaDay = '';
 
         function getRefreshBtnEls() {
             return {
@@ -1190,9 +1184,9 @@
         }
 
         function formatRelativeAr(ts) {
-            if (!ts) return 'ما عمرها ما تحدثات';
+            if (!ts) return 'لم يتم التحديث';
             const sec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
-            if (sec < 8) return 'دابا دابا';
+            if (sec < 8) return 'الآن';
             if (sec < 60) return `قبل ${sec} ث`;
             const min = Math.floor(sec / 60);
             if (min === 1) return 'قبل دقيقة';
@@ -1210,37 +1204,41 @@
 
             if (mode === 'offline' || (!navigator.onLine && !refreshBusy)) {
                 btn.disabled = false;
+                btn.classList.remove('is-loading');
                 icon.className = 'fa-solid fa-wifi';
-                label.textContent = 'بلا إنترنت';
+                label.textContent = 'بدون إنترنت';
                 sub.textContent = lastSuccessfulRefreshAt
-                    ? `آخر نجاح: ${formatRelativeAr(lastSuccessfulRefreshAt)}`
-                    : 'كتسنا الكونيكسيون...';
+                    ? `آخر تحديث: ${formatRelativeAr(lastSuccessfulRefreshAt)}`
+                    : 'في انتظار الاتصال...';
                 return;
             }
 
             // Interactive = user-facing spinner; silent = FB-style background revalidate
             if (refreshBusy && refreshInteractive) {
                 btn.disabled = true;
+                btn.classList.add('is-loading');
                 icon.className = 'fa-solid fa-rotate-right fa-spin';
                 label.textContent = 'جاري التحديث...';
                 sub.textContent = lastSuccessfulRefreshAt
-                    ? `آخر نجاح: ${formatRelativeAr(lastSuccessfulRefreshAt)}`
-                    : 'كنجيبو الداتا...';
+                    ? `آخر تحديث: ${formatRelativeAr(lastSuccessfulRefreshAt)}`
+                    : 'جاري جلب البيانات...';
                 return;
             }
 
             if (refreshBusy && !refreshInteractive) {
                 btn.disabled = false;
+                btn.classList.add('is-loading');
                 icon.className = 'fa-solid fa-rotate-right fa-spin';
                 label.textContent = 'تحديث';
-                sub.textContent = 'كينسنكرونيزي...';
+                sub.textContent = 'جاري المزامنة...';
                 return;
             }
 
             btn.disabled = false;
+            btn.classList.remove('is-loading');
             icon.className = 'fa-solid fa-rotate-right';
             if (lastRefreshError && !lastSuccessfulRefreshAt) {
-                label.textContent = 'عاود حاول';
+                label.textContent = 'إعادة المحاولة';
                 sub.textContent = 'فشل التحديث';
             } else {
                 label.textContent = 'تحديث';
@@ -1253,8 +1251,9 @@
         function startRelativeClock() {
             if (relativeTimeTimer) clearInterval(relativeTimeTimer);
             relativeTimeTimer = setInterval(() => {
+                if (document.visibilityState !== 'visible') return;
                 if (!refreshBusy) paintRefreshButton(navigator.onLine ? 'idle' : 'offline');
-            }, 8000);
+            }, RELATIVE_CLOCK_MS);
         }
 
         function clearRefreshWatchdog() {
@@ -1464,8 +1463,8 @@
             const interactive = reason === 'manual' || reason === 'boot';
             const forceEvenOffline = reason === 'manual' || reason === 'boot';
 
-            // Soft paths respect staleTime (TanStack default idea)
-            if ((reason === 'poll' || reason === 'visible' || reason === 'focus') && isDataFresh(STALE_TIME_MS)) {
+            // Soft paths respect staleTime — never hammer the network (battery)
+            if ((reason === 'visible' || reason === 'focus') && isDataFresh(STALE_TIME_MS)) {
                 paintRefreshButton(navigator.onLine ? 'idle' : 'offline');
                 return;
             }
@@ -1596,9 +1595,22 @@
                 paintRefreshButton('offline');
             });
 
-            // refetchOnWindowFocus
+            // refetchOnWindowFocus — only when returning to the tab (no background polling)
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState !== 'visible') return;
+
+                // New KSA calendar day while tab was away → snap filter to اليوم
+                try {
+                    const ksaToday = todayInStoreTz();
+                    if (lastSeenKsaDay && lastSeenKsaDay !== ksaToday && filterMode === 'exact') {
+                        const df = document.getElementById('date-filter');
+                        if (df && (!df.value || df.value === lastSeenKsaDay)) {
+                            setQuickDate('today');
+                        }
+                    }
+                    lastSeenKsaDay = ksaToday;
+                } catch (_) {}
+
                 if (!navigator.onLine) {
                     paintRefreshButton('offline');
                     return;
@@ -1624,33 +1636,52 @@
                 }
             });
 
-            // refetchInterval — only while tab visible + data stale
-            if (softPollTimer) clearInterval(softPollTimer);
-            softPollTimer = setInterval(() => {
-                if (document.visibilityState !== 'visible') return;
-                if (!navigator.onLine || refreshBusy) return;
-                if (isDataFresh(STALE_TIME_MS)) return;
-                refreshAllData(null, { reason: 'poll' });
-            }, SOFT_POLL_MS);
+            // Intentionally NO setInterval poll — saves battery / CPU
+            try { lastSeenKsaDay = todayInStoreTz(); } catch (_) { lastSeenKsaDay = ''; }
         }
 
         let filterMode = 'exact';
         let filterMonthValue = '';
         // Store operates in Saudi Arabia — always filter by Riyadh calendar day
         const STORE_TZ = 'Asia/Riyadh';
+        let _dayFmtKsa = null;
+        let _timePartsFmtKsa = null;
 
         function pad2(n) { return String(n).padStart(2, '0'); }
+
+        function dayFmtKsa() {
+            if (!_dayFmtKsa) {
+                _dayFmtKsa = new Intl.DateTimeFormat('en-CA', {
+                    timeZone: STORE_TZ,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+            }
+            return _dayFmtKsa;
+        }
+
+        function timePartsFmtKsa() {
+            if (!_timePartsFmtKsa) {
+                _timePartsFmtKsa = new Intl.DateTimeFormat('en-GB', {
+                    timeZone: STORE_TZ,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                    hourCycle: 'h23',
+                });
+            }
+            return _timePartsFmtKsa;
+        }
 
         function dayInStoreTz(ts) {
             const d = new Date(ts);
             if (Number.isNaN(d.getTime())) return '';
             try {
-                return new Intl.DateTimeFormat('en-CA', {
-                    timeZone: STORE_TZ,
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                }).format(d); // YYYY-MM-DD
+                return dayFmtKsa().format(d); // YYYY-MM-DD
             } catch {
                 return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
             }
@@ -1726,9 +1757,17 @@
             } else {
                 filtered = allOrders;
             }
-            
-            renderOrders(filtered);
-            renderAnalytics(filtered);
+
+            window.filteredOrders = filtered;
+
+            // Always update the header counter (cheap)
+            const countEl = document.getElementById('total-orders-count');
+            if (countEl) countEl.textContent = String(filtered.length);
+
+            // Only paint the active tab — huge win on phone
+            if (currentTab === 'orders') renderOrders(filtered);
+            else if (currentTab === 'stats') renderAnalytics(filtered);
+            else if (currentTab === 'sources') renderSources(filtered);
         }
 
         function localDay(ts) { return dayInStoreTz(ts); }
@@ -2153,13 +2192,35 @@
         }
 
         function orderTimeParts(order) {
-            const dateObj = new Date(order.created_at);
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const year = dateObj.getFullYear();
-            const hours = String(dateObj.getHours()).padStart(2, '0');
-            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-            return { day, month, year, hours, minutes };
+            // Always render wall-clock in Saudi Arabia (KSA / Asia/Riyadh) — never PC local TZ
+            const dateObj = new Date(order.created_at || order.timestamp);
+            if (Number.isNaN(dateObj.getTime())) {
+                return { day: '--', month: '--', year: '----', hours: '--', minutes: '--' };
+            }
+            try {
+                const parts = timePartsFmtKsa().formatToParts(dateObj);
+                const get = (type) => {
+                    const hit = parts.find(p => p.type === type);
+                    return hit ? hit.value : '';
+                };
+                let hours = get('hour');
+                if (hours === '24') hours = '00';
+                return {
+                    day: get('day'),
+                    month: get('month'),
+                    year: get('year'),
+                    hours,
+                    minutes: get('minute'),
+                };
+            } catch {
+                return {
+                    day: pad2(dateObj.getUTCDate()),
+                    month: pad2(dateObj.getUTCMonth() + 1),
+                    year: String(dateObj.getUTCFullYear()),
+                    hours: pad2(dateObj.getUTCHours()),
+                    minutes: pad2(dateObj.getUTCMinutes()),
+                };
+            }
         }
 
         function writeClipboard(text) {
@@ -2230,41 +2291,23 @@
             writeSeenOrders(seen);
         }
 
-        function renderOrders(ordersArray) {
-            const tbody = document.getElementById('orders-tbody');
-            window.visibleOrders = ordersArray;
-            
-            // Animate counter
-            animateValue("total-orders-count", parseInt(document.getElementById('total-orders-count').innerText), ordersArray.length, 500);
-            
-            if (ordersArray.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="11" class="p-12 text-center text-gray-500"><i class="fa-solid fa-box-open text-4xl mb-3"></i><div class="text-lg">No orders found for this date.</div></td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            const seenOrders = readSeenOrders();
-            
-            ordersArray.forEach(order => {
-                const t = orderTimeParts(order);
-                const timeText = `${t.day}/${t.month}/${t.year} ${t.hours}:${t.minutes}`;
-                const formattedDate = `<span class="text-emerald-100 font-bold">${t.day}/${t.month}/${t.year}</span> <span class="text-emerald-300 ml-1"><i class="fa-regular fa-clock"></i> ${t.hours}:${t.minutes}</span>`;
-                const jsName = String(order.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-                const jsPhone = String(order.phone || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-
-                const money = orderMoney(order);
-                const totalText = money.total || '—';
-                const netText = money.net || '—';
-                const montage = montageForOrder(order);
-                const montageVisual = montage.image
-                    ? `<img class="montage-thumb" src="${escHtml(montage.image)}" alt="${escHtml(montage.label)}" loading="lazy" />`
-                    : `<div class="montage-thumb montage-missing"><i class="fa-regular fa-image"></i></div>`;
-                const seen = seenOrders.has(String(order.id));
-                const tr = document.createElement('tr');
-                if (seen) tr.className = 'order-seen';
-                tr.innerHTML = `
+        function buildOrderRowHtml(order, seenOrders) {
+            const t = orderTimeParts(order);
+            const timeText = `${t.day}/${t.month}/${t.year} ${t.hours}:${t.minutes} KSA`;
+            const formattedDate = `<span class="text-emerald-100 font-bold">${t.day}/${t.month}/${t.year}</span> <span class="text-emerald-300 ml-1"><i class="fa-regular fa-clock"></i> ${t.hours}:${t.minutes}</span><span class="text-[10px] text-emerald-500/80 font-black ml-1 en-font">KSA</span>`;
+            const jsName = String(order.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            const jsPhone = String(order.phone || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            const money = orderMoney(order);
+            const totalText = money.total || '—';
+            const netText = money.net || '—';
+            const montage = montageForOrder(order);
+            const montageVisual = montage.image
+                ? `<img class="montage-thumb" src="${escHtml(montage.image)}" alt="${escHtml(montage.label)}" loading="lazy" decoding="async" />`
+                : `<div class="montage-thumb montage-missing"><i class="fa-regular fa-image"></i></div>`;
+            const seen = seenOrders.has(String(order.id));
+            return `<tr class="${seen ? 'order-seen' : ''}">
                     <td class="p-3 text-center seen-cell">
-                        <button type="button" class="seen-box" aria-label="تعليم الطلب كمراجع" aria-pressed="${seen ? 'true' : 'false'}" onclick="toggleOrderSeen('${escHtml(order.id)}', this)"></button>
+                        <button type="button" class="seen-box" aria-label="علم الطلب كمراجع" aria-pressed="${seen ? 'true' : 'false'}" onclick="toggleOrderSeen('${escHtml(order.id)}', this)"></button>
                     </td>
                     <td class="p-4 border-r border-gray-700/30 text-center">
                         <input type="checkbox" class="order-checkbox w-4 h-4 rounded border-gray-600 bg-gray-700 cursor-pointer" value="${escHtml(order.id)}" onchange="updateBulkDeleteButton()">
@@ -2334,9 +2377,45 @@
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </td>
-                `;
-                tbody.appendChild(tr);
-            });
+                </tr>`;
+        }
+
+        function renderOrders(ordersArray) {
+            const tbody = document.getElementById('orders-tbody');
+            if (!tbody) return;
+            window.visibleOrders = ordersArray;
+            const renderToken = (window._ordersRenderToken = (window._ordersRenderToken || 0) + 1);
+
+            const countEl = document.getElementById('total-orders-count');
+            if (countEl) countEl.textContent = String(ordersArray.length);
+
+            if (ordersArray.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="p-12 text-center text-gray-500"><i class="fa-solid fa-box-open text-4xl mb-3"></i><div class="text-lg">No orders found for this date.</div></td></tr>';
+                return;
+            }
+
+            const seenOrders = readSeenOrders();
+            const CHUNK = 35;
+
+            // First paint ASAP — then stream the rest (keeps phone UI smooth)
+            const first = ordersArray.slice(0, CHUNK);
+            tbody.innerHTML = first.map(o => buildOrderRowHtml(o, seenOrders)).join('');
+
+            if (ordersArray.length <= CHUNK) return;
+
+            let offset = CHUNK;
+            const pump = () => {
+                if (window._ordersRenderToken !== renderToken) return;
+                if (window.visibleOrders !== ordersArray) return;
+                const slice = ordersArray.slice(offset, offset + CHUNK);
+                if (!slice.length) return;
+                tbody.insertAdjacentHTML('beforeend', slice.map(o => buildOrderRowHtml(o, seenOrders)).join(''));
+                offset += CHUNK;
+                if (offset < ordersArray.length) {
+                    requestAnimationFrame(pump);
+                }
+            };
+            requestAnimationFrame(pump);
         }
 
         async function updateStatus(orderId, newStatus, selectElement) {
@@ -2519,21 +2598,10 @@
             }
         }
 
-        // Animated Number Counter
-        function animateValue(id, start, end, duration) {
-            if (start === end) return;
-            var range = end - start;
-            var current = start;
-            var increment = end > start ? 1 : -1;
-            var stepTime = Math.abs(Math.floor(duration / range));
-            var obj = document.getElementById(id);
-            var timer = setInterval(function() {
-                current += increment;
-                obj.innerHTML = current;
-                if (current == end) {
-                    clearInterval(timer);
-                }
-            }, stepTime);
+        // Instant counter update (no setInterval — saves mobile CPU)
+        function animateValue(id, start, end) {
+            const obj = document.getElementById(id);
+            if (obj) obj.textContent = String(end);
         }
 
         async function loadSettings() {
