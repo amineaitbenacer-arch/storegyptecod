@@ -98,15 +98,16 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .lp-live-toast-verb {
-  color: rgba(248, 250, 252, 0.92);
+  color: #ffffff !important;
 }
 
 .lp-live-toast-name {
-  color: #fde68a;
+  color: #fde68a !important;
   font-weight: 900;
 }
 
@@ -115,7 +116,7 @@
   font-size: 0.72rem;
   line-height: 1.3;
   font-weight: 800;
-  color: #ffffff;
+  color: #ffffff !important;
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
@@ -125,8 +126,26 @@
 }
 
 .lp-live-toast-city {
-  color: #fde68a;
+  color: #fde68a !important;
   font-weight: 900;
+}
+
+/* Beat #antichoc-root p / strong dark text overrides */
+#antichoc-root .lp-live-toast p,
+#antichoc-root .lp-live-toast .lp-live-toast-text,
+#antichoc-root .lp-live-toast .lp-live-toast-sub,
+#antichoc-root .lp-live-toast .lp-live-toast-verb {
+  color: #ffffff !important;
+}
+
+#antichoc-root .lp-live-toast .lp-live-toast-name,
+#antichoc-root .lp-live-toast .lp-live-toast-city,
+#antichoc-root .lp-live-toast strong {
+  color: #fde68a !important;
+}
+
+#antichoc-root .lp-live-toast .lp-live-toast-brand-name {
+  color: #f6e7a8 !important;
 }
 
 .lp-live-toast-brand {
