@@ -372,6 +372,30 @@
         .src-pill-tiktok { background: rgba(254,44,85,.12); color: #fda4af; border-color: rgba(37,244,238,.35); }
         .src-pill-snap { background: rgba(255,252,0,.12); color: #FFFC00; border-color: rgba(255,252,0,.4); }
         .src-pill-direct { background: rgba(148,163,184,.12); color: #e2e8f0; border-color: rgba(148,163,184,.35); }
+        .src-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 110px; }
+        .src-cell-row { display: inline-flex; align-items: center; gap: 6px; }
+        .src-utm {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            color: #fbcfe8;
+            background: rgba(236, 72, 153, 0.14);
+            border: 1px solid rgba(236, 72, 153, 0.35);
+            border-radius: 999px;
+            padding: 2px 8px;
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .src-proof {
+            font-size: 9px;
+            font-weight: 700;
+            color: #94a3b8;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+        .src-proof.ok { color: #6ee7b7; }
+        .src-proof.bad { color: #fca5a5; }
         .src-step { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
         .src-step-label { font-size: 14px; font-weight: 800; color: #e2e8f0; }
         .src-bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.06); overflow: hidden; margin-bottom: 8px; }
@@ -2154,6 +2178,43 @@
             const logoKey = item[2] === 'snap' ? 'snapchat' : item[2];
             return `<span class="src-pill ${item[1]}"><span class="src-logo src-logo-${item[2]}">${SOURCE_LOGOS[logoKey]}</span>${item[0]}</span>`;
         }
+        function sourceClickId(order) {
+            const src = String(order.source || '');
+            if (src === 'meta') return String(order.fbclid || '').trim();
+            if (src === 'tiktok') return String(order.ttclid || '').trim();
+            if (src === 'snapchat') return String(order.sccid || '').trim();
+            return String(order.fbclid || order.ttclid || order.sccid || '').trim();
+        }
+        function sourceProofLabel(order) {
+            const id = sourceClickId(order);
+            if (!id) return { text: 'بلا click id', ok: false };
+            if (/^(fbclid|ttclid|sccid|null|undefined)$/i.test(id)) {
+                return { text: 'click id مزيف', ok: false };
+            }
+            const short = id.length > 14 ? id.slice(0, 8) + '…' + id.slice(-4) : id;
+            return { text: short, ok: true };
+        }
+        function sourceCopyText(order) {
+            const name = sourceName(order.source);
+            const utm = String(order.utm_source || '').trim();
+            const id = sourceClickId(order);
+            const parts = [name];
+            if (utm) parts.push('utm=' + utm);
+            if (id) parts.push('id=' + id);
+            return parts.join(' | ');
+        }
+        function sourceCellHtml(order) {
+            const utm = String(order.utm_source || '').trim();
+            const proof = sourceProofLabel(order);
+            return `<div class="src-cell">
+                <div class="src-cell-row">
+                    ${sourceBadge(order.source)}
+                    ${copyChip(sourceCopyText(order), 'source')}
+                </div>
+                ${utm ? `<span class="src-utm" title="utm_source">${escHtml(utm)}</span>` : ''}
+                <span class="src-proof ${proof.ok ? 'ok' : 'bad'}" title="click id">${escHtml(proof.text)}</span>
+            </div>`;
+        }
         function srcRow(label, count, base) {
             const n = Number(count) || 0;
             const pct = base === null ? '' : (shareOfVisitors(n, base) + '%');
@@ -2595,10 +2656,7 @@
                         </div>
                     </td>
                     <td class="p-4 border-r border-gray-700/30">
-                        <div class="flex items-center justify-center gap-2">
-                            ${sourceBadge(order.source)}
-                            ${copyChip(sourceName(order.source), 'source')}
-                        </div>
+                        ${sourceCellHtml(order)}
                     </td>
                     <td class="p-4 border-r border-gray-700/30">
                         <div class="field-pill field-time" dir="ltr">

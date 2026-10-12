@@ -26,7 +26,7 @@ export type StoryBlock = {
 
 /** نمط التحويل: إطارات تسويق ثم صورة 1:1 ثم جسر تسويقي */
 export type StoryBeat = {
-  frames: { icon?: string; title: string; text: string }[];
+  frames: { icon?: string; title: string; text: string; /** صورة 1:1 مباشرة تحت الكادر */ image?: string }[];
   image?: string;
   imageBadge?: string;
   imageTitle?: string;
@@ -79,6 +79,14 @@ export type ProductPageConfig = {
   ctaLabel: string;
   /** صورة ترويجية بين اختيار الباقة وزر الطلب */
   offersPromoImage?: string;
+  /** دليل استخدام يظهر تحت زر الطلب السفلي */
+  howToUseGuide?: {
+    badge: string;
+    title: string;
+    intro?: string;
+    steps: { title: string; text: string }[];
+    tip?: string;
+  };
   /** عنوان قسم الصور. إن غاب، يبقى العنوان الافتراضي للصفحة. */
   storyTitle?: string;
   storySub?: string;
