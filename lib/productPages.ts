@@ -1046,7 +1046,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
         id: 3,
         name: 'ثلاث قطع',
         sub: 'لكِ + هديتين — لمن تحبين',
-        price: 509,
+        price: 499,
         oldPrice: 599,
         pieces: 3,
       },
@@ -1320,7 +1320,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           {
             icon: '🎁',
             title: 'ثلاث قطع لكِ ولمن تحبين',
-            text: 'بسعر 509 — لكِ وهديتين.',
+            text: 'بسعر 499 — لكِ وهديتين.',
           },
         ],
         imageBadge: 'العلبة',
@@ -1328,7 +1328,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           badge: 'جاهزة للطلب',
           title: 'العلبة توصلك… والجلسة لكِ',
           text: 'ادفعي عند الباب وابدئي بخصوصيتك.',
-          bullets: ['169 أو 339 أو 509', 'كل الملحقات معك', 'سهل من أول يوم'],
+          bullets: ['169 أو 339 أو 499', 'كل الملحقات معك', 'سهل من أول يوم'],
         },
       },
       {
@@ -1432,7 +1432,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
       'رد واتساب خلال 48 ساعة',
       'المنتج بحالته الأصلية مع الملحقات والتغليف',
     ],
-    ctaLabel: 'أبي نعومتي وراحتي الحين',
+    ctaLabel: 'اطلب الآن',
   },
   {
     id: 'produit-1',
