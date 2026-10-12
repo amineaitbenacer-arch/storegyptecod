@@ -614,6 +614,27 @@ button.hero-offer-card {
   z-index: 1;
 }
 
+.pv-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.pv-frame-photo {
+  margin: 0;
+  width: 100%;
+}
+
+.pv-frame-photo .pv-square {
+  border-radius: 16px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+}
+
+.pv-frame-photo .pv-square img {
+  object-fit: contain;
+}
+
 .pv-info-row {
   display: flex;
   align-items: flex-start;
@@ -731,6 +752,222 @@ button.hero-offer-card {
   flex-shrink: 0;
 }
 
+/* كادر عاطفي: شفرة VS ليزر — فوق قسم القصة */
+.pv-emotion-hook {
+  padding: 0.45rem 0 0.2rem;
+}
+
+.pv-emotion-cadre {
+  --eh-rose: #b76e79;
+  --eh-rose-deep: #7a3542;
+  --eh-gold: #c9a07a;
+  --eh-ink: #3a1820;
+  position: relative;
+  overflow: hidden;
+  margin: 0.35rem 0 1.1rem;
+  padding: 1.2rem 0.95rem 1.25rem;
+  border-radius: 24px;
+  border: 2px solid var(--eh-gold);
+  background:
+    radial-gradient(ellipse 80% 55% at 100% -10%, rgba(183, 110, 121, 0.22), transparent 55%),
+    radial-gradient(ellipse 70% 50% at -5% 110%, rgba(201, 160, 122, 0.2), transparent 50%),
+    linear-gradient(165deg, #fff7f5 0%, #ffffff 42%, #fff9f4 100%);
+  box-shadow:
+    0 18px 42px rgba(120, 53, 69, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  text-align: right;
+}
+
+.pv-emotion-cadre::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 18px;
+  border: 1px solid rgba(201, 160, 122, 0.4);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pv-emotion-cadre::after {
+  content: '';
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  top: -48px;
+  left: -36px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 160, 122, 0.22), transparent 68%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pv-emotion-top,
+.pv-emotion-feelings,
+.pv-emotion-photo-block,
+.pv-emotion-closing {
+  position: relative;
+  z-index: 1;
+}
+
+.pv-emotion-eyebrow {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--eh-rose);
+  opacity: 0.9;
+}
+
+.pv-emotion-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 0.7rem;
+  padding: 0.38rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(120deg, var(--eh-rose) 0%, var(--eh-rose-deep) 48%, var(--eh-gold) 120%);
+  box-shadow: 0 8px 20px rgba(122, 53, 66, 0.32);
+  animation: pv-eh-badge-in 0.55s ease both;
+}
+
+.pv-emotion-title {
+  margin: 0 0 0.55rem;
+  font-size: clamp(1.35rem, 5.2vw, 1.65rem);
+  font-weight: 900;
+  line-height: 1.4;
+  color: var(--eh-ink);
+  animation: pv-eh-rise 0.55s ease 0.05s both;
+}
+
+.pv-emotion-lead {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.78;
+  color: #5c3840;
+  animation: pv-eh-rise 0.55s ease 0.1s both;
+}
+
+.pv-emotion-feelings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.15rem 0 1.05rem;
+}
+
+.pv-emotion-feeling {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.72rem 0.7rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1.5px solid rgba(201, 160, 122, 0.42);
+  box-shadow: 0 4px 14px rgba(120, 53, 69, 0.05);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.pv-emotion-feeling:hover {
+  transform: translateY(-1px);
+  border-color: rgba(183, 110, 121, 0.55);
+}
+
+.pv-emotion-ico {
+  flex-shrink: 0;
+  width: 2.15rem;
+  height: 2.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fff1f2 0%, #fff7ed 100%);
+  border: 1px solid #f5d0d6;
+}
+
+.pv-emotion-point-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.pv-emotion-point-body strong {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--eh-ink);
+  line-height: 1.35;
+}
+
+.pv-emotion-point-body p {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.55;
+  color: #6b4a52;
+}
+
+.pv-emotion-photo-block {
+  text-align: center;
+  margin: 0.15rem 0 1rem;
+}
+
+.pv-emotion-photo {
+  margin: 0;
+}
+
+.pv-emotion-square {
+  border-radius: 18px;
+  border: 2px solid rgba(201, 160, 122, 0.7);
+  background: #fff;
+  box-shadow:
+    0 14px 36px rgba(120, 53, 69, 0.16),
+    0 0 0 4px rgba(255, 255, 255, 0.65);
+  animation: pv-eh-rise 0.65s ease 0.15s both;
+}
+
+.pv-emotion-square img {
+  object-fit: cover;
+}
+
+.pv-emotion-closing {
+  margin: 0.95rem 0 0;
+  padding: 0.85rem 0.85rem;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1.7;
+  text-align: center;
+  color: var(--eh-ink);
+  background: linear-gradient(135deg, rgba(183, 110, 121, 0.14), rgba(201, 160, 122, 0.18));
+  border: 1px solid rgba(183, 110, 121, 0.3);
+}
+
+@keyframes pv-eh-badge-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pv-eh-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* إطار واحد ثم صورة — يطوّل الصفحة */
 .pv-story-section {
   padding: 0.5rem 0 1.5rem;
@@ -773,18 +1010,6 @@ button.hero-offer-card {
   color: #64748b;
   line-height: 1.5;
   font-weight: 600;
-}
-
-.pv-beat-num {
-  display: inline-block;
-  margin-top: 0.45rem;
-  font-size: 0.72rem;
-  font-weight: 900;
-  color: #0e7490;
-  background: #ecfeff;
-  border: 1px solid #a5f3fc;
-  border-radius: 999px;
-  padding: 0.15rem 0.55rem;
 }
 
 .pv-story-badge {
@@ -981,6 +1206,101 @@ button.hero-offer-card {
   height: auto;
   border-radius: 16px;
   margin: 0.65rem 0 0.85rem;
+}
+
+/* دليل الاستخدام — تحت CTA السفلي (يلغي لون h3/p الداكن من الصفحة البيضاء) */
+#antichoc-root .pv-howto-cadre {
+  margin-top: 1.15rem;
+  padding: 1.1rem 1rem 1.15rem;
+  border-radius: 20px;
+  background: linear-gradient(155deg, #0f766e 0%, #115e59 48%, #134e4a 100%);
+  border: 2px solid #2dd4bf;
+  box-shadow: 0 14px 36px rgba(15, 118, 110, 0.35);
+  color: #ecfdf5 !important;
+  text-align: right;
+}
+
+#antichoc-root .pv-howto-badge {
+  display: inline-block;
+  background: #fbbf24;
+  color: #78350f !important;
+  font-size: 0.78rem;
+  font-weight: 900;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 0.65rem;
+  letter-spacing: 0.01em;
+}
+
+#antichoc-root .pv-howto-cadre .pv-howto-title,
+#antichoc-root .pv-howto-cadre h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1.35;
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+#antichoc-root .pv-howto-cadre .pv-howto-intro,
+#antichoc-root .pv-howto-cadre > p.pv-howto-intro {
+  margin: 0 0 0.85rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.55;
+  color: #ccfbf1 !important;
+}
+
+#antichoc-root .pv-howto-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+#antichoc-root .pv-howto-step {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(45, 212, 191, 0.55);
+  border-radius: 14px;
+  padding: 0.75rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+#antichoc-root .pv-howto-step strong {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #fde68a !important;
+}
+
+#antichoc-root .pv-howto-step span,
+#antichoc-root .pv-howto-step .latin-nums {
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.55;
+  color: #ecfdf5 !important;
+}
+
+#antichoc-root .pv-howto-step strong .latin-nums {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #fde68a !important;
+}
+
+#antichoc-root .pv-howto-cadre .pv-howto-tip,
+#antichoc-root .pv-howto-cadre > p.pv-howto-tip {
+  margin: 0.85rem 0 0;
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(251, 191, 36, 0.28);
+  border: 1px solid rgba(253, 230, 138, 0.85);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.55;
+  color: #fffbeb !important;
 }
 
 .pv-trust-bottom {

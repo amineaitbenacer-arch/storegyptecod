@@ -620,6 +620,52 @@ export default function ProductView({ product }: { product: ProductPageConfig })
         </div>
       </section>
 
+      {product.emotionHook && (
+        <section className="pv-emotion-hook" aria-label={product.emotionHook.title}>
+          <div className="container">
+            <div className="pv-emotion-cadre">
+              <div className="pv-emotion-top">
+                {product.emotionHook.eyebrow && (
+                  <span className="pv-emotion-eyebrow">{product.emotionHook.eyebrow}</span>
+                )}
+                <div className="pv-emotion-badge">{product.emotionHook.badge}</div>
+                <h2 className="pv-emotion-title">{product.emotionHook.title}</h2>
+                <p className="pv-emotion-lead">{product.emotionHook.lead}</p>
+              </div>
+
+              <div className="pv-emotion-photo-block">
+                <figure className="pv-emotion-photo">
+                  <div className="pv-square pv-emotion-square">
+                    <img
+                      src={product.emotionHook.image}
+                      alt={product.emotionHook.imageAlt || product.emotionHook.title}
+                    />
+                  </div>
+                </figure>
+              </div>
+
+              <div className="pv-emotion-feelings">
+                {product.emotionHook.feelings.map((feeling) => (
+                  <div key={feeling.title} className="pv-emotion-feeling">
+                    <span className="pv-emotion-ico" aria-hidden="true">
+                      {feeling.icon}
+                    </span>
+                    <div className="pv-emotion-point-body">
+                      <strong>{feeling.title}</strong>
+                      <p>{feeling.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {product.emotionHook.closing && (
+                <p className="pv-emotion-closing">{product.emotionHook.closing}</p>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {product.storyBeats && product.storyBeats.length > 0 && (
         <section className="product-visual-description-section pv-story-section">
           <div className="container">
