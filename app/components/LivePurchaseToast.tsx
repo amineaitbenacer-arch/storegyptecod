@@ -145,7 +145,7 @@ export default function LivePurchaseToast({ hidden = false }: Props) {
             <strong className="lp-live-toast-name">{item.name}</strong>
           </p>
           <p className="lp-live-toast-sub">
-            من <span className="lp-live-toast-city">{item.city}</span> · من هنا
+            من مدينة <span className="lp-live-toast-city">{item.city}</span> · الحين
           </p>
         </div>
       </div>
