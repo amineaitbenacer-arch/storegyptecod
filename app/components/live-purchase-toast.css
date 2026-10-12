@@ -111,20 +111,22 @@
 }
 
 .lp-live-toast-sub {
-  margin: 0.1rem 0 0;
-  font-size: 0.64rem;
-  line-height: 1.25;
-  font-weight: 700;
-  color: rgba(226, 232, 240, 0.82);
+  margin: 0.12rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  font-weight: 800;
+  color: #ffffff;
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  letter-spacing: 0.01em;
 }
 
 .lp-live-toast-city {
-  color: #fff;
-  font-weight: 800;
+  color: #fde68a;
+  font-weight: 900;
 }
 
 .lp-live-toast-brand {
@@ -216,7 +218,7 @@
   }
 
   .lp-live-toast-sub {
-    font-size: 0.6rem;
+    font-size: 0.68rem;
   }
 
   .lp-live-toast-brand {
