@@ -1036,7 +1036,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
         id: 2,
         name: 'قطعتان',
         sub: 'لكِ ولأختك — نفس الهمّ وفرحتين سوا',
-        price: 259,
+        price: 338,
         oldPrice: 698,
         pieces: 2,
         popular: true,
@@ -1045,11 +1045,11 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
       {
         id: 3,
         name: 'ثلاث قطع',
-        sub: 'لكِ + هديتين — أكبر توفير لمن تحبين',
-        price: 339,
+        sub: 'لكِ + هديتين — لمن تحبين',
+        price: 507,
         oldPrice: 1047,
         pieces: 3,
-        badge: 'توفير ضخم',
+        badge: 'ثلاث قطع',
       },
     ],
     trustCards: [
@@ -1316,12 +1316,12 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           {
             icon: '👯‍♀️',
             title: 'قطعتين لكِ ولأختك',
-            text: 'بسعر 259 — الأكثر طلبًا. نفس الهمّ وفرحتين.',
+            text: 'بسعر 338 — الأكثر طلبًا. نفس الهمّ وفرحتين.',
           },
           {
             icon: '🎁',
-            title: 'ثلاث قطع = أكبر توفير',
-            text: 'بسعر 339 — لكِ وهديتين لمن تحبين.',
+            title: 'ثلاث قطع جاهزة',
+            text: 'بسعر 507 — لكِ وهديتين لمن تحبين.',
           },
         ],
         imageBadge: 'العلبة',
@@ -1329,7 +1329,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
           badge: 'جاهزة للطلب',
           title: 'العلبة توصلك… والجلسة لكِ',
           text: 'ادفعي عند الباب وابدئي بخصوصيتك.',
-          bullets: ['169 أو 259 أو 339', 'كل الملحقات معك', 'سهل من أول يوم'],
+          bullets: ['169 أو 338 أو 507', 'كل الملحقات معك', 'سهل من أول يوم'],
         },
       },
       {
