@@ -7,7 +7,13 @@ import type { ProductPageConfig, OfferPack } from '../../lib/productPages';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
-import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
+import {
+  isOrderAlreadyRecordedError,
+  isValidOrderPhone,
+  normalizePhone,
+  ORDER_ALREADY_RECORDED_MSG,
+  submitOrderToApi,
+} from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 import './product-landing.css';
 import LivePurchaseToast from './LivePurchaseToast';
@@ -36,10 +42,11 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
 
   async function submit() {
     const clean = normalizePhone(phone);
-    if (!name.trim() || !city || !address.trim() || !isValidOrderPhone(clean)) {
-      setPhoneError(!isValidOrderPhone(clean) ? '⚠️ رقم الهاتف يجب أن يكون 10 أرقام' : '');
+    if (!isValidOrderPhone(clean)) {
+      setPhoneError('⚠️ رقم الهاتف يجب أن يكون 10 أرقام');
       return;
     }
+    setPhoneError('');
     setLoading(true);
     const orderId = `pl-${Date.now().toString(36)}`;
     trackStoreEvent('checkout', {
@@ -75,8 +82,12 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
       flushTrackingQueue();
       saveLastOrder(finalOrder);
       window.location.assign(thankYouHref(orderId));
-    } catch {
-      setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة');
+    } catch (error) {
+      setPhoneError(
+        isOrderAlreadyRecordedError(error)
+          ? ORDER_ALREADY_RECORDED_MSG
+          : '⚠️ ما تسجّلش الطلب — عاود المحاولة'
+      );
       setLoading(false);
     }
   }
@@ -302,9 +313,9 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
               ))}
             </div>
 
-            <input className="pl-input" placeholder="الاسم الكامل *" value={name} onChange={(e) => setName(e.target.value)} />
+            <input className="pl-input" placeholder="الاسم الكامل" value={name} onChange={(e) => setName(e.target.value)} />
             <input
-              className={`pl-input${phoneError ? ' error' : ''}`}
+              className={`pl-input${phoneError && phoneError !== ORDER_ALREADY_RECORDED_MSG ? ' error' : ''}`}
               placeholder="رقم الجوال (05XXXXXXXX) *"
               inputMode="numeric"
               value={phone}
@@ -314,16 +325,27 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
                 setPhoneError(v && v.length < 10 ? '⚠️ 10 أرقام' : '');
               }}
             />
-            {phoneError && <p className="pl-err">{phoneError}</p>}
+            {phoneError && (
+              <p
+                className="pl-err"
+                style={
+                  phoneError === ORDER_ALREADY_RECORDED_MSG
+                    ? { color: '#059669' }
+                    : undefined
+                }
+              >
+                {phoneError}
+              </p>
+            )}
             <select className="pl-input" value={city} onChange={(e) => setCity(e.target.value)}>
-              <option value="">اختر المدينة *</option>
+              <option value="">اختر المدينة</option>
               {CITIES.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
               ))}
             </select>
-            <input className="pl-input" placeholder="العنوان الكامل *" value={address} onChange={(e) => setAddress(e.target.value)} />
+            <input className="pl-input" placeholder="العنوان الكامل" value={address} onChange={(e) => setAddress(e.target.value)} />
 
             <div className="pl-total">
               <span>المجموع عند الاستلام</span>

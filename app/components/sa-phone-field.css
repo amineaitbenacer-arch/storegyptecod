@@ -95,3 +95,21 @@
   text-align: right;
   direction: rtl;
 }
+
+.sa-phone.ok,
+.sa-phone.ok:focus-within,
+.sa-phone.product.ok,
+.sa-phone.product.ok:focus-within {
+  border: 1.5px solid #34d399;
+  background: #0f1f1a;
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.22);
+}
+
+.sa-phone.ok .sa-phone-prefix {
+  color: #86efac;
+}
+
+.sa-phone-err.ok {
+  color: #6ee7b7;
+  font-weight: 800;
+}

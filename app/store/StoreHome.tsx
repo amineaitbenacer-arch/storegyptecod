@@ -9,7 +9,13 @@ import { formatSar } from '../../lib/money';
 import { orderTotalWithShipping, shippingFeeForOrder } from '../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
 import { PHONE_INCOMPLETE_MSG } from '../../lib/phone';
-import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
+import {
+  isOrderAlreadyRecordedError,
+  isValidOrderPhone,
+  normalizePhone,
+  ORDER_ALREADY_RECORDED_MSG,
+  submitOrderToApi,
+} from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 import StoreCheckoutSheet from './StoreCheckoutSheet';
 import ReturnPolicyPanel from '../components/ReturnPolicyPanel';
@@ -234,7 +240,7 @@ const STORIES: StoryItem[] = [
     ring: '#B76E79',
     image: '/products/ipl-aybel/lp/01-hero-lifestyle.jpg',
     title: 'ليزر ايبل IPL',
-    text: 'خلاص من روتين الواكس والحلاقة — نعومة وثقة من البيت.',
+    text: 'جلسة في بيتك… نعومة تزيد مع الوقت وراحة ترجع لكِ قدام من تحبين.',
   },
   {
     id: 's0',
@@ -493,10 +499,6 @@ export default function StoreHome() {
 
   async function submitOrder() {
     const clean = normalizePhone(phone);
-    if (!name.trim() || !city.trim()) {
-      setPhoneError('يرجى إدخال الاسم والمدينة.');
-      return;
-    }
     if (phone.length > 10 || !isValidOrderPhone(clean)) {
       setPhoneError(phone.length > 10 ? '' : PHONE_INCOMPLETE_MSG);
       return;
@@ -556,7 +558,11 @@ export default function StoreHome() {
       window.location.assign(thankYouHref(orderId));
     } catch (error) {
       console.error('[checkout] submit failed', error);
-      setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة (تحقق من الإنترنت)');
+      if (isOrderAlreadyRecordedError(error)) {
+        setPhoneError(ORDER_ALREADY_RECORDED_MSG);
+      } else {
+        setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة (تحقق من الإنترنت)');
+      }
       setSubmitting(false);
     }
   }

@@ -9,7 +9,13 @@ import { shippingFeeForOrder, orderTotalWithShipping } from '../../../lib/shippi
 import { saveLastOrder, thankYouHref } from '../../../lib/last-order';
 import SaPhoneField from '../../components/SaPhoneField';
 import { PHONE_INCOMPLETE_MSG } from '../../../lib/phone';
-import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../../lib/submit-order';
+import {
+  isOrderAlreadyRecordedError,
+  isValidOrderPhone,
+  normalizePhone,
+  ORDER_ALREADY_RECORDED_MSG,
+  submitOrderToApi,
+} from '../../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../../lib/tracking';
 import LivePurchaseToast from '../../components/LivePurchaseToast';
 
@@ -107,10 +113,6 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
   async function submit() {
     const clean = normalizePhone(phone);
-    if (!name.trim() || !city.trim()) {
-      setFormError('يرجى إكمال الاسم ورقم الجوال والمدينة.');
-      return;
-    }
     if (phone.length > 10 || !isValidOrderPhone(clean)) {
       setPhoneError(phone.length > 10 ? '' : PHONE_INCOMPLETE_MSG);
       setFormError('');
@@ -156,8 +158,13 @@ export default function ProductView({ product }: { product: ProductPageConfig })
       flushTrackingQueue();
       saveLastOrder({ ...orderData, orderId, serverOrderId: saved.orderId });
       window.location.assign(thankYouHref(orderId));
-    } catch {
-      setFormError('ما تسجّلش الطلب. عاود المحاولة.');
+    } catch (error) {
+      if (isOrderAlreadyRecordedError(error)) {
+        setPhoneError(ORDER_ALREADY_RECORDED_MSG);
+        setFormError('');
+      } else {
+        setFormError('ما تسجّلش الطلب. عاود المحاولة.');
+      }
       setLoading(false);
     }
   }
@@ -381,7 +388,6 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               id="inp-name"
               className={`form-inp${name.trim() ? ' field-ready' : ''}`}
               placeholder="👤 الاسم الكامل"
-              required
               autoComplete="name"
               enterKeyHint="next"
               value={name}
@@ -402,7 +408,6 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               id="inp-city"
               className={`form-inp${city.trim() ? ' field-ready' : ''}`}
               placeholder="📍 المدينة"
-              required
               autoComplete="address-level2"
               enterKeyHint="done"
               value={city}
@@ -623,44 +628,49 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               </p>
             </div>
 
-            {product.storyBeats.map((beat, i) => (
-              <div key={beat.imageTitle || beat.image} className="pv-beat">
+            {product.storyBeats.map((beat, beatIdx) => (
+              <div key={beat.imageTitle || beat.image || beat.imageBadge || `beat-${beatIdx}`} className="pv-beat">
                 <div className="pv-info-cadre">
-                  <div className="pv-info-cadre-badge">
-                    تفاصيل {i + 1} / {product.storyBeats!.length}
-                  </div>
+                  <div className="pv-info-cadre-badge">{beat.imageBadge || 'تفاصيل'}</div>
                   <div className="pv-info-list">
                     {beat.frames.map((frame) => (
-                      <div key={frame.title} className="pv-info-row">
-                        {frame.icon && (
-                          <span className="pv-info-ico" aria-hidden="true">
-                            {frame.icon}
-                          </span>
-                        )}
-                        <div className="pv-info-body">
-                          <strong>{frame.title}</strong>
-                          <p>{frame.text}</p>
+                      <div key={frame.title} className="pv-info-block">
+                        <div className="pv-info-row">
+                          {frame.icon && (
+                            <span className="pv-info-ico" aria-hidden="true">
+                              {frame.icon}
+                            </span>
+                          )}
+                          <div className="pv-info-body">
+                            <strong>{frame.title}</strong>
+                            <p>{frame.text}</p>
+                          </div>
                         </div>
+                        {frame.image && (
+                          <figure className="pv-frame-photo">
+                            <div className="pv-square">
+                              <img src={frame.image} alt={frame.title} />
+                            </div>
+                          </figure>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <figure className="pv-beat-photo">
-                  {beat.imageBadge && <span className="pv-story-badge">{beat.imageBadge}</span>}
-                  {beat.image && (
+                {beat.image && (
+                  <figure className="pv-beat-photo">
                     <div className="pv-square">
                       <img src={beat.image} alt={beat.imageTitle || product.heroTitle} />
                     </div>
-                  )}
-                  {(beat.imageTitle || beat.imageText) && (
-                    <figcaption>
-                      {beat.imageTitle && <strong>{beat.imageTitle}</strong>}
-                      {beat.imageText && <span>{beat.imageText}</span>}
-                    </figcaption>
-                  )}
-                  <span className="pv-beat-num">{i + 1} / {product.storyBeats!.length}</span>
-                </figure>
+                    {(beat.imageTitle || beat.imageText) && (
+                      <figcaption>
+                        {beat.imageTitle && <strong>{beat.imageTitle}</strong>}
+                        {beat.imageText && <span>{beat.imageText}</span>}
+                      </figcaption>
+                    )}
+                  </figure>
+                )}
 
                 {beat.bridge && (
                   <div className="pv-info-cadre pv-bridge-cadre">
@@ -890,6 +900,29 @@ export default function ProductView({ product }: { product: ProductPageConfig })
           <button type="button" className="offer-cta-main" onClick={openSheet}>
             {product.ctaLabel} — {formatSar(offer.price)}
           </button>
+
+          {product.howToUseGuide && (
+            <aside className="pv-howto-cadre" aria-label={product.howToUseGuide.title}>
+              <div className="pv-howto-badge">{product.howToUseGuide.badge}</div>
+              <h3 className="pv-howto-title">{product.howToUseGuide.title}</h3>
+              {product.howToUseGuide.intro && (
+                <p className="pv-howto-intro">{product.howToUseGuide.intro}</p>
+              )}
+              <ol className="pv-howto-list">
+                {product.howToUseGuide.steps.map((step, stepIdx) => (
+                  <li key={step.title} className="pv-howto-step">
+                    <strong>
+                      <span className="latin-nums">{stepIdx + 1})</span> {step.title}
+                    </strong>
+                    <span>{step.text}</span>
+                  </li>
+                ))}
+              </ol>
+              {product.howToUseGuide.tip && (
+                <p className="pv-howto-tip">{product.howToUseGuide.tip}</p>
+              )}
+            </aside>
+          )}
         </div>
       </section>
 

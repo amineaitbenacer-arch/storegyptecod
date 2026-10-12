@@ -6,7 +6,13 @@ import { OFFERS } from '../../lib/offers';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
-import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
+import {
+  isOrderAlreadyRecordedError,
+  isValidOrderPhone,
+  normalizePhone,
+  ORDER_ALREADY_RECORDED_MSG,
+  submitOrderToApi,
+} from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 
 interface BottomSheetProps {
@@ -42,11 +48,12 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
 
   const handleSubmit = async () => {
     const clean = normalizePhone(phone);
-    if (!name.trim() || !city || !address.trim() || !isValidOrderPhone(clean)) {
-      if (!isValidOrderPhone(clean)) setPhoneError('⚠️ تأكد من رقم الهاتف (10 أرقام)');
+    if (!isValidOrderPhone(clean)) {
+      setPhoneError('⚠️ تأكد من رقم الهاتف (10 أرقام)');
       return;
     }
 
+    setPhoneError('');
     setIsSubmitting(true);
     const productId =
       typeof window !== 'undefined'
@@ -64,7 +71,7 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
       name: name.trim(),
       phone: clean,
       city,
-      address: address.trim(),
+      address: address.trim() || city,
       offer: selectedOffer.name,
       offerName: selectedOffer.name,
       pieces: selectedOffer.pieces,
@@ -88,8 +95,12 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
       flushTrackingQueue();
       saveLastOrder(finalOrder);
       window.location.assign(thankYouHref(orderId));
-    } catch {
-      setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة');
+    } catch (error) {
+      setPhoneError(
+        isOrderAlreadyRecordedError(error)
+          ? ORDER_ALREADY_RECORDED_MSG
+          : '⚠️ ما تسجّلش الطلب — عاود المحاولة'
+      );
       setIsSubmitting(false);
     }
   };
@@ -205,10 +216,10 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <input className="form-input" type="text" placeholder="الاسم الكامل *" value={name} onChange={(e) => setName(e.target.value)} />
+                <input className="form-input" type="text" placeholder="الاسم الكامل" value={name} onChange={(e) => setName(e.target.value)} />
                 <div>
                   <input
-                    className={`form-input ${phoneError ? 'error' : ''}`}
+                    className={`form-input ${phoneError && phoneError !== ORDER_ALREADY_RECORDED_MSG ? 'error' : ''}`}
                     type="tel"
                     inputMode="numeric"
                     placeholder="رقم الجوال (05XXXXXXXX) *"
@@ -216,11 +227,20 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
                     onChange={(e) => handlePhoneChange(e.target.value)}
                   />
                   {phoneError && (
-                    <p style={{ color: '#EF4444', fontSize: 13, marginTop: 6, fontWeight: 600 }}>{phoneError}</p>
+                    <p
+                      style={{
+                        color: phoneError === ORDER_ALREADY_RECORDED_MSG ? '#059669' : '#EF4444',
+                        fontSize: 13,
+                        marginTop: 6,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {phoneError}
+                    </p>
                   )}
                 </div>
                 <select className="form-input" value={city} onChange={(e) => setCity(e.target.value)}>
-                  <option value="">اختر المدينة *</option>
+                  <option value="">اختر المدينة</option>
                   {CITIES.map((c) => (
                     <option key={c} value={c}>
                       {c}
@@ -230,7 +250,7 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
                 <input
                   className="form-input"
                   type="text"
-                  placeholder="العنوان الكامل *"
+                  placeholder="العنوان الكامل"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                 />

@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { appendEvent } from '../../../lib/analytics-store';
 import {
+  clientIpFromHeaders,
+  evaluateOrderGuard,
+  ORDER_ALREADY_RECORDED,
+} from '../../../lib/order-guard';
+import {
   deleteOrder,
   insertOrder,
   listOrders,
@@ -35,13 +40,32 @@ export async function POST(request: NextRequest) {
     } = body;
     const offerLabel = offer || offerName;
     const cleanPhone = normalizePhone(String(phone || ''));
+    const cleanProductId = String(productId || '').replace(/[^\w.-]/g, '').slice(0, 80);
+    const cleanVisitorId = String(visitorId || '').replace(/[^\w-]/g, '').slice(0, 80);
+    const cleanName = String(name || '').trim();
+    const cleanCity = String(city || '').trim();
+    const cleanAddress = String(address || cleanCity || '').trim();
+    const clientIp = clientIpFromHeaders(request.headers);
 
-    if (!name || !cleanPhone || !city || !offerLabel) {
+    if (!cleanPhone || !offerLabel) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     if (!isValidOrderPhone(cleanPhone)) {
       return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
+    }
+
+    const guard = await evaluateOrderGuard({
+      phone: cleanPhone,
+      productId: cleanProductId,
+      ip: clientIp,
+      visitorId: cleanVisitorId,
+    });
+    if (!guard.allow) {
+      return NextResponse.json(
+        { success: false, error: ORDER_ALREADY_RECORDED },
+        { status: 409 }
+      );
     }
 
     const clickSource = sourceFromClick({
@@ -59,10 +83,10 @@ export async function POST(request: NextRequest) {
 
     const order: StoreOrder = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-      name: String(name).trim(),
+      name: cleanName,
       phone: cleanPhone,
-      city: String(city).trim(),
-      address: String(address || city || '').trim(),
+      city: cleanCity,
+      address: cleanAddress,
       offer: String(offerLabel),
       pieces,
       price,
@@ -74,9 +98,10 @@ export async function POST(request: NextRequest) {
       ttclid: ttclid || '',
       sccid: sccid || '',
       utm_source: utm_source || '',
-      productId: String(productId || '').replace(/[^\w.-]/g, '').slice(0, 80),
+      productId: cleanProductId,
       clientOrderId: String(clientOrderId || '').replace(/[^\w.-]/g, '').slice(0, 80),
-      visitorId: String(visitorId || '').replace(/[^\w-]/g, '').slice(0, 80),
+      visitorId: cleanVisitorId,
+      ip: clientIp,
     };
 
     await insertOrder(order);

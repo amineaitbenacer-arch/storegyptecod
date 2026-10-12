@@ -219,7 +219,6 @@ export default function StoreCheckoutSheet({
             onChange={(e) => onName(e.target.value)}
             autoComplete="name"
             enterKeyHint="next"
-            required
           />
           <SaPhoneField variant="store" value={phone} error={phoneError} onChange={onPhone} />
           <input
@@ -230,7 +229,6 @@ export default function StoreCheckoutSheet({
             onChange={(e) => onCity(e.target.value)}
             autoComplete="address-level2"
             enterKeyHint="done"
-            required
           />
 
           <div className="store-ac-sum">

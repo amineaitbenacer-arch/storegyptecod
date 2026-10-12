@@ -5,7 +5,13 @@ import AntichocMarkup from './AntichocMarkup';
 import { formatSar, formatSarHtml } from '../../../lib/money';
 import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../../lib/last-order';
-import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../../lib/submit-order';
+import {
+  isOrderAlreadyRecordedError,
+  isValidOrderPhone,
+  normalizePhone,
+  ORDER_ALREADY_RECORDED_MSG,
+  submitOrderToApi,
+} from '../../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../../lib/tracking';
 
 type Bundle = { id: number; name: string; price: number };
@@ -211,18 +217,16 @@ export default function ProductShell() {
       const addressInp = document.getElementById('inp-address') as HTMLInputElement | null;
       const address = addressInp?.value.trim() || city;
 
-      if (!name || !phone || !city) {
-        alert('عافاك كمل جميع المعلومات (الاسم، الهاتف والمدينة).');
-        return;
-      }
-
       const phoneInput = document.getElementById('inp-phone') as HTMLInputElement | null;
       const phoneError = document.getElementById('phone-error') as HTMLElement | null;
       const cleanPhone = normalizePhone(phone);
       if (!isValidOrderPhone(cleanPhone)) {
         if (phoneInput) phoneInput.style.border = '2px solid #ef4444';
-        if (phoneError) phoneError.style.display = 'block';
-        alert('⚠️ تأكد من رقم الهاتف (10 أرقام)');
+        if (phoneError) {
+          phoneError.textContent = '⚠️ تأكد من رقم الهاتف (10 أرقام)';
+          phoneError.style.display = 'block';
+          phoneError.style.color = '#ef4444';
+        }
         return;
       }
       if (phoneError) phoneError.style.display = 'none';
@@ -273,8 +277,21 @@ export default function ProductShell() {
         flushTrackingQueue();
         saveLastOrder(finalOrder);
         window.location.assign(thankYouHref(orderId));
-      } catch {
-        alert('⚠️ ما تسجّلش الطلب — عاود المحاولة');
+      } catch (error) {
+        if (isOrderAlreadyRecordedError(error)) {
+          if (phoneError) {
+            phoneError.textContent = ORDER_ALREADY_RECORDED_MSG;
+            phoneError.style.display = 'block';
+            phoneError.style.color = '#059669';
+          }
+          if (phoneInput) phoneInput.style.border = '2px solid #34d399';
+        } else {
+          if (phoneError) {
+            phoneError.textContent = '⚠️ ما تسجّلش الطلب — عاود المحاولة';
+            phoneError.style.display = 'block';
+            phoneError.style.color = '#ef4444';
+          }
+        }
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = 'أكد الطلب الآن 🔒';

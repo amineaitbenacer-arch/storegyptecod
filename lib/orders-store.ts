@@ -22,6 +22,7 @@ export type StoreOrder = {
   productId: string;
   clientOrderId: string;
   visitorId: string;
+  ip: string;
 };
 
 type OrderRow = {
@@ -44,9 +45,34 @@ type OrderRow = {
   product_id: string;
   client_order_id: string;
   visitor_id: string;
+  ip: string | null;
+};
+
+type OrderBlock = {
+  ip: string;
+  productId: string;
+  until: string;
+  reason: string;
+};
+
+type AbuseAttempt = {
+  ip: string;
+  productId: string;
+  reason: string;
+  timestamp: string;
 };
 
 const ORDERS_FILE = path.join(process.cwd(), 'orders.json');
+const ORDER_BLOCKS_FILE = path.join(process.cwd(), 'order-blocks.json');
+const ABUSE_ATTEMPTS_FILE = path.join(process.cwd(), 'order-abuse-attempts.json');
+
+const CANCELLED_STATUS_RE = /annul|cancel|ملغ|رفض|refus/i;
+
+let schemaReady: Promise<void> | null = null;
+
+export function isCancelledStatus(status: string): boolean {
+  return CANCELLED_STATUS_RE.test(String(status || ''));
+}
 
 function parseMaybeJson(value: string | null): unknown {
   if (value == null || value === '') return value;
@@ -81,6 +107,7 @@ function rowToOrder(row: OrderRow): StoreOrder {
     productId: row.product_id || '',
     clientOrderId: row.client_order_id || '',
     visitorId: row.visitor_id || '',
+    ip: row.ip || '',
   };
 }
 
@@ -94,7 +121,11 @@ async function readFileOrders(): Promise<StoreOrder[]> {
   try {
     const raw = await fs.readFile(ORDERS_FILE, 'utf-8');
     const data = JSON.parse(raw);
-    return Array.isArray(data) ? (data as StoreOrder[]) : [];
+    if (!Array.isArray(data)) return [];
+    return (data as StoreOrder[]).map((order) => ({
+      ...order,
+      ip: order.ip || '',
+    }));
   } catch {
     return [];
   }
@@ -102,6 +133,19 @@ async function readFileOrders(): Promise<StoreOrder[]> {
 
 async function writeFileOrders(orders: StoreOrder[]) {
   await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf-8');
+}
+
+async function readJsonFile<T>(filePath: string, fallback: T): Promise<T> {
+  try {
+    const raw = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+async function writeJsonFile(filePath: string, data: unknown) {
+  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
 }
 
 function mergeOrdersById(primary: StoreOrder[], extra: StoreOrder[]): StoreOrder[] {
@@ -113,6 +157,47 @@ function mergeOrdersById(primary: StoreOrder[], extra: StoreOrder[]): StoreOrder
     merged.push(order);
   }
   return merged.sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
+}
+
+async function ensureOrderSchema(): Promise<void> {
+  const sql = getSql();
+  if (!sql) return;
+  if (!schemaReady) {
+    schemaReady = (async () => {
+      await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS ip text NOT NULL DEFAULT ''`;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_orders_phone_product
+        ON orders (phone, product_id)
+      `;
+      await sql`
+        CREATE TABLE IF NOT EXISTS order_blocks (
+          ip text NOT NULL,
+          product_id text NOT NULL,
+          until_at timestamptz NOT NULL,
+          reason text NOT NULL DEFAULT '',
+          created_at timestamptz NOT NULL DEFAULT now(),
+          PRIMARY KEY (ip, product_id)
+        )
+      `;
+      await sql`
+        CREATE TABLE IF NOT EXISTS order_abuse_attempts (
+          id bigserial PRIMARY KEY,
+          ip text NOT NULL,
+          product_id text NOT NULL,
+          reason text NOT NULL DEFAULT '',
+          created_at timestamptz NOT NULL DEFAULT now()
+        )
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_order_abuse_ip_product_created
+        ON order_abuse_attempts (ip, product_id, created_at DESC)
+      `;
+    })().catch((error) => {
+      schemaReady = null;
+      throw error;
+    });
+  }
+  await schemaReady;
 }
 
 export async function listOrders(): Promise<StoreOrder[]> {
@@ -145,13 +230,14 @@ export async function insertOrder(order: StoreOrder): Promise<void> {
     if (!sql) {
       throw new Error('DATABASE_URL is set but SQL client is unavailable');
     }
+    await ensureOrderSchema();
     // Never fall back to the local file when Neon is configured: that made
     // checkout succeed + Purchase pixel fire while /admin (Neon) missed the row.
     await sql`
       INSERT INTO orders (
         id, name, phone, city, address, offer, pieces, price,
         timestamp, status, note, source, fbclid, ttclid, sccid,
-        utm_source, product_id, client_order_id, visitor_id
+        utm_source, product_id, client_order_id, visitor_id, ip
       ) VALUES (
         ${order.id},
         ${order.name},
@@ -171,15 +257,266 @@ export async function insertOrder(order: StoreOrder): Promise<void> {
         ${order.utm_source || ''},
         ${order.productId || ''},
         ${order.clientOrderId || ''},
-        ${order.visitorId || ''}
+        ${order.visitorId || ''},
+        ${order.ip || ''}
       )
     `;
     return;
   }
 
   const orders = await readFileOrders();
-  orders.push(order);
+  orders.push({ ...order, ip: order.ip || '' });
   await writeFileOrders(orders);
+}
+
+export async function findActiveOrderByPhoneProduct(
+  phone: string,
+  productId: string
+): Promise<StoreOrder | null> {
+  const cleanPhone = String(phone || '');
+  const cleanProduct = String(productId || '');
+  if (!cleanPhone || !cleanProduct) return null;
+
+  if (hasDatabase()) {
+    try {
+      const sql = getSql();
+      if (sql) {
+        await ensureOrderSchema();
+        const rows = (await sql`
+          SELECT id, phone, status, product_id, timestamp, ip, visitor_id
+          FROM orders
+          WHERE phone = ${cleanPhone}
+            AND product_id = ${cleanProduct}
+          ORDER BY timestamp DESC
+          LIMIT 5
+        `) as OrderRow[];
+        const hit = rows.map(rowToOrder).find((order) => !isCancelledStatus(order.status));
+        if (hit) return hit;
+      }
+    } catch (error) {
+      console.error('[orders] findActiveOrderByPhoneProduct failed', error);
+    }
+  }
+
+  const fileOrders = await readFileOrders();
+  return (
+    fileOrders.find(
+      (order) =>
+        order.phone === cleanPhone &&
+        order.productId === cleanProduct &&
+        !isCancelledStatus(order.status)
+    ) || null
+  );
+}
+
+/** Small set for near-dup checks: same product + same IP or visitor only. */
+export async function listRecentOrdersForNearDup(
+  productId: string,
+  sinceIso: string,
+  ip: string,
+  visitorId: string
+): Promise<StoreOrder[]> {
+  const cleanProduct = String(productId || '');
+  const cleanIp = String(ip || '').trim();
+  const cleanVisitor = String(visitorId || '').trim();
+  if (!cleanProduct || (!cleanIp && !cleanVisitor)) return [];
+  const sinceMs = Date.parse(sinceIso);
+
+  if (hasDatabase()) {
+    try {
+      const sql = getSql();
+      if (sql) {
+        await ensureOrderSchema();
+        const rows = (await sql`
+          SELECT id, phone, status, timestamp, ip, visitor_id, product_id
+          FROM orders
+          WHERE product_id = ${cleanProduct}
+            AND timestamp >= ${sinceIso}
+            AND (
+              (${cleanIp} <> '' AND ip = ${cleanIp})
+              OR (${cleanVisitor} <> '' AND visitor_id = ${cleanVisitor})
+            )
+          ORDER BY timestamp DESC
+          LIMIT 30
+        `) as OrderRow[];
+        return rows
+          .map(rowToOrder)
+          .filter((order) => !isCancelledStatus(order.status));
+      }
+    } catch (error) {
+      console.error('[orders] listRecentOrdersForNearDup failed', error);
+    }
+  }
+
+  const fileOrders = await readFileOrders();
+  return fileOrders.filter((order) => {
+    if (order.productId !== cleanProduct || isCancelledStatus(order.status)) {
+      return false;
+    }
+    if (Date.parse(order.timestamp) < sinceMs) return false;
+    const sameIp = Boolean(cleanIp && order.ip === cleanIp);
+    const sameVisitor = Boolean(cleanVisitor && order.visitorId === cleanVisitor);
+    return sameIp || sameVisitor;
+  });
+}
+
+export async function isIpProductBlocked(
+  ip: string,
+  productId: string
+): Promise<boolean> {
+  const cleanIp = String(ip || '').trim();
+  const cleanProduct = String(productId || '').trim();
+  if (!cleanIp || !cleanProduct) return false;
+  const now = Date.now();
+
+  if (hasDatabase()) {
+    try {
+      const sql = getSql();
+      if (sql) {
+        await ensureOrderSchema();
+        const rows = (await sql`
+          SELECT until_at
+          FROM order_blocks
+          WHERE ip = ${cleanIp}
+            AND product_id = ${cleanProduct}
+          LIMIT 1
+        `) as { until_at: string | Date }[];
+        if (!rows[0]) return false;
+        const untilMs =
+          typeof rows[0].until_at === 'string'
+            ? Date.parse(rows[0].until_at)
+            : rows[0].until_at.getTime();
+        return untilMs > now;
+      }
+    } catch (error) {
+      console.error('[orders] isIpProductBlocked failed', error);
+    }
+  }
+
+  const blocks = await readJsonFile<OrderBlock[]>(ORDER_BLOCKS_FILE, []);
+  return blocks.some(
+    (block) =>
+      block.ip === cleanIp &&
+      block.productId === cleanProduct &&
+      Date.parse(block.until) > now
+  );
+}
+
+export async function banIpProduct(
+  ip: string,
+  productId: string,
+  untilIso: string,
+  reason: string
+): Promise<void> {
+  const cleanIp = String(ip || '').trim();
+  const cleanProduct = String(productId || '').trim();
+  if (!cleanIp || !cleanProduct) return;
+
+  if (hasDatabase()) {
+    try {
+      const sql = getSql();
+      if (sql) {
+        await ensureOrderSchema();
+        await sql`
+          INSERT INTO order_blocks (ip, product_id, until_at, reason)
+          VALUES (${cleanIp}, ${cleanProduct}, ${untilIso}, ${reason || ''})
+          ON CONFLICT (ip, product_id)
+          DO UPDATE SET
+            until_at = EXCLUDED.until_at,
+            reason = EXCLUDED.reason
+        `;
+        return;
+      }
+    } catch (error) {
+      console.error('[orders] banIpProduct failed', error);
+    }
+  }
+
+  const blocks = await readJsonFile<OrderBlock[]>(ORDER_BLOCKS_FILE, []);
+  const next = blocks.filter(
+    (block) => !(block.ip === cleanIp && block.productId === cleanProduct)
+  );
+  next.push({
+    ip: cleanIp,
+    productId: cleanProduct,
+    until: untilIso,
+    reason: reason || '',
+  });
+  await writeJsonFile(ORDER_BLOCKS_FILE, next);
+}
+
+export async function recordAbuseAttempt(
+  ip: string,
+  productId: string,
+  reason: string
+): Promise<void> {
+  const cleanIp = String(ip || '').trim();
+  const cleanProduct = String(productId || '').trim();
+  if (!cleanIp || !cleanProduct) return;
+  const timestamp = new Date().toISOString();
+
+  if (hasDatabase()) {
+    try {
+      const sql = getSql();
+      if (sql) {
+        await ensureOrderSchema();
+        await sql`
+          INSERT INTO order_abuse_attempts (ip, product_id, reason, created_at)
+          VALUES (${cleanIp}, ${cleanProduct}, ${reason || ''}, ${timestamp})
+        `;
+        return;
+      }
+    } catch (error) {
+      console.error('[orders] recordAbuseAttempt failed', error);
+    }
+  }
+
+  const attempts = await readJsonFile<AbuseAttempt[]>(ABUSE_ATTEMPTS_FILE, []);
+  attempts.push({
+    ip: cleanIp,
+    productId: cleanProduct,
+    reason: reason || '',
+    timestamp,
+  });
+  await writeJsonFile(ABUSE_ATTEMPTS_FILE, attempts);
+}
+
+export async function countAbuseAttempts(
+  ip: string,
+  productId: string,
+  sinceIso: string
+): Promise<number> {
+  const cleanIp = String(ip || '').trim();
+  const cleanProduct = String(productId || '').trim();
+  if (!cleanIp || !cleanProduct) return 0;
+  const sinceMs = Date.parse(sinceIso);
+
+  if (hasDatabase()) {
+    try {
+      const sql = getSql();
+      if (sql) {
+        await ensureOrderSchema();
+        const rows = (await sql`
+          SELECT COUNT(*)::int AS count
+          FROM order_abuse_attempts
+          WHERE ip = ${cleanIp}
+            AND product_id = ${cleanProduct}
+            AND created_at >= ${sinceIso}
+        `) as { count: number }[];
+        return Number(rows[0]?.count || 0);
+      }
+    } catch (error) {
+      console.error('[orders] countAbuseAttempts failed', error);
+    }
+  }
+
+  const attempts = await readJsonFile<AbuseAttempt[]>(ABUSE_ATTEMPTS_FILE, []);
+  return attempts.filter(
+    (attempt) =>
+      attempt.ip === cleanIp &&
+      attempt.productId === cleanProduct &&
+      Date.parse(attempt.timestamp) >= sinceMs
+  ).length;
 }
 
 export async function updateOrderFields(
