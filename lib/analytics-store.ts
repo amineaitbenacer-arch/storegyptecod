@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { getSql, hasDatabase } from './db';
-import { isAdSource, sourceFromClick, type AdSource } from './tracking';
+import { resolveAttributedSource, type AdSource } from './tracking';
 
 export type TrackType =
   | 'pageview'
@@ -218,19 +218,15 @@ export function normalizeIncoming(body: Record<string, unknown>): StoredEvent | 
   if (!TYPES.has(type)) return null;
   if (Number.isNaN(Date.parse(ts))) return null;
 
-  const fromClicks = sourceFromClick({
-    fbclid: String(body.fbclid || '') || undefined,
-    ttclid: String(body.ttclid || '') || undefined,
-    sccid: String(body.sccid || '') || undefined,
-    utm_source: String(body.utm_source || '') || undefined,
+  const attributed = resolveAttributedSource({
+    fbclid: body.fbclid,
+    ttclid: body.ttclid,
+    sccid: body.sccid,
+    utm_source: body.utm_source,
+    clickAt: body.clickAt,
+    bodySource: body.source,
   });
-  const bodySource = String(body.source || '');
-  const source: AdSource =
-    fromClicks !== 'direct'
-      ? fromClicks
-      : isAdSource(bodySource)
-        ? bodySource
-        : 'direct';
+  const source: AdSource = attributed.source;
 
   return {
     visitorId,

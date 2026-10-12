@@ -14,7 +14,7 @@ import {
   type StoreOrder,
 } from '../../../lib/orders-store';
 import { isValidOrderPhone, normalizePhone } from '../../../lib/phone';
-import { isAdSource, sourceFromClick, type AdSource } from '../../../lib/tracking';
+import { resolveAttributedSource } from '../../../lib/tracking';
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
       ttclid,
       sccid,
       utm_source,
+      clickAt,
       productId,
       visitorId,
       orderId: clientOrderId,
@@ -74,18 +75,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const clickSource = sourceFromClick({
-      fbclid: fbclid || undefined,
-      ttclid: ttclid || undefined,
-      sccid: sccid || undefined,
-      utm_source: utm_source || undefined,
+    const attributed = resolveAttributedSource({
+      fbclid,
+      ttclid,
+      sccid,
+      utm_source,
+      clickAt,
+      bodySource,
     });
-    const source: AdSource =
-      clickSource !== 'direct'
-        ? clickSource
-        : isAdSource(bodySource)
-          ? bodySource
-          : 'direct';
+    const source = attributed.source;
 
     const order: StoreOrder = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
@@ -100,10 +98,10 @@ export async function POST(request: NextRequest) {
       status: 'Nouveau',
       note: '',
       source,
-      fbclid: fbclid || '',
-      ttclid: ttclid || '',
-      sccid: sccid || '',
-      utm_source: utm_source || '',
+      fbclid: attributed.fbclid,
+      ttclid: attributed.ttclid,
+      sccid: attributed.sccid,
+      utm_source: attributed.utm_source,
       productId: cleanProductId,
       clientOrderId: String(clientOrderId || '').replace(/[^\w.-]/g, '').slice(0, 80),
       visitorId: cleanVisitorId,

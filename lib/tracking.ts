@@ -20,6 +20,9 @@ function catalogValue(productId: string): { value?: number; name?: string } {
 export const AD_SOURCES = ['meta', 'tiktok', 'snapchat', 'direct'] as const;
 export type AdSource = (typeof AD_SOURCES)[number];
 
+/** Last-click paid attribution window (Meta default click window). */
+export const ATTRIBUTION_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
 export type StoreEventType =
   | 'pageview'
   | 'lp'
@@ -59,6 +62,14 @@ function lsSet(key: string, value: string) {
   }
 }
 
+function lsRemove(key: string) {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function currentProductId() {
   if (typeof window === 'undefined') return '';
   const fromPath = productIdFromPath(window.location.pathname);
@@ -69,28 +80,117 @@ export function currentProductId() {
   return lsGet(PID_KEY) || '';
 }
 
-type ClickIds = {
+export type ClickIds = {
   fbclid?: string;
   ttclid?: string;
   sccid?: string;
   utm_source?: string;
+  at?: number;
 };
 
-function readClicks(): ClickIds {
-  if (typeof window === 'undefined') return {};
-  try {
-    const parsed = JSON.parse(lsGet(CLICK_KEY) || '{}') as ClickIds;
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    return {};
-  }
+const PLACEHOLDER_CLICK_IDS = new Set([
+  'fbclid',
+  'ttclid',
+  'sccid',
+  'sc_click_id',
+  'scclid',
+  'null',
+  'undefined',
+  'nil',
+  '(not set)',
+  '{{fbclid}}',
+  '{{ttclid}}',
+  '{fbclid}',
+  '{ttclid}',
+]);
+
+function normalizeUtm(value: unknown) {
+  return String(value || '')
+    .trim()
+    .toLowerCase();
+}
+
+/** Drop template junk like fbclid=fbclid that was poisoning Meta vs TikTok. */
+export function cleanClickId(value: unknown): string | undefined {
+  const raw = String(value || '').trim();
+  if (!raw) return undefined;
+  const lower = raw.toLowerCase();
+  if (PLACEHOLDER_CLICK_IDS.has(lower)) return undefined;
+  if (lower.startsWith('{{') || lower.startsWith('%7b')) return undefined;
+  // Real ad click IDs are long opaque tokens.
+  if (raw.length < 12) return undefined;
+  return raw.slice(0, 240);
+}
+
+function isMetaUtm(utm: string) {
+  return (
+    utm === 'facebook' ||
+    utm === 'meta' ||
+    utm === 'fb' ||
+    utm === 'ig' ||
+    utm === 'instagram' ||
+    utm.startsWith('facebook') ||
+    utm.startsWith('instagram') ||
+    utm.startsWith('meta_') ||
+    utm.startsWith('fb_') ||
+    utm.startsWith('ig_')
+  );
+}
+
+function isTikTokUtm(utm: string) {
+  return utm === 'tt' || utm === 'tiktok' || utm.startsWith('tiktok') || utm.startsWith('tt_');
+}
+
+function isSnapUtm(utm: string) {
+  return utm === 'snap' || utm === 'snapchat' || utm.startsWith('snapchat') || utm.startsWith('snap_');
+}
+
+function hasClickSignal(click: ClickIds) {
+  return Boolean(click.fbclid || click.ttclid || click.sccid || click.utm_source);
+}
+
+function sanitizeClickIds(click: ClickIds): ClickIds {
+  return {
+    fbclid: cleanClickId(click.fbclid),
+    ttclid: cleanClickId(click.ttclid),
+    sccid: cleanClickId(click.sccid),
+    utm_source: click.utm_source ? String(click.utm_source).trim().slice(0, 80) : undefined,
+    at: click.at,
+  };
 }
 
 export function sourceFromClick(click: ClickIds): AdSource {
-  const utm = String(click.utm_source || '').toLowerCase();
-  if (click.fbclid || ['facebook', 'meta', 'fb', 'ig', 'instagram'].includes(utm)) return 'meta';
-  if (click.ttclid || utm === 'tiktok' || utm === 'tt') return 'tiktok';
-  if (click.sccid || utm === 'snapchat' || utm === 'snap') return 'snapchat';
+  const clean = sanitizeClickIds(click);
+  const utm = normalizeUtm(clean.utm_source);
+  const hasFb = Boolean(clean.fbclid);
+  const hasTt = Boolean(clean.ttclid);
+  const hasSc = Boolean(clean.sccid);
+
+  // Prefer platform where UTM and click-id agree (fixes fake fbclid + real ttclid).
+  if (isTikTokUtm(utm) && hasTt) return 'tiktok';
+  if (isMetaUtm(utm) && hasFb) return 'meta';
+  if (isSnapUtm(utm) && hasSc) return 'snapchat';
+
+  const idCount = [hasFb, hasTt, hasSc].filter(Boolean).length;
+  if (idCount === 1) {
+    if (hasTt) return 'tiktok';
+    if (hasFb) return 'meta';
+    if (hasSc) return 'snapchat';
+  }
+  if (idCount > 1) {
+    if (isTikTokUtm(utm)) return 'tiktok';
+    if (isMetaUtm(utm)) return 'meta';
+    if (isSnapUtm(utm)) return 'snapchat';
+    // Ambiguous dual IDs: TikTok token shape is distinctive; otherwise Meta.
+    if (hasTt && String(clean.ttclid).startsWith('E_C_P_')) return 'tiktok';
+    if (hasFb) return 'meta';
+    if (hasTt) return 'tiktok';
+    if (hasSc) return 'snapchat';
+  }
+
+  if (isMetaUtm(utm)) return 'meta';
+  if (isTikTokUtm(utm)) return 'tiktok';
+  if (isSnapUtm(utm)) return 'snapchat';
   return 'direct';
 }
 
@@ -98,25 +198,246 @@ export function isAdSource(value: unknown): value is AdSource {
   return AD_SOURCES.includes(String(value) as AdSource);
 }
 
+export function isPaidAdSource(value: unknown): value is Exclude<AdSource, 'direct'> {
+  return value === 'meta' || value === 'tiktok' || value === 'snapchat';
+}
+
+function parseClickAt(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value) && value > 0) return value;
+  if (typeof value === 'string' && value.trim()) {
+    const asNum = Number(value);
+    if (Number.isFinite(asNum) && asNum > 0) return asNum;
+    const asDate = Date.parse(value);
+    if (!Number.isNaN(asDate)) return asDate;
+  }
+  return null;
+}
+
+export function isClickFresh(clickAt: unknown, now = Date.now()): boolean {
+  const at = parseClickAt(clickAt);
+  if (at == null) return false;
+  const age = now - at;
+  return age >= 0 && age <= ATTRIBUTION_WINDOW_MS;
+}
+
+/**
+ * Server + client: last-click paid source inside the attribution window.
+ * Never trust a paid `bodySource` without click-id / ad-UTM proof.
+ * If `clickAt` is present and older than the window → Direct (strip stale IDs).
+ * If `clickAt` is missing (legacy clients) → still trust click-id / ad-UTM proof.
+ */
+export function resolveAttributedSource(input: {
+  fbclid?: unknown;
+  ttclid?: unknown;
+  sccid?: unknown;
+  utm_source?: unknown;
+  clickAt?: unknown;
+  bodySource?: unknown;
+  now?: number;
+}): {
+  source: AdSource;
+  fbclid: string;
+  ttclid: string;
+  sccid: string;
+  utm_source: string;
+  clickAt: number | null;
+} {
+  const now = input.now ?? Date.now();
+  const fbclid = cleanClickId(input.fbclid) || '';
+  const ttclid = cleanClickId(input.ttclid) || '';
+  const sccid = cleanClickId(input.sccid) || '';
+  const utm_source = String(input.utm_source || '').trim().slice(0, 80);
+  const clickAt = parseClickAt(input.clickAt);
+  const click: ClickIds = {
+    fbclid: fbclid || undefined,
+    ttclid: ttclid || undefined,
+    sccid: sccid || undefined,
+    utm_source: utm_source || undefined,
+  };
+  const fromClick = sourceFromClick(click);
+  const hasProof = Boolean(fbclid || ttclid || sccid || (utm_source && fromClick !== 'direct'));
+  const stale = clickAt != null && !isClickFresh(clickAt, now);
+
+  if (stale) {
+    return {
+      source: 'direct',
+      fbclid: '',
+      ttclid: '',
+      sccid: '',
+      utm_source: '',
+      clickAt: null,
+    };
+  }
+
+  if (isPaidAdSource(fromClick) && hasProof) {
+    // Keep only the winning platform proof — never store cross-channel junk.
+    return {
+      source: fromClick,
+      fbclid: fromClick === 'meta' ? fbclid : '',
+      ttclid: fromClick === 'tiktok' ? ttclid : '',
+      sccid: fromClick === 'snapchat' ? sccid : '',
+      utm_source,
+      clickAt,
+    };
+  }
+
+  // Non-ad UTM only (whatsapp, google, …) — report Direct, keep UTM.
+  if (utm_source && fromClick === 'direct') {
+    return { source: 'direct', fbclid: '', ttclid: '', sccid: '', utm_source, clickAt };
+  }
+
+  // Paid label without proof is ignored (old sticky localStorage bug).
+  void input.bodySource;
+  return {
+    source: 'direct',
+    fbclid: '',
+    ttclid: '',
+    sccid: '',
+    utm_source: '',
+    clickAt: null,
+  };
+}
+
+/** Meta first-party cookie `_fbc` = fb.1.<ts>.<fbclid> — use when URL lost fbclid. */
+function readMetaFbcClickId(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)_fbc=([^;]+)/);
+    if (!match?.[1]) return undefined;
+    const value = decodeURIComponent(match[1]);
+    const parts = value.split('.');
+    if (parts.length < 4 || parts[0] !== 'fb') return undefined;
+    return cleanClickId(parts.slice(3).join('.'));
+  } catch {
+    return undefined;
+  }
+}
+
+function clearStoredAttribution() {
+  lsRemove(CLICK_KEY);
+  lsSet(SRC_KEY, 'direct');
+}
+
+function narrowClickToSource(click: ClickIds, source: AdSource): ClickIds {
+  const at = click.at && click.at > 0 ? click.at : Date.now();
+  if (source === 'meta') {
+    return {
+      fbclid: click.fbclid,
+      utm_source: click.utm_source || 'fb',
+      at,
+    };
+  }
+  if (source === 'tiktok') {
+    return {
+      ttclid: click.ttclid,
+      utm_source: click.utm_source || 'tiktok',
+      at,
+    };
+  }
+  if (source === 'snapchat') {
+    return {
+      sccid: click.sccid,
+      utm_source: click.utm_source || 'snapchat',
+      at,
+    };
+  }
+  return { utm_source: click.utm_source, at };
+}
+
+function writeStoredAttribution(click: ClickIds, source: AdSource) {
+  const payload = narrowClickToSource(sanitizeClickIds(click), source);
+  lsSet(CLICK_KEY, JSON.stringify(payload));
+  lsSet(SRC_KEY, source);
+  return source;
+}
+
+function readClicks(): ClickIds {
+  if (typeof window === 'undefined') return {};
+  try {
+    const parsed = JSON.parse(lsGet(CLICK_KEY) || '{}') as ClickIds;
+    if (!parsed || typeof parsed !== 'object') return {};
+    return sanitizeClickIds(parsed);
+  } catch {
+    return {};
+  }
+}
+
+function readFreshStoredClicks(now = Date.now()): ClickIds | null {
+  const stored = readClicks();
+  if (!hasClickSignal(stored)) {
+    // Wipe poisoned placeholders like fbclid:"fbclid" left by old clients.
+    if (lsGet(CLICK_KEY)) clearStoredAttribution();
+    return null;
+  }
+  // Legacy rows had no `at` — stamp once so the 7-day window starts (ends infinite sticky).
+  if (stored.at == null || !Number.isFinite(stored.at)) {
+    const source = sourceFromClick(stored);
+    if (!isPaidAdSource(source) && !stored.utm_source) {
+      clearStoredAttribution();
+      return null;
+    }
+    writeStoredAttribution({ ...stored, at: now }, isPaidAdSource(source) ? source : 'direct');
+    return { ...stored, at: now };
+  }
+  if (!isClickFresh(stored.at, now)) {
+    clearStoredAttribution();
+    return null;
+  }
+  return stored;
+}
+
 export function captureVisitSource(): AdSource {
   if (typeof window === 'undefined') return 'direct';
   try {
+    const now = Date.now();
     const params = new URLSearchParams(window.location.search);
-    const incoming: ClickIds = {
+    const incoming: ClickIds = sanitizeClickIds({
       fbclid: params.get('fbclid') || undefined,
       ttclid: params.get('ttclid') || undefined,
       sccid: params.get('ScCid') || params.get('sccid') || params.get('sc_click_id') || undefined,
       utm_source: params.get('utm_source') || undefined,
-    };
-    const detected = Object.values(incoming).some(Boolean) ? sourceFromClick(incoming) : null;
-    if (detected === 'meta' || detected === 'tiktok' || detected === 'snapchat') {
-      lsSet(CLICK_KEY, JSON.stringify(incoming));
-      lsSet(SRC_KEY, detected);
-      return detected;
+      at: now,
+    });
+    // URL/ad params only — a leftover Meta `_fbc` cookie alone is not a new last-touch.
+    const hasIncoming = hasClickSignal(incoming);
+
+    if (hasIncoming) {
+      let detected = sourceFromClick(incoming);
+      // Fill fbclid from `_fbc` only when this hit is already Meta (never on TikTok URLs).
+      if (detected === 'meta' && !incoming.fbclid) {
+        const fromFbc = readMetaFbcClickId();
+        if (fromFbc) incoming.fbclid = fromFbc;
+      }
+      if (isPaidAdSource(detected)) {
+        // Last-touch: new paid click always wins; store only that platform's proof.
+        return writeStoredAttribution(incoming, detected);
+      }
+      // Non-ad UTM (whatsapp, google, …) overrides previous paid sticky tag.
+      clearStoredAttribution();
+      lsSet(
+        CLICK_KEY,
+        JSON.stringify({
+          utm_source: incoming.utm_source,
+          at: now,
+        } satisfies ClickIds)
+      );
+      lsSet(SRC_KEY, 'direct');
+      return 'direct';
     }
-    const stored = lsGet(SRC_KEY);
-    if (isAdSource(stored)) return stored;
-    lsSet(SRC_KEY, 'direct');
+
+    // No URL params: keep last paid click only inside the window (Direct does not wipe it).
+    const fresh = readFreshStoredClicks(now);
+    if (fresh) {
+      const source = sourceFromClick(fresh);
+      if (isPaidAdSource(source)) {
+        lsSet(SRC_KEY, source);
+        return source;
+      }
+    }
+
+    const storedSrc = lsGet(SRC_KEY);
+    if (storedSrc === 'direct') return 'direct';
+    clearStoredAttribution();
     return 'direct';
   } catch {
     return 'direct';
@@ -143,15 +464,25 @@ export function getVisitorId() {
 
 export function trackingFields() {
   if (typeof window !== 'undefined') captureVisitSource();
-  const click = readClicks();
+  const now = Date.now();
+  const click = readFreshStoredClicks(now) || {};
+  const resolved = resolveAttributedSource({
+    fbclid: click.fbclid,
+    ttclid: click.ttclid,
+    sccid: click.sccid,
+    utm_source: click.utm_source,
+    clickAt: click.at,
+    now,
+  });
   return {
-    source: captureVisitSource(),
+    source: resolved.source,
     productId: currentProductId(),
     visitorId: typeof window !== 'undefined' ? visitorId() : '',
-    fbclid: click.fbclid || '',
-    ttclid: click.ttclid || '',
-    sccid: click.sccid || '',
-    utm_source: click.utm_source || '',
+    fbclid: resolved.fbclid,
+    ttclid: resolved.ttclid,
+    sccid: resolved.sccid,
+    utm_source: resolved.utm_source,
+    clickAt: resolved.clickAt ?? '',
   };
 }
 
@@ -229,9 +560,8 @@ export function trackStoreEvent(
 ) {
   if (typeof window === 'undefined') return;
   try {
-    const source = captureVisitSource();
-    const click = readClicks();
-    const id = visitorId();
+    const fields = trackingFields();
+    const id = fields.visitorId || visitorId();
     const path = window.location.pathname || '/';
     if (path.startsWith('/admin')) return;
     if (opts?.productId) lsSet(PID_KEY, opts.productId.slice(0, 80));
@@ -259,16 +589,17 @@ export function trackStoreEvent(
     const body = JSON.stringify({
       visitorId: id,
       type,
-      source,
+      source: fields.source,
       path,
       productId,
       orderId: orderKey,
       loadMs,
       ts: new Date().toISOString(),
-      fbclid: click.fbclid || '',
-      ttclid: click.ttclid || '',
-      sccid: click.sccid || '',
-      utm_source: click.utm_source || '',
+      fbclid: fields.fbclid || '',
+      ttclid: fields.ttclid || '',
+      sccid: fields.sccid || '',
+      utm_source: fields.utm_source || '',
+      clickAt: fields.clickAt || '',
     });
 
     const critical = type === 'purchase' || type === 'checkout' || type === 'addtocart';
