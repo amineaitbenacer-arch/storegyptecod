@@ -5,6 +5,7 @@ import {
   evaluateOrderGuard,
   ORDER_ALREADY_RECORDED,
 } from '../../../lib/order-guard';
+import { DuplicateOrderError } from '../../../lib/order-messages';
 import {
   deleteOrder,
   insertOrder,
@@ -104,7 +105,17 @@ export async function POST(request: NextRequest) {
       ip: clientIp,
     };
 
-    await insertOrder(order);
+    try {
+      await insertOrder(order);
+    } catch (error) {
+      if (error instanceof DuplicateOrderError) {
+        return NextResponse.json(
+          { success: false, error: ORDER_ALREADY_RECORDED },
+          { status: 409 }
+        );
+      }
+      throw error;
+    }
 
     const vid = String(order.visitorId || '');
     if (/^[a-zA-Z0-9-]{8,80}$/.test(vid)) {
@@ -126,6 +137,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, orderId: order.id }, { status: 201 });
   } catch (error) {
+    if (error instanceof DuplicateOrderError) {
+      return NextResponse.json(
+        { success: false, error: ORDER_ALREADY_RECORDED },
+        { status: 409 }
+      );
+    }
     console.error('[orders] POST failed', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

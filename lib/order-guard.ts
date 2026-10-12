@@ -62,9 +62,13 @@ export async function evaluateOrderGuard(
     return { allow: false, code: ORDER_ALREADY_RECORDED };
   }
 
-  const exact = await findActiveOrderByPhoneProduct(phone, productId);
-  if (exact) {
-    return { allow: false, code: ORDER_ALREADY_RECORDED };
+  try {
+    const exact = await findActiveOrderByPhoneProduct(phone, productId);
+    if (exact) {
+      return { allow: false, code: ORDER_ALREADY_RECORDED };
+    }
+  } catch {
+    // Lookup failed — still allow insert; unique DB index is the hard stop.
   }
 
   if (!ip && !visitorId) {

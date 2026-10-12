@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { getSql, hasDatabase } from './db';
+import { DuplicateOrderError } from './order-messages';
 
 export type StoreOrder = {
   id: string;
@@ -169,6 +170,14 @@ async function ensureOrderSchema(): Promise<void> {
         CREATE INDEX IF NOT EXISTS idx_orders_phone_product
         ON orders (phone, product_id)
       `;
+      // Hard stop at DB level — app checks alone can miss double-clicks / races.
+      await sql`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_phone_product_active
+        ON orders (phone, product_id)
+        WHERE phone <> ''
+          AND product_id <> ''
+          AND status NOT IN ('Annulé', 'cancelled', 'ملغي')
+      `;
       await sql`
         CREATE TABLE IF NOT EXISTS order_blocks (
           ip text NOT NULL,
@@ -233,40 +242,71 @@ export async function insertOrder(order: StoreOrder): Promise<void> {
     await ensureOrderSchema();
     // Never fall back to the local file when Neon is configured: that made
     // checkout succeed + Purchase pixel fire while /admin (Neon) missed the row.
-    await sql`
-      INSERT INTO orders (
-        id, name, phone, city, address, offer, pieces, price,
-        timestamp, status, note, source, fbclid, ttclid, sccid,
-        utm_source, product_id, client_order_id, visitor_id, ip
-      ) VALUES (
-        ${order.id},
-        ${order.name},
-        ${order.phone},
-        ${order.city},
-        ${order.address || ''},
-        ${order.offer},
-        ${encodeField(order.pieces)},
-        ${encodeField(order.price)},
-        ${order.timestamp},
-        ${order.status || 'Nouveau'},
-        ${order.note || ''},
-        ${order.source || 'direct'},
-        ${order.fbclid || ''},
-        ${order.ttclid || ''},
-        ${order.sccid || ''},
-        ${order.utm_source || ''},
-        ${order.productId || ''},
-        ${order.clientOrderId || ''},
-        ${order.visitorId || ''},
-        ${order.ip || ''}
-      )
-    `;
+    try {
+      await sql`
+        INSERT INTO orders (
+          id, name, phone, city, address, offer, pieces, price,
+          timestamp, status, note, source, fbclid, ttclid, sccid,
+          utm_source, product_id, client_order_id, visitor_id, ip
+        ) VALUES (
+          ${order.id},
+          ${order.name},
+          ${order.phone},
+          ${order.city},
+          ${order.address || ''},
+          ${order.offer},
+          ${encodeField(order.pieces)},
+          ${encodeField(order.price)},
+          ${order.timestamp},
+          ${order.status || 'Nouveau'},
+          ${order.note || ''},
+          ${order.source || 'direct'},
+          ${order.fbclid || ''},
+          ${order.ttclid || ''},
+          ${order.sccid || ''},
+          ${order.utm_source || ''},
+          ${order.productId || ''},
+          ${order.clientOrderId || ''},
+          ${order.visitorId || ''},
+          ${order.ip || ''}
+        )
+      `;
+    } catch (error) {
+      if (isUniqueViolation(error)) throw new DuplicateOrderError();
+      throw error;
+    }
     return;
   }
 
   const orders = await readFileOrders();
+  const phone = order.phone || '';
+  const productId = order.productId || '';
+  if (
+    phone &&
+    productId &&
+    orders.some(
+      (existing) =>
+        existing.phone === phone &&
+        existing.productId === productId &&
+        !isCancelledStatus(existing.status)
+    )
+  ) {
+    throw new DuplicateOrderError();
+  }
   orders.push({ ...order, ip: order.ip || '' });
   await writeFileOrders(orders);
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const err = error as { code?: string; message?: string; cause?: { code?: string } };
+  if (err.code === '23505' || err.cause?.code === '23505') return true;
+  const message = String(err.message || '');
+  return (
+    message.includes('idx_orders_phone_product_active') ||
+    message.includes('duplicate key') ||
+    message.includes('unique constraint')
+  );
 }
 
 export async function findActiveOrderByPhoneProduct(
@@ -278,23 +318,23 @@ export async function findActiveOrderByPhoneProduct(
   if (!cleanPhone || !cleanProduct) return null;
 
   if (hasDatabase()) {
+    const sql = getSql();
+    if (!sql) return null;
     try {
-      const sql = getSql();
-      if (sql) {
-        await ensureOrderSchema();
-        const rows = (await sql`
-          SELECT id, phone, status, product_id, timestamp, ip, visitor_id
-          FROM orders
-          WHERE phone = ${cleanPhone}
-            AND product_id = ${cleanProduct}
-          ORDER BY timestamp DESC
-          LIMIT 5
-        `) as OrderRow[];
-        const hit = rows.map(rowToOrder).find((order) => !isCancelledStatus(order.status));
-        if (hit) return hit;
-      }
+      await ensureOrderSchema();
+      const rows = (await sql`
+        SELECT id, phone, status, product_id, timestamp, ip, visitor_id
+        FROM orders
+        WHERE phone = ${cleanPhone}
+          AND product_id = ${cleanProduct}
+        ORDER BY timestamp DESC
+        LIMIT 5
+      `) as OrderRow[];
+      return rows.map(rowToOrder).find((order) => !isCancelledStatus(order.status)) || null;
     } catch (error) {
       console.error('[orders] findActiveOrderByPhoneProduct failed', error);
+      // Fail closed: treat as existing so spam cannot slip through on lookup errors.
+      throw error;
     }
   }
 
