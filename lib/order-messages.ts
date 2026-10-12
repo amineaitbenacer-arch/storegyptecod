@@ -1,4 +1,8 @@
-/** Client-safe order messaging — no Node/fs imports. */
+/**
+ * Site-wide COD order messaging (all products / future montages).
+ * Soft block copy shown under the phone when the same number reorders the same product.
+ * No Node/fs imports — safe for client components.
+ */
 
 export const ORDER_ALREADY_RECORDED = 'ORDER_ALREADY_RECORDED';
 

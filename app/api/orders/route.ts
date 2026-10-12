@@ -52,6 +52,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // productId required so phone+product lock applies to every montage (current + future).
+    if (!cleanProductId) {
+      return NextResponse.json({ error: 'Missing productId' }, { status: 400 });
+    }
+
     if (!isValidOrderPhone(cleanPhone)) {
       return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
     }
@@ -108,7 +113,7 @@ export async function POST(request: NextRequest) {
     try {
       await insertOrder(order);
     } catch (error) {
-      if (error instanceof DuplicateOrderError) {
+      if (isDuplicateBlock(error)) {
         return NextResponse.json(
           { success: false, error: ORDER_ALREADY_RECORDED },
           { status: 409 }
@@ -137,7 +142,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, orderId: order.id }, { status: 201 });
   } catch (error) {
-    if (error instanceof DuplicateOrderError) {
+    if (isDuplicateBlock(error)) {
       return NextResponse.json(
         { success: false, error: ORDER_ALREADY_RECORDED },
         { status: 409 }
@@ -146,6 +151,16 @@ export async function POST(request: NextRequest) {
     console.error('[orders] POST failed', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
+}
+
+function isDuplicateBlock(error: unknown): boolean {
+  if (error instanceof DuplicateOrderError) return true;
+  if (!(error instanceof Error)) return false;
+  return (
+    error.name === 'DuplicateOrderError' ||
+    error.message === ORDER_ALREADY_RECORDED ||
+    /idx_orders_phone_product_active|duplicate key|unique constraint/i.test(error.message)
+  );
 }
 
 const NO_STORE = {

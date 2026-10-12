@@ -159,10 +159,12 @@ export default function ProductView({ product }: { product: ProductPageConfig })
       saveLastOrder({ ...orderData, orderId, serverOrderId: saved.orderId });
       window.location.assign(thankYouHref(orderId));
     } catch (error) {
+      // Soft confirmation stays under the phone — never the red form error.
       if (isOrderAlreadyRecordedError(error)) {
         setPhoneError(ORDER_ALREADY_RECORDED_MSG);
         setFormError('');
       } else {
+        setPhoneError('');
         setFormError('ما تسجّلش الطلب. عاود المحاولة.');
       }
       setLoading(false);
