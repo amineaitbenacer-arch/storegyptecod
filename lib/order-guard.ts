@@ -1,3 +1,4 @@
+import { isIpBanned, isPhoneBanned, isVisitorBanned } from './bans-store';
 import {
   findActiveOrderByPhoneProduct,
   isIpProductBlocked,
@@ -58,6 +59,19 @@ export async function evaluateOrderGuard(
     return { allow: true };
   }
 
+  // Ban only this actor's checkout — never lock the whole site.
+  if (await isPhoneBanned(phone)) {
+    return { allow: false, code: ORDER_ALREADY_RECORDED };
+  }
+
+  if (visitorId && (await isVisitorBanned(visitorId))) {
+    return { allow: false, code: ORDER_ALREADY_RECORDED };
+  }
+
+  if (ip && (await isIpBanned(ip))) {
+    return { allow: false, code: ORDER_ALREADY_RECORDED };
+  }
+
   if (ip && (await isIpProductBlocked(ip, productId))) {
     return { allow: false, code: ORDER_ALREADY_RECORDED };
   }
@@ -110,16 +124,25 @@ async function maybeEscalateIpBan(
 }
 
 export function clientIpFromHeaders(headers: Headers): string {
-  const cf = headers.get('cf-connecting-ip')?.trim();
-  if (cf) return cf.slice(0, 80);
+  const candidates = [
+    headers.get('cf-connecting-ip'),
+    headers.get('true-client-ip'),
+    headers.get('x-real-ip'),
+    headers.get('x-client-ip'),
+    headers.get('x-vercel-forwarded-for')?.split(',')[0],
+    headers.get('x-forwarded-for')?.split(',')[0],
+    headers.get('fly-client-ip'),
+  ];
 
-  const real = headers.get('x-real-ip')?.trim();
-  if (real) return real.slice(0, 80);
+  for (const raw of candidates) {
+    const ip = String(raw || '').trim();
+    if (ip && ip !== '::1' && ip !== '127.0.0.1') return ip.slice(0, 80);
+  }
 
-  const forwarded = headers.get('x-forwarded-for');
-  if (forwarded) {
-    const first = forwarded.split(',')[0]?.trim();
-    if (first) return first.slice(0, 80);
+  // Last resort: allow localhost in dev so IP still gets stored for testing.
+  for (const raw of candidates) {
+    const ip = String(raw || '').trim();
+    if (ip) return ip.slice(0, 80);
   }
 
   return '';

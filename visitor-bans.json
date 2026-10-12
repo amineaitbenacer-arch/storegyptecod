@@ -1,0 +1,12 @@
+[
+  {
+    "visitorId": "9be93016-a35f-432f-b4fd-0c4c4e2ec351",
+    "reason": "abuse: multi-order 0509606340",
+    "createdAt": "2026-10-12T00:00:00.000Z"
+  },
+  {
+    "visitorId": "fe9fc92d-86bf-4723-a7dc-2863de77c35d",
+    "reason": "abuse: multi-order 0570267340",
+    "createdAt": "2026-10-12T00:00:00.000Z"
+  }
+]
