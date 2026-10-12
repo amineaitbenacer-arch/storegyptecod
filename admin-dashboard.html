@@ -372,30 +372,7 @@
         .src-pill-tiktok { background: rgba(254,44,85,.12); color: #fda4af; border-color: rgba(37,244,238,.35); }
         .src-pill-snap { background: rgba(255,252,0,.12); color: #FFFC00; border-color: rgba(255,252,0,.4); }
         .src-pill-direct { background: rgba(148,163,184,.12); color: #e2e8f0; border-color: rgba(148,163,184,.35); }
-        .src-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 110px; }
-        .src-cell-row { display: inline-flex; align-items: center; gap: 6px; }
-        .src-utm {
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 0.02em;
-            color: #fbcfe8;
-            background: rgba(236, 72, 153, 0.14);
-            border: 1px solid rgba(236, 72, 153, 0.35);
-            border-radius: 999px;
-            padding: 2px 8px;
-            max-width: 140px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .src-proof {
-            font-size: 9px;
-            font-weight: 700;
-            color: #94a3b8;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        }
-        .src-proof.ok { color: #6ee7b7; }
-        .src-proof.bad { color: #fca5a5; }
+        .src-cell { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: nowrap; }
         .src-step { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
         .src-step-label { font-size: 14px; font-weight: 800; color: #e2e8f0; }
         .src-bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.06); overflow: hidden; margin-bottom: 8px; }
@@ -2167,6 +2144,34 @@
         } else {
             injectBrandLogos();
         }
+        function isPlaceholderClickId(value) {
+            const raw = String(value || '').trim();
+            if (!raw || raw.length < 12) return true;
+            return /^(fbclid|ttclid|sccid|null|undefined)$/i.test(raw);
+        }
+        /** Prefer real click-id proof over a stale/wrong stored label. */
+        function resolvedOrderSource(order) {
+            const utm = String(order.utm_source || '').trim().toLowerCase();
+            const fb = isPlaceholderClickId(order.fbclid) ? '' : String(order.fbclid || '').trim();
+            const tt = isPlaceholderClickId(order.ttclid) ? '' : String(order.ttclid || '').trim();
+            const sc = isPlaceholderClickId(order.sccid) ? '' : String(order.sccid || '').trim();
+            const isTtUtm = utm === 'tt' || utm === 'tiktok' || utm.startsWith('tiktok') || utm.startsWith('tt_');
+            const isMetaUtm = utm === 'fb' || utm === 'ig' || utm === 'facebook' || utm === 'instagram' || utm === 'meta' || utm.startsWith('fb_') || utm.startsWith('ig_');
+            const isSnapUtm = utm === 'snap' || utm === 'snapchat' || utm.startsWith('snap');
+            if (isTtUtm && tt) return 'tiktok';
+            if (isMetaUtm && fb) return 'meta';
+            if (isSnapUtm && sc) return 'snapchat';
+            if (tt && !fb && !sc) return 'tiktok';
+            if (fb && !tt && !sc) return 'meta';
+            if (sc && !fb && !tt) return 'snapchat';
+            if (tt && tt.indexOf('E_C_P_') === 0) return 'tiktok';
+            if (isTtUtm) return 'tiktok';
+            if (isMetaUtm) return 'meta';
+            if (isSnapUtm) return 'snapchat';
+            const stored = String(order.source || '').trim();
+            if (stored === 'meta' || stored === 'tiktok' || stored === 'snapchat' || stored === 'direct') return stored;
+            return 'direct';
+        }
         function sourceBadge(source) {
             const map = {
                 meta: ['Meta', 'src-pill-meta', 'meta'],
@@ -2178,41 +2183,29 @@
             const logoKey = item[2] === 'snap' ? 'snapchat' : item[2];
             return `<span class="src-pill ${item[1]}"><span class="src-logo src-logo-${item[2]}">${SOURCE_LOGOS[logoKey]}</span>${item[0]}</span>`;
         }
-        function sourceClickId(order) {
-            const src = String(order.source || '');
-            if (src === 'meta') return String(order.fbclid || '').trim();
-            if (src === 'tiktok') return String(order.ttclid || '').trim();
-            if (src === 'snapchat') return String(order.sccid || '').trim();
-            return String(order.fbclid || order.ttclid || order.sccid || '').trim();
-        }
-        function sourceProofLabel(order) {
-            const id = sourceClickId(order);
-            if (!id) return { text: 'بلا click id', ok: false };
-            if (/^(fbclid|ttclid|sccid|null|undefined)$/i.test(id)) {
-                return { text: 'click id مزيف', ok: false };
-            }
-            const short = id.length > 14 ? id.slice(0, 8) + '…' + id.slice(-4) : id;
-            return { text: short, ok: true };
+        function sourceClickId(order, source) {
+            const src = source || resolvedOrderSource(order);
+            if (src === 'meta') return isPlaceholderClickId(order.fbclid) ? '' : String(order.fbclid || '').trim();
+            if (src === 'tiktok') return isPlaceholderClickId(order.ttclid) ? '' : String(order.ttclid || '').trim();
+            if (src === 'snapchat') return isPlaceholderClickId(order.sccid) ? '' : String(order.sccid || '').trim();
+            return '';
         }
         function sourceCopyText(order) {
-            const name = sourceName(order.source);
+            const source = resolvedOrderSource(order);
+            const name = sourceName(source);
             const utm = String(order.utm_source || '').trim();
-            const id = sourceClickId(order);
+            const id = sourceClickId(order, source);
             const parts = [name];
-            if (utm) parts.push('utm=' + utm);
-            if (id) parts.push('id=' + id);
-            return parts.join(' | ');
+            if (utm) parts.push(utm);
+            if (id) parts.push(id);
+            return parts.join(' · ');
         }
         function sourceCellHtml(order) {
-            const utm = String(order.utm_source || '').trim();
-            const proof = sourceProofLabel(order);
-            return `<div class="src-cell">
-                <div class="src-cell-row">
-                    ${sourceBadge(order.source)}
-                    ${copyChip(sourceCopyText(order), 'source')}
-                </div>
-                ${utm ? `<span class="src-utm" title="utm_source">${escHtml(utm)}</span>` : ''}
-                <span class="src-proof ${proof.ok ? 'ok' : 'bad'}" title="click id">${escHtml(proof.text)}</span>
+            const source = resolvedOrderSource(order);
+            const tip = sourceCopyText(order);
+            return `<div class="src-cell" title="${escHtml(tip)}">
+                ${sourceBadge(source)}
+                ${copyChip(tip, 'source')}
             </div>`;
         }
         function srcRow(label, count, base) {
