@@ -230,7 +230,7 @@ const STORIES: StoryItem[] = [
     id: 's-game-stick',
     label: 'ألعاب الطيبين',
     ring: '#65A30D',
-    image: '/products/game-stick-lite/lp/01-hero-kit-1x1.png',
+    image: '/products/game-stick-lite/lp/01-hero-kit-1x1.jpg',
     title: 'جهاز ألعاب الطيبين',
     text: '+10,000 لعبة كلاسيكية على التلفزيون — يدين لاسلكيتين وتوصيل 20 ريال.',
   },
