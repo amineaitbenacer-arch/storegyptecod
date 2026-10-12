@@ -378,6 +378,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
           <form
             id="express-order-form"
+            noValidate
             onSubmit={(e) => {
               e.preventDefault();
               void submit();
