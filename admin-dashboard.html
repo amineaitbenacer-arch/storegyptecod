@@ -2238,7 +2238,7 @@
                 const carts = uniqueVisitors(mine, 'addtocart');
                 const checkouts = uniqueVisitors(mine, 'checkout');
                 const purchases = uniqueVisitors(mine, 'purchase');
-                const orders = scopedOrders.filter(order => order.source === src.id).length;
+                const orders = scopedOrders.filter(order => resolvedOrderSource(order) === src.id).length;
                 const salesCount = Math.max(orders, purchases);
                 const depth = productDepthBuckets(mine);
                 return `<div class="src-card src-${src.tone}">
@@ -2414,7 +2414,7 @@
             // Insights: top city / offer / source + unique phones
             const topCity = topCount(ordersList, o => o.city);
             const topOffer = topCount(ordersList, o => o.offer_name || o.product_name || o.productId);
-            const topSource = topCount(ordersList, o => sourceName(o.source));
+            const topSource = topCount(ordersList, o => sourceName(resolvedOrderSource(o)));
             const phones = ordersList.map(o => String(o.phone || '').replace(/\D/g, '')).filter(Boolean);
             const uniquePhones = new Set(phones).size;
             const phoneCounts = new Map();
