@@ -1000,10 +1000,10 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
     heroBadge: 'خصوصية · حب · ثقة',
     images: [
       '/products/ipl-aybel/lp/wasf/hero-new/01-device-problems.jpg',
-      '/products/ipl-aybel/lp/wasf/hero-new/02-bikini-ba.jpg',
-      '/products/ipl-aybel/lp/wasf/hero-new/03-legs-ba.jpg',
+      '/products/ipl-aybel/lp/wasf/razor-vs/02-bikini-razor-vs.jpg',
+      '/products/ipl-aybel/lp/wasf/razor-vs/01-legs-razor-vs.jpg',
       '/products/ipl-aybel/lp/wasf/hero-new/04-arm-ba.jpg',
-      '/products/ipl-aybel/lp/wasf/hero-new/05-underarm-ba.jpg',
+      '/products/ipl-aybel/lp/wasf/razor-vs/03-underarm-razor-vs.jpg',
     ],
     catalogImage: '/products/ipl-aybel/lp/wasf/hero-new/01-device-problems.jpg',
     shortDesc: 'IPL منزلي — نعومة بخصوصيتك عشان ترتاحين في قربك',
@@ -1121,7 +1121,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
             icon: '👀',
             title: 'هذي النتيجة اللي تدفعين عشانها',
             text: 'قبل: شعر كثيف يسرق ثقتك. بعد: نعومة أوضح — مع الالتزام، مو من أول ومضة.',
-            image: '/products/ipl-aybel/lp/wasf/00-ba-icon-official.png',
+            image: '/products/ipl-aybel/lp/wasf/razor-vs/01-legs-razor-vs.jpg',
           },
           {
             icon: '🍓',
@@ -1148,7 +1148,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
             icon: '🤫',
             title: 'البيكيني… الهمّ اللي ما ينقال',
             text: 'شعر كثيف يخلّي الواكس كابوس — والخجل قدام الزوج أثقل من الوجع.',
-            image: '/products/ipl-aybel/lp/wasf/ba-angles/21-bikini-ba.jpg',
+            image: '/products/ipl-aybel/lp/wasf/razor-vs/02-bikini-razor-vs.jpg',
           },
           {
             icon: '🏠',
@@ -1175,7 +1175,7 @@ export const PRODUCT_PAGES: ProductPageConfig[] = [
             icon: '💪',
             title: 'ظل الإبط بعد يومين يبان',
             text: 'ترفعي يدك قدامه أو قدام المرآة — واللبس الفاتح يصير قرار صعب.',
-            image: '/products/ipl-aybel/lp/wasf/ba-angles/18-underarm-ba.jpg',
+            image: '/products/ipl-aybel/lp/wasf/razor-vs/03-underarm-razor-vs.jpg',
           },
           {
             icon: '👗',
