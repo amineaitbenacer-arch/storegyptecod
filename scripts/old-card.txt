@@ -1,0 +1,120 @@
+﻿'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import Image from 'next/image';
+import Link from 'next/link';
+import { PRODUCTS, type StoreProduct } from '../../lib/products';
+import { formatSar } from '../../lib/money';
+import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../lib/shipping';
+import { saveLastOrder, thankYouHref } from '../../lib/last-order';
+import { isValidOrderPhone, normalizePhone, submitOrderToApi } from '../../lib/submit-order';
+import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
+import StoreCheckoutSheet from './StoreCheckoutSheet';
+import ReturnPolicyPanel from '../components/ReturnPolicyPanel';
+import './store.css';
+
+const CART_KEY = 'store_cart_v1';
+
+type CartItem = { id: string; name: string; price: number; qty: number; image: string };
+
+function enrichItem(raw: Partial<CartItem>): CartItem | null {
+  if (!raw?.id) return null;
+  const catalog = PRODUCTS.find((p) => p.id === raw.id);
+  return {
+    id: raw.id,
+    name: raw.name || catalog?.name || '┘à┘åÏ¬Ï¼',
+    price: Number(raw.price) || catalog?.price || 0,
+    qty: Math.max(1, Number(raw.qty) || 1),
+    image: raw.image || catalog?.image || '/images/hero_anti_choc_product_1789640183592.png',
+  };
+}
+
+function readCart(): CartItem[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(CART_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(enrichItem).filter((i): i is CartItem => !!i);
+  } catch {
+    return [];
+  }
+}
+
+function writeCart(items: CartItem[]) {
+  localStorage.setItem(CART_KEY, JSON.stringify(items));
+}
+
+function ProductCard({
+  product,
+  index,
+  onAdd,
+}: {
+  product: StoreProduct;
+  index: number;
+  onAdd: (product: StoreProduct) => void;
+}) {
+  return (
+    <article
+      className={`duo-card${index === 0 ? ' duo-card-lead' : ''}`}
+      style={{ animationDelay: `${0.15 + index * 0.12}s` }}
+    >
+      <Link href={product.href} className="duo-media-link" aria-label={product.name}>
+        <div className="duo-media">
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width:760px) 50vw, 50vw"
+            style={{ objectFit: 'cover' }}
+            priority={index < 2}
+          />
+          <span className="duo-badge" style={{ background: product.badgeColor || undefined }}>
+            {product.badge}
+          </span>
+          <span className="duo-index" aria-hidden>
+            {String(index + 1).padStart(2, '0')}
+          </span>
+        </div>
+      </Link>
+
+      <div className="duo-body">
+        <div className="duo-meta">
+          <span className="duo-type">{product.type}</span>
+          <span className="duo-emoji" aria-hidden>
+            {product.emoji}
+          </span>
+        </div>
+        <h3 className="duo-name">
+          <Link href={product.href}>{product.name}</Link>
+        </h3>
+        <p className="duo-desc">{product.shortDesc}</p>
+
+        <div className="duo-price-block">
+          <span className="duo-old">{formatSar(product.oldPrice)}</span>
+          <strong className="duo-price">{formatSar(product.price)}</strong>
+        </div>
+
+        <div className="duo-actions">
+          <Link href={product.href} className="duo-cta duo-cta-order">
+            <span className="duo-cta-long">ÏºÏÂÏ║ÏÀ ┘ä┘äÏÀ┘äÏ¿</span>
+            <span className="duo-cta-short">ÏºÏÀ┘äÏ¿</span>
+            <i className="fa-solid fa-arrow-left" aria-hidden />
+          </Link>
+          <button
+            type="button"
+            className="duo-cta duo-cta-cart"
+            onClick={() => onAdd(product)}
+            aria-label="ÏúÏÂ┘ü ÏÑ┘ä┘ë Ïº┘äÏ│┘äÏ®"
+          >
+            <span className="duo-cta-long">ÏúÏÂ┘ü ÏÑ┘ä┘ë Ïº┘äÏ│┘äÏ®</span>
+            <span className="duo-cta-short">Ï│┘äÏ®</span>
+            <i className="fa-solid fa-cart-plus" aria-hidden />
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+

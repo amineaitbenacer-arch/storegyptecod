@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أرقام واتساب وهواتف شركات ووكالات الـ Media Buyer بالمغرب</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --accent: #10b981;
+            --whatsapp: #25D366;
+            --dark: #0f172a;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text);
+            line-height: 1.7;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 35px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border-bottom: 4px solid var(--whatsapp);
+        }
+
+        header h1 {
+            font-size: 2.1rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        header p {
+            font-size: 1.05rem;
+            color: #94a3b8;
+        }
+
+        .badge-list {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(37, 211, 102, 0.15);
+            color: #25D366;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(37, 211, 102, 0.3);
+        }
+
+        .section {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.92rem;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #1e293b;
+            font-weight: 700;
+            padding: 12px 14px;
+            text-align: right;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .btn-wa {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #25D366;
+            color: white !important;
+            text-decoration: none;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-wa:hover {
+            background: #1eb956;
+            transform: translateY(-1px);
+        }
+
+        .phone-text {
+            font-family: 'Courier New', Courier, monospace;
+            direction: ltr;
+            text-align: right;
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 0.95rem;
+            display: block;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .tag-meta { background: #e0f2fe; color: #0369a1; }
+        .tag-tiktok { background: #fce7f3; color: #be185d; }
+        .tag-snap { background: #fef9c3; color: #854d0e; }
+        .tag-recruiting { background: #dcfce7; color: #15803d; font-weight: bold; }
+        .tag-brand { background: #ede9fe; color: #6d28d9; }
+
+        .script-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #166534;
+        }
+
+        .print-btn {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            background: #0f172a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            font-weight: 700;
+            font-size: 0.95rem;
+            z-index: 1000;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .print-btn { display: none; }
+            .section { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn" onclick="window.print()">
+        🖨️ طباعة أو حفظ كـ PDF
+    </button>
+
+    <div class="container">
+        <header>
+            <h1>📱 دليل أرقام هواتف وواتساب شركات ووكالات الـ Media Buyer بالمغرب</h1>
+            <p>أرقام مباشرة لوكالات أعلنت عن وظائف Media Buyer، وبراندات ذات إنفاق إعلاني مرتفع (High Ad Spend) على Meta و TikTok و Snapchat للتواصل الفوري عبر WhatsApp.</p>
+            <div class="badge-list">
+                <span class="badge">✅ أرقام واتساب مباشرة بنقرة واحدة</span>
+                <span class="badge">📍 كازا - مراكش - الرباط - طنجة</span>
+                <span class="badge">💼 تخصص: Performance Media Buying & Sales Funnels</span>
+            </div>
+        </header>
+
+        <!-- TABLE 1: AGENCIES HIRING RIGHT NOW -->
+        <div class="section">
+            <h2 class="section-title"><span>🔥</span> 1. وكالات أعلنت رسمياً عن حاجتها لـ Media Buyer (أرقام مباشرة)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>الشركة / الوكالة</th>
+                        <th>المدينة</th>
+                        <th>المنصب المطلوب</th>
+                        <th>رقم الهاتف المباشر</th>
+                        <th>رابط الواتساب الفوري</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong>Adflix</strong><br>
+                            <small>وكالة متخصصة في E-com Ads والفيديوهات الإعلانية</small>
+                        </td>
+                        <td>الدار البيضاء</td>
+                        <td><span class="tag tag-recruiting">Media Buyer E-commerce</span></td>
+                        <td><span class="phone-text">+212 7 07 07 87 65</span></td>
+                        <td><a href="https://wa.me/212707078765?text=Bonjour,%20je%20suis%20Media%20Buyer%20sp%C3%A9cialis%C3%A9%20Meta%20et%20TikTok%20suite%20%C3%A0%20votre%20offre..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Zelon Agency</strong><br>
+                            <small>شارع زليخة نصري، وكالة تسويق رقمي</small>
+                        </td>
+                        <td>الدار البيضاء</td>
+                        <td><span class="tag tag-recruiting">Media Buying Specialist</span></td>
+                        <td><span class="phone-text">+212 6 60 46 66 05</span></td>
+                        <td><a href="https://wa.me/212660466605?text=Bonjour,%20je%20vous%20contacte%20concernant%20le%20poste%20de%20Media%20Buyer..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>The Originals Creative Agency</strong><br>
+                            <small>شارع محمد الزركطوني، مركز طالب</small>
+                        </td>
+                        <td>مراكش</td>
+                        <td><span class="tag tag-recruiting">Media Buyer (Meta/TikTok)</span></td>
+                        <td>
+                            <span class="phone-text">+212 6 61 75 70 57</span>
+                            <span class="phone-text">+212 6 20 14 99 50</span>
+                        </td>
+                        <td><a href="https://wa.me/212661757057?text=Bonjour,%20je%20suis%20Media%20Buyer%20orient%C3%A9%20performance..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Weshore Agency</strong><br>
+                            <small>131 شارع علال الفاسي</small>
+                        </td>
+                        <td>مراكش</td>
+                        <td><span class="tag tag-recruiting">Performance Media Buyer</span></td>
+                        <td>
+                            <span class="phone-text">+212 6 65 20 61 30</span>
+                            <span class="phone-text">+212 6 60 30 43 43</span>
+                        </td>
+                        <td><a href="https://wa.me/212665206130?text=Bonjour,%20je%20vous%20contacte%20pour%20le%20poste%20de%20Media%20Buyer..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>AdFikra</strong><br>
+                            <small>وكالة متخصصة 100% في الـ Media Buying والـ COD</small>
+                        </td>
+                        <td>الدار البيضاء</td>
+                        <td><span class="tag tag-recruiting">Media Buying / COD Lead</span></td>
+                        <td><span class="phone-text">+212 6 80 83 53 33</span></td>
+                        <td><a href="https://wa.me/212680835333?text=Salam,%20ana%20Media%20Buyer%20sp%C3%A9cialis%C3%A9%20Meta%20TikTok%20et%20COD..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Webotic</strong><br>
+                            <small>أتيليه بيرفورمانس وتسويق الأداء (سيدي معروف)</small>
+                        </td>
+                        <td>الدار البيضاء / الرباط</td>
+                        <td><span class="tag tag-recruiting">Performance Marketer</span></td>
+                        <td><span class="phone-text">+212 6 64 33 45 42</span></td>
+                        <td><a href="https://wa.me/212664334542?text=Bonjour,%20je%20suis%20Media%20Buyer%20orient%C3%A9%20performance..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>212 Communication</strong><br>
+                            <small>وكالة إدارة الإعلانات والاتصال</small>
+                        </td>
+                        <td>مراكش</td>
+                        <td><span class="tag tag-recruiting">Paid Ads Specialist</span></td>
+                        <td>
+                            <span class="phone-text">+212 6 61 21 22 56</span>
+                            <span class="phone-text">+212 6 61 65 02 12</span>
+                        </td>
+                        <td><a href="https://wa.me/212661212256?text=Bonjour,%20je%20suis%20Media%20Buyer..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Webeuz Performance Agency</strong><br>
+                            <small>سيدي معروف، إحدى أضخم وكالات الأداء بالمغرب</small>
+                        </td>
+                        <td>الدار البيضاء</td>
+                        <td><span class="tag tag-recruiting">Media Buying & Acquisition</span></td>
+                        <td>
+                            <span class="phone-text">+212 6 61 59 13 51</span>
+                            <span class="phone-text">+212 6 95 05 19 09</span>
+                            <span class="phone-text">+212 6 61 56 82 54</span>
+                        </td>
+                        <td><a href="https://wa.me/212661591351?text=Bonjour,%20je%20suis%20Media%20Buyer%20sp%C3%A9cialis%C3%A9%20Meta%20et%20TikTok..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Web Success</strong><br>
+                            <small>161 شارع عبد المومن، غاليري دي شون</small>
+                        </td>
+                        <td>الدار البيضاء</td>
+                        <td><span class="tag tag-recruiting">Digital Acquisition Ads</span></td>
+                        <td><span class="phone-text">+212 6 25 61 59 56</span></td>
+                        <td><a href="https://wa.me/212625615956?text=Bonjour,%20je%20suis%20Media%20Buyer..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Webmania</strong><br>
+                            <small>140 شارع محمد الزركطوني</small>
+                        </td>
+                        <td>الدار البيضاء</td>
+                        <td><span class="tag tag-recruiting">Paid Ads / Traffic Manager</span></td>
+                        <td><span class="phone-text">+212 6 62 40 05 56</span></td>
+                        <td><a href="https://wa.me/212662400556?text=Bonjour,%20je%20suis%20Media%20Buyer..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>AzertyMedia</strong><br>
+                            <small>31 شارع الجزائر</small>
+                        </td>
+                        <td>الدار البيضاء</td>
+                        <td><span class="tag tag-recruiting">Media Buying</span></td>
+                        <td><span class="phone-text">+212 6 64 83 65 42</span></td>
+                        <td><a href="https://wa.me/212664836542?text=Bonjour,%20je%20suis%20Media%20Buyer..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TABLE 2: HIGH AD SPEND BRANDS & COD PLATFORMS -->
+        <div class="section">
+            <h2 class="section-title"><span>💎</span> 2. براندات كبرى وشبكات COD تصرف ميزانيات ضخمة (أرقام واتساب مباشرة)</h2>
+            <p style="margin-bottom: 15px;">هذه الشركات تصرف ميزانيات يومية طائلة على Meta Ads و TikTok Ads و Snapchat Ads، وتتلقى رسائل العمل فورياً عبر الواتساب:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>البراند / المنصة</th>
+                        <th>مجال العمل</th>
+                        <th>المنصات الإعلانية النشطة</th>
+                        <th>رقم الواتساب / الهاتف</th>
+                        <th>تواصل واتساب مباشر</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong>COD Partner / COD Solutions</strong><br>
+                            <small>شارع مرس السلطان، الدار البيضاء</small>
+                        </td>
+                        <td>شبكة ومنصة الدفع عند الاستلام الأكبر بالمغرب</td>
+                        <td>
+                            <span class="tag tag-tiktok">TikTok</span>
+                            <span class="tag tag-meta">Meta</span>
+                            <span class="tag tag-snap">Snap</span>
+                        </td>
+                        <td><span class="phone-text">+212 6 98 81 32 40</span></td>
+                        <td><a href="https://wa.me/212698813240?text=Salam,%20ana%20Media%20Buyer%20Meta%20TikTok%20Snapchat%20kankhdem%20Performance%20et%20Sales%20funnels..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Marwa Maroc</strong><br>
+                            <small>أكبر براند أزياء نسائية بالمغرب</small>
+                        </td>
+                        <td>Prêt-à-Porter & E-commerce (إنفاق ضخم ومستمر)</td>
+                        <td>
+                            <span class="tag tag-meta">Meta</span>
+                            <span class="tag tag-tiktok">TikTok</span>
+                        </td>
+                        <td><span class="phone-text">+212 6 60 74 56 31</span></td>
+                        <td><a href="https://wa.me/212660745631?text=Bonjour,%20je%20suis%20Media%20Buyer%20sp%C3%A9cialis%C3%A9%20Mode%20et%20E-commerce..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Diamantine Maroc</strong><br>
+                            <small>الدار البيضاء - متجر إلكتروني عملاق</small>
+                        </td>
+                        <td>الملابس التقليدية والعصرية (إعلانات مستمرة طوال العام)</td>
+                        <td>
+                            <span class="tag tag-meta">Meta</span>
+                            <span class="tag tag-tiktok">TikTok</span>
+                        </td>
+                        <td><span class="phone-text">+212 6 68 19 25 91</span></td>
+                        <td><a href="https://wa.me/212668192591?text=Bonjour,%20je%20suis%20Media%20Buyer%20sp%C3%A9cialis%C3%A9%20Meta%20Ads%20et%20E-commerce..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Yan&One (Groupe Aksal)</strong><br>
+                            <small>الموروكو مول، كازا</small>
+                        </td>
+                        <td>أكبر براند مستحضرات تجميل بالمغرب (إنفاق خيالي)</td>
+                        <td>
+                            <span class="tag tag-tiktok">TikTok</span>
+                            <span class="tag tag-meta">Meta</span>
+                            <span class="tag tag-snap">Snap</span>
+                        </td>
+                        <td><span class="phone-text">+212 6 62 56 48 11</span></td>
+                        <td><a href="https://wa.me/212662564811?text=Bonjour,%20je%20suis%20Media%20Buyer%20sp%C3%A9cialis%C3%A9%20Cosm%C3%A9tiques%20et%20Performance..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Botanika Marrakech</strong><br>
+                            <small>مراكش / بوسكورة</small>
+                        </td>
+                        <td>براند مستحضرات تجميل وعناية طبيعية (إعلانات سكيلينغ)</td>
+                        <td>
+                            <span class="tag tag-meta">Meta</span>
+                            <span class="tag tag-tiktok">TikTok</span>
+                        </td>
+                        <td>
+                            <span class="phone-text">+212 6 68 88 45 55</span>
+                            <span class="phone-text">+212 6 61 05 26 38</span>
+                        </td>
+                        <td><a href="https://wa.me/212668884555?text=Bonjour,%20je%20suis%20Media%20Buyer%20sp%C3%A9cialis%C3%A9%20Dermocosm%C3%A9tique%20et%20Performance..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Dolidol Maroc</strong><br>
+                            <small>دار بوعزة، الدار البيضاء</small>
+                        </td>
+                        <td>الأفرشة والمفروشات (ميزانيات إعلانية هائلة على Meta Lead Gen)</td>
+                        <td>
+                            <span class="tag tag-meta">Meta Ads</span>
+                            <span class="tag tag-tiktok">TikTok</span>
+                        </td>
+                        <td>
+                            <span class="phone-text">+212 6 69 58 97 46</span>
+                            <span class="phone-text">+212 6 69 58 96 80</span>
+                        </td>
+                        <td><a href="https://wa.me/212669589746?text=Bonjour,%20je%20suis%20Media%20Buyer%20sp%C3%A9cialis%C3%A9%20Lead%20Generation%20et%20Meta%20Ads..." target="_blank" class="btn-wa">💬 محادثة واتساب</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SECTION 3: SCRIPT -->
+        <div class="section">
+            <h2 class="section-title"><span>💬</span> 3. الميساج اللي تصيفطو فهاد النوامر باش يجاوبوك فالبلاصة</h2>
+            <div class="script-box">
+                السلام عليكم أخاي [اسم الشخص / اسم البراند]، كنتمنى تكون بخير وأمورك مزيانة.<br><br>
+                تواصلت معاك بخصوص إعلانات الـ Media Buying ديالكم اللي طالقين دابا فـ Meta / TikTok. أنا سميتي [اسمك]، <strong>Media Buyer & Performance Marketer</strong> بالمغرب متخصص فـ Meta و TikTok و Snapchat Ads.<br><br>
+                نقطة القوة ديالي هي أنني مكنطلقش غير الإعلانات، بل كنخدم على <strong>Marketing & Sales Funnel كامل</strong>: يعني تحسين الـ Creative Angles باش يتزاد الـ CTR، وتحسين نسبة التحويل (Conversion Rate)، وتخفيض الـ CPA باش يبقى الـ ROAS دائماً مربح ومرتفع وخا تسكيليو البيجيت.<br><br>
+                شفت الكامبينز ديالكم وعندكم برودويات فيهم بوتونسييل كبير، وعندي أفكار واجدة كيفاش نطلعو المبيعات ونخفضو تكلفة كل مبيعة.<br><br>
+                إلا كان ممكن، نصيفط ليك أوديو قصير أو نديرو مكالمة خفيفة ديال 5 دقائق نوريك فيها بعض النتائج اللي درتها مع براندات أخرى ونشرح ليك الخطة. واش يناسبك؟
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
