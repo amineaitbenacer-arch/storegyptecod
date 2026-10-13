@@ -15,8 +15,8 @@ export const FORM_STARTED_FIELD = 'formStartedAt';
 
 /** Humans need a few seconds to type name + phone + city. */
 const MIN_FILL_MS = 2_500;
-/** Instant API hits (<800ms) = almost always a bot → hard ban. */
-const INSTANT_BOT_MS = 800;
+/** Instant API hits (<600ms) = almost always a bot → hard ban. */
+const INSTANT_BOT_MS = 600;
 
 /** Max order POST attempts (incl. fails) per IP per window before site ban. */
 export const ORDER_ATTEMPT_WINDOW_MS = 10 * 60 * 1000;
