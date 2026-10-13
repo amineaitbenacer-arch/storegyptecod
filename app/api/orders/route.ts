@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const cleanAddress = String(address || cleanCity || '').trim();
     const clientIp = clientIpFromHeaders(request.headers);
 
-    // --- Anti-bot wall (before anything else that writes orders) ---
+    // --- GLOBAL anti-bot wall (ALL products, current + future — no bypass) ---
     const anti = evaluateAntiBot({
       body,
       userAgent: request.headers.get('user-agent'),

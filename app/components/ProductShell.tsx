@@ -9,16 +9,33 @@ import { shouldBanIpForBadPhone } from '../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
+  markCheckoutReady,
   normalizePhone,
   ORDER_ALREADY_RECORDED_MSG,
   submitOrderToApi,
 } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
+import { HONEYPOT_FIELD } from '../../lib/anti-bot';
 
 type Bundle = { id: number; name: string; price: number };
 
 export default function ProductShell() {
   useEffect(() => {
+    markCheckoutReady();
+
+    // Inject honeypot into legacy DOM form (same shield as ProductView).
+    const orderForm =
+      document.getElementById('express-order-form') ||
+      document.querySelector('form#orderForm') ||
+      document.querySelector('form');
+    if (orderForm && !orderForm.querySelector(`[name="${HONEYPOT_FIELD}"]`)) {
+      const wrap = document.createElement('div');
+      wrap.setAttribute('aria-hidden', 'true');
+      wrap.style.cssText = 'position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden';
+      wrap.innerHTML = `<label>Website</label><input name="${HONEYPOT_FIELD}" type="text" tabindex="-1" autocomplete="off" value="" />`;
+      orderForm.prepend(wrap);
+    }
+
     let currentBundle: Bundle = {
       id: 1,
       name: 'طقم الحماية الأساسي (2 قطع) 🛡️',

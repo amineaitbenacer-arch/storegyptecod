@@ -1,5 +1,10 @@
 /**
  * Anti-bot / fake-order shield for COD checkout.
+ *
+ * GLOBAL (not per-product): enforced on every POST /api/orders.
+ * Any current product and any future launch is covered automatically —
+ * do not add product-specific bypasses.
+ *
  * Layered checks — none alone is perfect; together they stop most bots & kids.
  */
 
@@ -136,8 +141,18 @@ export function antiBotClientFields(): Record<string, string | number> {
     started = Date.now() - 3_500;
     checkoutOpenedAt = started;
   }
+
+  // Read honeypot from ANY form on the page (bots auto-fill it).
+  let honey = '';
+  if (typeof document !== 'undefined') {
+    const el = document.querySelector(
+      `input[name="${HONEYPOT_FIELD}"]`
+    ) as HTMLInputElement | null;
+    if (el?.value) honey = String(el.value).trim();
+  }
+
   return {
-    [HONEYPOT_FIELD]: '',
+    [HONEYPOT_FIELD]: honey,
     [JS_TOKEN_FIELD]: JS_TOKEN_VALUE,
     [FORM_STARTED_FIELD]: started,
   };

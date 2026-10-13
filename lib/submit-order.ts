@@ -30,13 +30,18 @@ export function isOrderAlreadyRecordedError(error: unknown): boolean {
   return error instanceof Error && error.message === ORDER_ALREADY_RECORDED;
 }
 
+/**
+ * ONLY client entry to create orders. Always attaches anti-bot fields.
+ * Used by ProductView, store cart, shells, landings — and any future checkout.
+ */
 export async function submitOrderToApi(payload: Record<string, unknown>) {
   const phone = normalizePhone(String(payload.phone || ''));
+  // antiBotClientFields() LAST so callers cannot overwrite honeypot / js_token / timer.
   const shielded = {
     ...payload,
-    ...antiBotClientFields(),
     phone,
     timestamp: payload.timestamp || new Date().toISOString(),
+    ...antiBotClientFields(),
   };
 
   if (!isValidOrderPhone(phone)) {

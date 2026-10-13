@@ -5,6 +5,7 @@ import { Amiri, Tajawal } from 'next/font/google';
 import './globals.css';
 import TrackVisit from './components/TrackVisit';
 import AdPixels from './components/AdPixels';
+import CheckoutShieldBoot from './components/CheckoutShieldBoot';
 import { pixelBootScript } from '../lib/pixel-boot';
 import { readSettings } from '../lib/settings-store';
 
@@ -61,6 +62,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         ) : null}
         <TrackVisit />
         <AdPixels />
+        {/* Anti-bot / fake-order shield — active for ALL products (current + future). */}
+        <CheckoutShieldBoot />
         {children}
       </body>
     </html>
