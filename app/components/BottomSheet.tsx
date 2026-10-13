@@ -6,6 +6,7 @@ import { OFFERS } from '../../lib/offers';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
+import { shouldBanIpForBadPhone } from '../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
@@ -48,17 +49,27 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
 
   const handleSubmit = async () => {
     const clean = normalizePhone(phone);
+    const productId =
+      typeof window !== 'undefined'
+        ? window.location.pathname.match(/^\/product\/([^/?#]+)/)?.[1] || 'produit-1'
+        : 'produit-1';
     if (!isValidOrderPhone(clean)) {
       setPhoneError('⚠️ تأكد من رقم الهاتف (10 أرقام)');
+      if (shouldBanIpForBadPhone(clean)) {
+        void submitOrderToApi({
+          ...trackingFields(),
+          phone: clean,
+          name: name.trim(),
+          city,
+          offer: selectedOffer.name,
+          productId,
+        }).catch(() => {});
+      }
       return;
     }
 
     setPhoneError('');
     setIsSubmitting(true);
-    const productId =
-      typeof window !== 'undefined'
-        ? window.location.pathname.match(/^\/product\/([^/?#]+)/)?.[1] || 'produit-1'
-        : 'produit-1';
     const orderId = `bs-${Date.now().toString(36)}`;
     trackStoreEvent('checkout', {
       productId,

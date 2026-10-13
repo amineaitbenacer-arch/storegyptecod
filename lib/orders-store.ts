@@ -559,6 +559,45 @@ export async function countAbuseAttempts(
   ).length;
 }
 
+/** How many non-cancelled orders this IP placed since `sinceIso`. */
+export async function countRecentOrdersByIp(
+  ip: string,
+  sinceIso: string
+): Promise<number> {
+  const cleanIp = String(ip || '').trim();
+  if (!cleanIp) return 0;
+  const sinceMs = Date.parse(sinceIso);
+
+  if (hasDatabase()) {
+    try {
+      const sql = getSql();
+      if (sql) {
+        await ensureOrderSchema();
+        const rows = (await sql`
+          SELECT COUNT(*)::int AS count
+          FROM orders
+          WHERE ip = ${cleanIp}
+            AND timestamp >= ${sinceIso}
+            AND COALESCE(status, '') NOT ILIKE '%annul%'
+            AND COALESCE(status, '') NOT ILIKE '%cancel%'
+            AND COALESCE(status, '') NOT ILIKE '%الغاء%'
+            AND COALESCE(status, '') NOT ILIKE '%إلغاء%'
+        `) as { count: number }[];
+        return Number(rows[0]?.count || 0);
+      }
+    } catch (error) {
+      console.error('[orders] countRecentOrdersByIp failed', error);
+    }
+  }
+
+  const fileOrders = await readFileOrders();
+  return fileOrders.filter((order) => {
+    if (order.ip !== cleanIp) return false;
+    if (Date.parse(order.timestamp) < sinceMs) return false;
+    return !isCancelledStatus(order.status);
+  }).length;
+}
+
 export async function updateOrderFields(
   id: string,
   patch: { status?: string; note?: string; address?: string }

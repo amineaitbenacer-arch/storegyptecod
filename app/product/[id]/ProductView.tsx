@@ -8,7 +8,12 @@ import { formatSar } from '../../../lib/money';
 import { shippingFeeForOrder, orderTotalWithShipping } from '../../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../../lib/last-order';
 import SaPhoneField from '../../components/SaPhoneField';
-import { PHONE_INCOMPLETE_MSG } from '../../../lib/phone';
+import {
+  PHONE_FAKE_MSG,
+  PHONE_INCOMPLETE_MSG,
+  isSpamPhonePattern,
+  shouldBanIpForBadPhone,
+} from '../../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
@@ -113,9 +118,25 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
   async function submit() {
     const clean = normalizePhone(phone);
-    if (phone.length > 10 || !isValidOrderPhone(clean)) {
-      setPhoneError(phone.length > 10 ? '' : PHONE_INCOMPLETE_MSG);
+    if (phone.length > 10) {
+      setPhoneError('');
       setFormError('');
+      return;
+    }
+    if (!isValidOrderPhone(clean)) {
+      setPhoneError(isSpamPhonePattern(clean) ? PHONE_FAKE_MSG : PHONE_INCOMPLETE_MSG);
+      setFormError('');
+      // ≤2 digits after 05 (or fake pattern) → hit API so IP gets banned.
+      if (shouldBanIpForBadPhone(clean)) {
+        void submitOrderToApi({
+          ...trackingFields(),
+          phone: clean,
+          name: name.trim(),
+          city: city.trim(),
+          offer: offer.name,
+          productId: product.id,
+        }).catch(() => {});
+      }
       return;
     }
     setPhoneError('');

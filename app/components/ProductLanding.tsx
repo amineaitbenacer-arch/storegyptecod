@@ -7,6 +7,7 @@ import type { ProductPageConfig, OfferPack } from '../../lib/productPages';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
+import { shouldBanIpForBadPhone } from '../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
@@ -44,6 +45,16 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
     const clean = normalizePhone(phone);
     if (!isValidOrderPhone(clean)) {
       setPhoneError('⚠️ رقم الهاتف يجب أن يكون 10 أرقام');
+      if (shouldBanIpForBadPhone(clean)) {
+        void submitOrderToApi({
+          ...trackingFields(),
+          phone: clean,
+          name: name.trim(),
+          city,
+          offer: offer.name,
+          productId: product.id,
+        }).catch(() => {});
+      }
       return;
     }
     setPhoneError('');

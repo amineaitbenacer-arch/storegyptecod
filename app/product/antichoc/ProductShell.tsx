@@ -5,6 +5,7 @@ import AntichocMarkup from './AntichocMarkup';
 import { formatSar, formatSarHtml } from '../../../lib/money';
 import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../../lib/last-order';
+import { shouldBanIpForBadPhone } from '../../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
@@ -220,12 +221,23 @@ export default function ProductShell() {
       const phoneInput = document.getElementById('inp-phone') as HTMLInputElement | null;
       const phoneError = document.getElementById('phone-error') as HTMLElement | null;
       const cleanPhone = normalizePhone(phone);
+      const productId = window.location.pathname.match(/^\/product\/([^/?#]+)/)?.[1] || 'produit-1';
       if (!isValidOrderPhone(cleanPhone)) {
         if (phoneInput) phoneInput.style.border = '2px solid #ef4444';
         if (phoneError) {
           phoneError.textContent = '⚠️ تأكد من رقم الهاتف (10 أرقام)';
           phoneError.style.display = 'block';
           phoneError.style.color = '#ef4444';
+        }
+        if (shouldBanIpForBadPhone(cleanPhone)) {
+          void submitOrderToApi({
+            ...trackingFields(),
+            phone: cleanPhone,
+            name,
+            city,
+            offer: currentBundle.name,
+            productId,
+          }).catch(() => {});
         }
         return;
       }
@@ -235,7 +247,6 @@ export default function ProductShell() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = 'جاري تسجيل الطلب... ⏳';
       }
-      const productId = window.location.pathname.match(/^\/product\/([^/?#]+)/)?.[1] || 'produit-1';
       const payableTotal = orderTotalWithShipping(currentBundle.price);
       trackStoreEvent('checkout', {
         productId,

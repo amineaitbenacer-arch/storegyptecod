@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { appendEvent } from '../../../lib/analytics-store';
+import { banActor } from '../../../lib/bans-store';
+import { siteBanCookieHeader } from '../../../lib/ip-gate';
 import {
   clientIpFromHeaders,
   evaluateOrderGuard,
@@ -13,8 +15,22 @@ import {
   updateOrderFields,
   type StoreOrder,
 } from '../../../lib/orders-store';
-import { isValidOrderPhone, normalizePhone } from '../../../lib/phone';
+import {
+  isValidOrderPhone,
+  normalizePhone,
+  shouldBanIpForBadPhone,
+} from '../../../lib/phone';
 import { resolveAttributedSource } from '../../../lib/tracking';
+
+function jsonWithSiteBan(
+  body: Record<string, unknown>,
+  status: number,
+  siteBan: boolean
+) {
+  const res = NextResponse.json(body, { status });
+  if (siteBan) res.headers.set('Set-Cookie', siteBanCookieHeader());
+  return res;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,6 +75,16 @@ export async function POST(request: NextRequest) {
     }
 
     if (!isValidOrderPhone(cleanPhone)) {
+      // Incomplete (≤2 digits after 05) or fake pattern → permanent site ban.
+      if (shouldBanIpForBadPhone(cleanPhone)) {
+        await banActor({
+          ip: clientIp,
+          visitorId: cleanVisitorId,
+          phone: cleanPhone.length >= 10 ? cleanPhone : undefined,
+          reason: `auto: bad phone ${cleanPhone} (≤2 digits after 05 or spam pattern)`,
+        });
+        return jsonWithSiteBan({ error: 'Invalid phone number' }, 400, true);
+      }
       return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
     }
 
@@ -67,11 +93,14 @@ export async function POST(request: NextRequest) {
       productId: cleanProductId,
       ip: clientIp,
       visitorId: cleanVisitorId,
+      name: cleanName,
+      city: cleanCity,
     });
     if (!guard.allow) {
-      return NextResponse.json(
+      return jsonWithSiteBan(
         { success: false, error: ORDER_ALREADY_RECORDED },
-        { status: 409 }
+        409,
+        Boolean(guard.siteBan)
       );
     }
 

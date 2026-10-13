@@ -22,9 +22,64 @@ export function normalizePhone(phone: string): string {
   return digits;
 }
 
-export function isValidOrderPhone(phone: string): boolean {
-  return /^05\d{8}$/.test(normalizePhone(phone));
+/**
+ * Fake / troll numbers kids type for fun: 0512121212, 0500000000, 0512345678…
+ * Reject at checkout so they never become real orders.
+ */
+export function isSpamPhonePattern(phone: string): boolean {
+  const p = normalizePhone(phone);
+  if (!/^05\d{8}$/.test(p)) return false;
+  const body = p.slice(2);
+
+  // 00000000 / 11111111 / …
+  if (/^(\d)\1{7}$/.test(body)) return true;
+  // 12121212 / 01010101 / …
+  if (/^(\d{2})\1{3}$/.test(body)) return true;
+  // 12341234 / 55505550-style doubles
+  if (/^(\d{4})\1$/.test(body)) return true;
+  // Obvious sequences
+  if (
+    body === '01234567' ||
+    body === '12345678' ||
+    body === '23456789' ||
+    body === '98765432' ||
+    body === '87654321' ||
+    body === '76543210'
+  ) {
+    return true;
+  }
+  // Only 1–2 distinct digits in the whole number body
+  if (new Set(body).size <= 2) return true;
+
+  return false;
 }
+
+export function isValidOrderPhone(phone: string): boolean {
+  const p = normalizePhone(phone);
+  return /^05\d{8}$/.test(p) && !isSpamPhonePattern(p);
+}
+
+/** Digits typed after the locked 05 (0–8 expected for a complete SA mobile). */
+export function phoneBodyLen(phone: string): number {
+  const p = normalizePhone(phone);
+  if (!p.startsWith('05')) return 0;
+  return Math.max(0, p.length - 2);
+}
+
+/**
+ * Troll / incomplete: only 0–2 digits after 05 (of the 8 required),
+ * or a full fake pattern like 0512121212 → ban their IP.
+ */
+export function shouldBanIpForBadPhone(phone: string): boolean {
+  const p = normalizePhone(phone);
+  if (!p.startsWith('05')) return false;
+  const bodyLen = phoneBodyLen(p);
+  if (bodyLen >= 0 && bodyLen <= 2) return true;
+  if (isSpamPhonePattern(p)) return true;
+  return false;
+}
+
+export const PHONE_FAKE_MSG = 'الرقم غير صالح. يرجى إدخال رقم جوال حقيقي.';
 
 /**
  * Checkout draft. Always starts with 05.

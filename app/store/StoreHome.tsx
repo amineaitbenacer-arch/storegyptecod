@@ -8,7 +8,12 @@ import { PRODUCTS, type StoreProduct } from '../../lib/products';
 import { formatSar } from '../../lib/money';
 import { orderTotalWithShipping, shippingFeeForOrder } from '../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
-import { PHONE_INCOMPLETE_MSG } from '../../lib/phone';
+import {
+  PHONE_FAKE_MSG,
+  PHONE_INCOMPLETE_MSG,
+  isSpamPhonePattern,
+  shouldBanIpForBadPhone,
+} from '../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
@@ -499,19 +504,33 @@ export default function StoreHome() {
 
   async function submitOrder() {
     const clean = normalizePhone(phone);
-    if (phone.length > 10 || !isValidOrderPhone(clean)) {
-      setPhoneError(phone.length > 10 ? '' : PHONE_INCOMPLETE_MSG);
+    if (phone.length > 10) {
+      setPhoneError('');
+      return;
+    }
+    const offerLabel =
+      cart.length === 1
+        ? `${cart[0].name} × ${cart[0].qty}`
+        : cart.map((i) => `${i.name} × ${i.qty}`).join(' · ');
+    const productId = cart[0]?.id || 'cart';
+    if (!isValidOrderPhone(clean)) {
+      setPhoneError(isSpamPhonePattern(clean) ? PHONE_FAKE_MSG : PHONE_INCOMPLETE_MSG);
+      if (shouldBanIpForBadPhone(clean)) {
+        void submitOrderToApi({
+          ...trackingFields(),
+          phone: clean,
+          name: name.trim(),
+          city: city.trim(),
+          offer: offerLabel,
+          productId,
+        }).catch(() => {});
+      }
       return;
     }
     setPhoneError('');
     setSubmitting(true);
 
-    const offerLabel =
-      cart.length === 1
-        ? `${cart[0].name} × ${cart[0].qty}`
-        : cart.map((i) => `${i.name} × ${i.qty}`).join(' · ');
     const orderId = `st-${Date.now().toString(36)}`;
-    const productId = cart[0]?.id || 'cart';
     const payableTotal = orderTotalWithShipping(cartTotal, cartShippingIncluded);
     const orderData = {
       orderId,

@@ -1,56 +1,24 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import {
+  SEED_IP_BANS,
+  SEED_PHONE_BANS,
+  SEED_VISITOR_BANS,
+  type SeedIpBan,
+  type SeedPhoneBan,
+  type SeedVisitorBan,
+} from './ban-seeds';
 import { getSql, hasDatabase } from './db';
+import { isIpBannedSync as edgeIpBannedSync } from './ip-gate';
 import { normalizePhone } from './phone';
 
-export type PhoneBan = {
-  phone: string;
-  reason: string;
-  createdAt: string;
-};
-
-export type IpBan = {
-  ip: string;
-  reason: string;
-  createdAt: string;
-};
-
-export type VisitorBan = {
-  visitorId: string;
-  reason: string;
-  createdAt: string;
-};
+export type PhoneBan = SeedPhoneBan;
+export type IpBan = SeedIpBan;
+export type VisitorBan = SeedVisitorBan;
 
 const PHONE_BANS_FILE = path.join(process.cwd(), 'phone-bans.json');
 const IP_BANS_FILE = path.join(process.cwd(), 'ip-bans.json');
 const VISITOR_BANS_FILE = path.join(process.cwd(), 'visitor-bans.json');
-
-/** Permanent site bans — seeded for known abusers. */
-const SEED_PHONE_BANS: PhoneBan[] = [
-  {
-    phone: '0509606340',
-    reason: 'abuse: multi-order قريش شرواني',
-    createdAt: '2026-10-12T00:00:00.000Z',
-  },
-  {
-    phone: '0570267340',
-    reason: 'abuse: same person alt number قريش شرواني',
-    createdAt: '2026-10-12T00:00:00.000Z',
-  },
-];
-
-const SEED_VISITOR_BANS: VisitorBan[] = [
-  {
-    visitorId: '9be93016-a35f-432f-b4fd-0c4c4e2ec351',
-    reason: 'abuse: multi-order 0509606340',
-    createdAt: '2026-10-12T00:00:00.000Z',
-  },
-  {
-    visitorId: 'fe9fc92d-86bf-4723-a7dc-2863de77c35d',
-    reason: 'abuse: multi-order 0570267340',
-    createdAt: '2026-10-12T00:00:00.000Z',
-  },
-];
 
 let schemaReady: Promise<void> | null = null;
 let seedReady: Promise<void> | null = null;
@@ -107,6 +75,9 @@ async function ensureSeedBans(): Promise<void> {
     seedReady = (async () => {
       for (const ban of SEED_PHONE_BANS) {
         await banPhone(ban.phone, ban.reason, ban.createdAt);
+      }
+      for (const ban of SEED_IP_BANS) {
+        await banIp(ban.ip, ban.reason, ban.createdAt);
       }
       for (const ban of SEED_VISITOR_BANS) {
         await banVisitor(ban.visitorId, ban.reason, ban.createdAt);
@@ -214,6 +185,21 @@ export async function banVisitor(
   await writeJsonFile(VISITOR_BANS_FILE, next);
 }
 
+/** Ban IP + visitor + phone together (max lockdown). */
+export async function banActor(opts: {
+  ip?: string;
+  visitorId?: string;
+  phone?: string;
+  reason: string;
+}): Promise<void> {
+  const reason = opts.reason || 'abuse';
+  const tasks: Promise<void>[] = [];
+  if (opts.ip) tasks.push(banIp(opts.ip, reason));
+  if (opts.visitorId) tasks.push(banVisitor(opts.visitorId, reason));
+  if (opts.phone) tasks.push(banPhone(opts.phone, reason));
+  await Promise.all(tasks);
+}
+
 export async function isPhoneBanned(phone: string): Promise<boolean> {
   await ensureSeedBans();
   const clean = normalizePhone(phone);
@@ -243,6 +229,8 @@ export async function isPhoneBanned(phone: string): Promise<boolean> {
 export async function isIpBanned(ip: string): Promise<boolean> {
   const clean = String(ip || '').trim();
   if (!clean) return false;
+
+  if (SEED_IP_BANS.some((b) => b.ip === clean)) return true;
 
   if (hasDatabase()) {
     try {
@@ -293,11 +281,5 @@ export async function isVisitorBanned(visitorId: string): Promise<boolean> {
 
 /** Fast sync check for middleware (seed + env only — no DB/fs). */
 export function isIpBannedSync(ip: string): boolean {
-  const clean = String(ip || '').trim();
-  if (!clean) return false;
-  const fromEnv = (process.env.BANNED_IPS || '')
-    .split(/[,;\s]+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return fromEnv.includes(clean);
+  return edgeIpBannedSync(ip);
 }

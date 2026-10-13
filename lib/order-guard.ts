@@ -1,4 +1,11 @@
-import { isIpBanned, isPhoneBanned, isVisitorBanned } from './bans-store';
+import {
+  banActor,
+  banIp,
+  isIpBanned,
+  isPhoneBanned,
+  isVisitorBanned,
+} from './bans-store';
+import { clientIpFromHeaders } from './client-ip';
 import {
   findActiveOrderByPhoneProduct,
   isIpProductBlocked,
@@ -6,19 +13,25 @@ import {
   recordAbuseAttempt,
   banIpProduct,
   countAbuseAttempts,
+  countRecentOrdersByIp,
 } from './orders-store';
 import {
   ORDER_ALREADY_RECORDED,
   ORDER_ALREADY_RECORDED_MSG,
 } from './order-messages';
-import { normalizePhone } from './phone';
+import { isSpamPhonePattern, normalizePhone } from './phone';
 
 export { ORDER_ALREADY_RECORDED, ORDER_ALREADY_RECORDED_MSG };
+export { clientIpFromHeaders };
 
 const NEAR_DUP_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 const ABUSE_WINDOW_MS = 48 * 60 * 60 * 1000;
 const ABUSE_BAN_MS = 48 * 60 * 60 * 1000;
-const ABUSE_THRESHOLD = 3;
+/** First abuse strike → permanent IP ban (max). */
+const ABUSE_THRESHOLD = 1;
+/** Burst orders from same IP in 1h → site ban. */
+const IP_BURST_WINDOW_MS = 60 * 60 * 1000;
+const IP_BURST_MAX = 4;
 
 export function phoneHammingDistance(a: string, b: string): number {
   const left = normalizePhone(a);
@@ -41,11 +54,13 @@ export type OrderGuardInput = {
   productId: string;
   ip: string;
   visitorId: string;
+  name?: string;
+  city?: string;
 };
 
 export type OrderGuardResult =
   | { allow: true }
-  | { allow: false; code: typeof ORDER_ALREADY_RECORDED };
+  | { allow: false; code: typeof ORDER_ALREADY_RECORDED; siteBan?: boolean };
 
 export async function evaluateOrderGuard(
   input: OrderGuardInput
@@ -59,26 +74,69 @@ export async function evaluateOrderGuard(
     return { allow: true };
   }
 
-  // Ban only this actor's checkout — never lock the whole site.
+  // Fake pattern (0512121212…) → wipe actor from the site.
+  if (isSpamPhonePattern(phone)) {
+    await banActor({
+      ip,
+      visitorId,
+      phone,
+      reason: `auto: spam phone pattern ${phone}`,
+    });
+    return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
+  }
+
   if (await isPhoneBanned(phone)) {
-    return { allow: false, code: ORDER_ALREADY_RECORDED };
+    await banActor({
+      ip,
+      visitorId,
+      phone,
+      reason: `auto: banned phone ${phone}`,
+    });
+    return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
   }
 
   if (visitorId && (await isVisitorBanned(visitorId))) {
-    return { allow: false, code: ORDER_ALREADY_RECORDED };
+    await banActor({
+      ip,
+      visitorId,
+      phone,
+      reason: `auto: banned visitor ${visitorId}`,
+    });
+    return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
   }
 
   if (ip && (await isIpBanned(ip))) {
-    return { allow: false, code: ORDER_ALREADY_RECORDED };
+    return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
   }
 
   if (ip && (await isIpProductBlocked(ip, productId))) {
-    return { allow: false, code: ORDER_ALREADY_RECORDED };
+    await banIp(ip, `auto: escalate ip-product block ${productId}`);
+    return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
+  }
+
+  // Burst spam from one IP.
+  if (ip) {
+    try {
+      const sinceIso = new Date(Date.now() - IP_BURST_WINDOW_MS).toISOString();
+      const burst = await countRecentOrdersByIp(ip, sinceIso);
+      if (burst >= IP_BURST_MAX) {
+        await banActor({
+          ip,
+          visitorId,
+          phone,
+          reason: `auto: ip burst ${burst} orders/1h`,
+        });
+        return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
+      }
+    } catch {
+      /* ignore burst lookup failures */
+    }
   }
 
   try {
     const exact = await findActiveOrderByPhoneProduct(phone, productId);
     if (exact) {
+      // Soft block only — real customers sometimes double-tap submit.
       return { allow: false, code: ORDER_ALREADY_RECORDED };
     }
   } catch {
@@ -100,10 +158,14 @@ export async function evaluateOrderGuard(
   const nearHit = recent.find((order) => isNearDuplicatePhone(phone, order.phone));
 
   if (nearHit) {
-    if (ip) {
-      await maybeEscalateIpBan(ip, productId, 'near_dup_phone');
-    }
-    return { allow: false, code: ORDER_ALREADY_RECORDED };
+    await banActor({
+      ip,
+      visitorId,
+      phone,
+      reason: `auto: near_dup_phone vs ${nearHit.phone}`,
+    });
+    await maybeEscalateIpBan(ip, productId, 'near_dup_phone');
+    return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
   }
 
   return { allow: true };
@@ -114,36 +176,13 @@ async function maybeEscalateIpBan(
   productId: string,
   reason: string
 ): Promise<void> {
+  if (!ip) return;
   await recordAbuseAttempt(ip, productId, reason);
   const sinceIso = new Date(Date.now() - ABUSE_WINDOW_MS).toISOString();
   const attempts = await countAbuseAttempts(ip, productId, sinceIso);
   if (attempts >= ABUSE_THRESHOLD) {
     const until = new Date(Date.now() + ABUSE_BAN_MS).toISOString();
     await banIpProduct(ip, productId, until, reason);
+    await banIp(ip, `auto: abuse threshold ${reason}`);
   }
-}
-
-export function clientIpFromHeaders(headers: Headers): string {
-  const candidates = [
-    headers.get('cf-connecting-ip'),
-    headers.get('true-client-ip'),
-    headers.get('x-real-ip'),
-    headers.get('x-client-ip'),
-    headers.get('x-vercel-forwarded-for')?.split(',')[0],
-    headers.get('x-forwarded-for')?.split(',')[0],
-    headers.get('fly-client-ip'),
-  ];
-
-  for (const raw of candidates) {
-    const ip = String(raw || '').trim();
-    if (ip && ip !== '::1' && ip !== '127.0.0.1') return ip.slice(0, 80);
-  }
-
-  // Last resort: allow localhost in dev so IP still gets stored for testing.
-  for (const raw of candidates) {
-    const ip = String(raw || '').trim();
-    if (ip) return ip.slice(0, 80);
-  }
-
-  return '';
 }
