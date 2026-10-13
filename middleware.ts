@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { isBotUserAgent } from './lib/anti-bot';
 import { clientIpFromHeaders } from './lib/client-ip';
 import {
   blockedSiteHtml,
@@ -39,6 +40,13 @@ export async function middleware(request: NextRequest) {
   const ip = clientIpFromHeaders(request.headers);
   if (ip && (await isIpSiteBanned(ip))) {
     return deny();
+  }
+
+  // Kill scripted order floods before they hit the API route.
+  if (pathname === '/api/orders' && request.method === 'POST') {
+    if (isBotUserAgent(request.headers.get('user-agent'))) {
+      return deny();
+    }
   }
 
   return NextResponse.next();

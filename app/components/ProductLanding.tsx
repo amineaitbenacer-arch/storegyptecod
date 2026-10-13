@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ProductPageConfig, OfferPack } from '../../lib/productPages';
@@ -11,6 +11,7 @@ import { shouldBanIpForBadPhone } from '../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
+  markCheckoutReady,
   normalizePhone,
   ORDER_ALREADY_RECORDED_MSG,
   submitOrderToApi,
@@ -18,6 +19,7 @@ import {
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
 import './product-landing.css';
 import LivePurchaseToast from './LivePurchaseToast';
+import HoneypotField from './HoneypotField';
 
 export default function ProductLanding({ product }: { product: ProductPageConfig }) {
   const [mainIdx, setMainIdx] = useState(0);
@@ -32,7 +34,13 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
   const [loading, setLoading] = useState(false);
 
   const save = useMemo(() => offer.oldPrice - offer.price, [offer]);
+
+  useEffect(() => {
+    markCheckoutReady();
+  }, []);
+
   const openSheet = useCallback(() => {
+    markCheckoutReady();
     trackStoreEvent('addtocart', {
       productId: product.id,
       value: offer.price,
@@ -324,6 +332,7 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
               ))}
             </div>
 
+            <HoneypotField />
             <input className="pl-input" placeholder="الاسم الكامل" value={name} onChange={(e) => setName(e.target.value)} />
             <input
               className={`pl-input${phoneError && phoneError !== ORDER_ALREADY_RECORDED_MSG ? ' error' : ''}`}

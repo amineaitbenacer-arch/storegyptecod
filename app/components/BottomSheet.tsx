@@ -10,11 +10,13 @@ import { shouldBanIpForBadPhone } from '../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
+  markCheckoutReady,
   normalizePhone,
   ORDER_ALREADY_RECORDED_MSG,
   submitOrderToApi,
 } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
+import HoneypotField from './HoneypotField';
 
 interface BottomSheetProps {
   isOpen: boolean;
@@ -35,6 +37,7 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
 
   useEffect(() => {
     if (isOpen) {
+      markCheckoutReady();
       const next = OFFERS.find((o) => o.id === initialOfferId) || OFFERS[1];
       setSelectedOffer(next);
       trackStoreEvent('addtocart');
@@ -227,6 +230,7 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <HoneypotField />
                 <input className="form-input" type="text" placeholder="الاسم الكامل" value={name} onChange={(e) => setName(e.target.value)} />
                 <div>
                   <input

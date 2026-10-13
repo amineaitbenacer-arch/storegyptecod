@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { appendEvent } from '../../../lib/analytics-store';
+import { evaluateAntiBot } from '../../../lib/anti-bot';
 import { banActor } from '../../../lib/bans-store';
 import { siteBanCookieHeader } from '../../../lib/ip-gate';
 import {
@@ -8,6 +9,7 @@ import {
   ORDER_ALREADY_RECORDED,
 } from '../../../lib/order-guard';
 import { DuplicateOrderError } from '../../../lib/order-messages';
+import { recordOrderAttempt } from '../../../lib/order-rate-limit';
 import {
   deleteOrder,
   insertOrder,
@@ -34,7 +36,7 @@ function jsonWithSiteBan(
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, unknown>;
 
     const {
       name,
@@ -64,6 +66,46 @@ export async function POST(request: NextRequest) {
     const cleanCity = String(city || '').trim();
     const cleanAddress = String(address || cleanCity || '').trim();
     const clientIp = clientIpFromHeaders(request.headers);
+
+    // --- Anti-bot wall (before anything else that writes orders) ---
+    const anti = evaluateAntiBot({
+      body,
+      userAgent: request.headers.get('user-agent'),
+      secFetchSite: request.headers.get('sec-fetch-site'),
+    });
+    if (!anti.ok) {
+      if (anti.ban) {
+        await banActor({
+          ip: clientIp,
+          visitorId: cleanVisitorId,
+          phone: isValidOrderPhone(cleanPhone) ? cleanPhone : undefined,
+          reason: `auto: antibot ${anti.reason}`,
+        });
+        return jsonWithSiteBan(
+          { success: false, error: ORDER_ALREADY_RECORDED },
+          409,
+          true
+        );
+      }
+      return NextResponse.json({ success: false, error: 'TOO_FAST' }, { status: 429 });
+    }
+
+    if (clientIp) {
+      const limit = await recordOrderAttempt(clientIp);
+      if (!limit.allowed) {
+        await banActor({
+          ip: clientIp,
+          visitorId: cleanVisitorId,
+          phone: isValidOrderPhone(cleanPhone) ? cleanPhone : undefined,
+          reason: `auto: order attempt flood (${limit.hits}/10min)`,
+        });
+        return jsonWithSiteBan(
+          { success: false, error: ORDER_ALREADY_RECORDED },
+          409,
+          true
+        );
+      }
+    }
 
     if (!cleanPhone || !offerLabel) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -121,9 +163,9 @@ export async function POST(request: NextRequest) {
       city: cleanCity,
       address: cleanAddress,
       offer: String(offerLabel),
-      pieces,
-      price,
-      timestamp: timestamp || new Date().toISOString(),
+      pieces: pieces as StoreOrder['pieces'],
+      price: price as StoreOrder['price'],
+      timestamp: String(timestamp || new Date().toISOString()),
       status: 'Nouveau',
       note: '',
       source,

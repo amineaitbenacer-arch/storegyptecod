@@ -8,6 +8,7 @@ import { formatSar } from '../../../lib/money';
 import { shippingFeeForOrder, orderTotalWithShipping } from '../../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../../lib/last-order';
 import SaPhoneField from '../../components/SaPhoneField';
+import HoneypotField from '../../components/HoneypotField';
 import {
   PHONE_FAKE_MSG,
   PHONE_INCOMPLETE_MSG,
@@ -17,6 +18,7 @@ import {
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
+  markCheckoutReady,
   normalizePhone,
   ORDER_ALREADY_RECORDED_MSG,
   submitOrderToApi,
@@ -64,6 +66,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
   useEffect(() => {
     setMounted(true);
+    markCheckoutReady();
   }, []);
 
   useEffect(() => {
@@ -184,6 +187,9 @@ export default function ProductView({ product }: { product: ProductPageConfig })
       if (isOrderAlreadyRecordedError(error)) {
         setPhoneError(ORDER_ALREADY_RECORDED_MSG);
         setFormError('');
+      } else if (error instanceof Error && error.message === 'TOO_FAST') {
+        setPhoneError('');
+        setFormError('لحظة… كمّل بياناتك ثم اضغط تأكيد الطلب.');
       } else {
         setPhoneError('');
         setFormError('ما تسجّلش الطلب. عاود المحاولة.');
@@ -407,6 +413,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
               void submit();
             }}
           >
+            <HoneypotField />
             <input
               type="text"
               id="inp-name"

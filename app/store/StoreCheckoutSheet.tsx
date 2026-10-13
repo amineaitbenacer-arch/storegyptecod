@@ -3,8 +3,10 @@
 import { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import SaPhoneField from '../components/SaPhoneField';
+import HoneypotField from '../components/HoneypotField';
 import { formatSar } from '../../lib/money';
 import { orderTotalWithShipping } from '../../lib/shipping';
+import { markCheckoutReady } from '../../lib/submit-order';
 import './store-checkout-sheet.css';
 
 export type CheckoutCartItem = {
@@ -62,6 +64,7 @@ export default function StoreCheckoutSheet({
 
   useEffect(() => {
     if (!open) return;
+    markCheckoutReady();
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
@@ -212,6 +215,7 @@ export default function StoreCheckoutSheet({
             onSubmit();
           }}
         >
+          <HoneypotField />
           <input
             className={`store-ac-inp${name.trim() ? ' field-ready' : ''}`}
             type="text"

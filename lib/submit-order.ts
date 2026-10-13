@@ -1,3 +1,4 @@
+import { antiBotClientFields } from './anti-bot';
 import {
   ORDER_ALREADY_RECORDED,
   ORDER_ALREADY_RECORDED_MSG,
@@ -10,6 +11,7 @@ import {
 
 export { isValidOrderPhone, normalizePhone };
 export { ORDER_ALREADY_RECORDED, ORDER_ALREADY_RECORDED_MSG };
+export { markCheckoutReady } from './anti-bot';
 
 export class OrderSubmitError extends Error {
   code: string;
@@ -30,6 +32,13 @@ export function isOrderAlreadyRecordedError(error: unknown): boolean {
 
 export async function submitOrderToApi(payload: Record<string, unknown>) {
   const phone = normalizePhone(String(payload.phone || ''));
+  const shielded = {
+    ...payload,
+    ...antiBotClientFields(),
+    phone,
+    timestamp: payload.timestamp || new Date().toISOString(),
+  };
+
   if (!isValidOrderPhone(phone)) {
     // Still hit API so server can ban IP when they only typed ≤2 digits after 05.
     if (shouldBanIpForBadPhone(phone)) {
@@ -37,11 +46,7 @@ export async function submitOrderToApi(payload: Record<string, unknown>) {
         await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...payload,
-            phone,
-            timestamp: payload.timestamp || new Date().toISOString(),
-          }),
+          body: JSON.stringify(shielded),
         });
       } catch {
         /* ban attempt best-effort */
@@ -53,11 +58,7 @@ export async function submitOrderToApi(payload: Record<string, unknown>) {
   const res = await fetch('/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      ...payload,
-      phone,
-      timestamp: payload.timestamp || new Date().toISOString(),
-    }),
+    body: JSON.stringify(shielded),
   });
 
   let data: { success?: boolean; orderId?: string; error?: string } = {};
@@ -69,6 +70,10 @@ export async function submitOrderToApi(payload: Record<string, unknown>) {
 
   if (data.error === ORDER_ALREADY_RECORDED || res.status === 409) {
     throw new OrderSubmitError(ORDER_ALREADY_RECORDED);
+  }
+
+  if (data.error === 'TOO_FAST') {
+    throw new OrderSubmitError('TOO_FAST');
   }
 
   if (!res.ok || !data.success) {

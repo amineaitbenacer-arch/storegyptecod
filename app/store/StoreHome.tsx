@@ -17,6 +17,7 @@ import {
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
+  markCheckoutReady,
   normalizePhone,
   ORDER_ALREADY_RECORDED_MSG,
   submitOrderToApi,
@@ -343,6 +344,7 @@ export default function StoreHome() {
 
   useEffect(() => {
     setMounted(true);
+    markCheckoutReady();
     syncCart(readCart());
   }, []);
 
@@ -579,6 +581,8 @@ export default function StoreHome() {
       console.error('[checkout] submit failed', error);
       if (isOrderAlreadyRecordedError(error)) {
         setPhoneError(ORDER_ALREADY_RECORDED_MSG);
+      } else if (error instanceof Error && error.message === 'TOO_FAST') {
+        setPhoneError('لحظة… كمّل بياناتك ثم اضغط تأكيد الطلب.');
       } else {
         setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة (تحقق من الإنترنت)');
       }
