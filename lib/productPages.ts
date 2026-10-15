@@ -3,6 +3,7 @@
  */
 
 import { GAME_STICK_LITE_PAGE } from './product-game-stick-lite';
+import { KEY_SAFE_PAGE } from './product-key-safe';
 
 export type OfferPack = {
   id: number;
@@ -115,6 +116,7 @@ export type ProductPageConfig = {
 };
 
 export const PRODUCT_PAGES: ProductPageConfig[] = [
+  KEY_SAFE_PAGE,
   GAME_STICK_LITE_PAGE,
   {
     id: 'hilal-3in1',

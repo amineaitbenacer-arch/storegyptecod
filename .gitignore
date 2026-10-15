@@ -42,3 +42,5 @@ analytics.json
 .agents/
 .vercel
 .env*
+.freebuff/
+.vscode/
