@@ -4,6 +4,9 @@
 
 import { GAME_STICK_LITE_PAGE } from './product-game-stick-lite';
 import { KEY_SAFE_PAGE } from './product-key-safe';
+import { HEATED_KNEE_PAGE } from './product-heated-knee';
+import { ZA75_FAN_PAGE } from './product-za75';
+import { HB_INVERTER_PAGE } from './product-hb-inverter';
 
 export type OfferPack = {
   id: number;
@@ -116,6 +119,9 @@ export type ProductPageConfig = {
 };
 
 export const PRODUCT_PAGES: ProductPageConfig[] = [
+  HEATED_KNEE_PAGE,
+  ZA75_FAN_PAGE,
+  HB_INVERTER_PAGE,
   KEY_SAFE_PAGE,
   GAME_STICK_LITE_PAGE,
   {
