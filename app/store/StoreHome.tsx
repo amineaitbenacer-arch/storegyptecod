@@ -12,7 +12,6 @@ import {
   PHONE_FAKE_MSG,
   PHONE_INCOMPLETE_MSG,
   isSpamPhonePattern,
-  shouldBanIpForBadPhone,
 } from '../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
@@ -517,16 +516,6 @@ export default function StoreHome() {
     const productId = cart[0]?.id || 'cart';
     if (!isValidOrderPhone(clean)) {
       setPhoneError(isSpamPhonePattern(clean) ? PHONE_FAKE_MSG : PHONE_INCOMPLETE_MSG);
-      if (shouldBanIpForBadPhone(clean)) {
-        void submitOrderToApi({
-          ...trackingFields(),
-          phone: clean,
-          name: name.trim(),
-          city: city.trim(),
-          offer: offerLabel,
-          productId,
-        }).catch(() => {});
-      }
       return;
     }
     setPhoneError('');
@@ -584,7 +573,7 @@ export default function StoreHome() {
       } else if (error instanceof Error && error.message === 'TOO_FAST') {
         setPhoneError('لحظة… كمّل بياناتك ثم اضغط تأكيد الطلب.');
       } else {
-        setPhoneError('⚠️ ما تسجّلش الطلب — عاود المحاولة (تحقق من الإنترنت)');
+        setPhoneError('⚠️ تعذر تسجيل الطلب — يرجى التأكد من البيانات والمحاولة مرة أخرى');
       }
       setSubmitting(false);
     }

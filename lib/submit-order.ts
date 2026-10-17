@@ -6,7 +6,6 @@ import {
 import {
   isValidOrderPhone,
   normalizePhone,
-  shouldBanIpForBadPhone,
 } from './phone';
 
 export { isValidOrderPhone, normalizePhone };
@@ -45,18 +44,6 @@ export async function submitOrderToApi(payload: Record<string, unknown>) {
   };
 
   if (!isValidOrderPhone(phone)) {
-    // Still hit API so server can ban IP when they only typed ≤2 digits after 05.
-    if (shouldBanIpForBadPhone(phone)) {
-      try {
-        await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(shielded),
-        });
-      } catch {
-        /* ban attempt best-effort */
-      }
-    }
     throw new OrderSubmitError('INVALID_PHONE');
   }
 

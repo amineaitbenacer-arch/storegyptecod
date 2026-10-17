@@ -13,7 +13,6 @@ import {
   PHONE_FAKE_MSG,
   PHONE_INCOMPLETE_MSG,
   isSpamPhonePattern,
-  shouldBanIpForBadPhone,
 } from '../../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
@@ -129,17 +128,6 @@ export default function ProductView({ product }: { product: ProductPageConfig })
     if (!isValidOrderPhone(clean)) {
       setPhoneError(isSpamPhonePattern(clean) ? PHONE_FAKE_MSG : PHONE_INCOMPLETE_MSG);
       setFormError('');
-      // ≤2 digits after 05 (or fake pattern) → hit API so IP gets banned.
-      if (shouldBanIpForBadPhone(clean)) {
-        void submitOrderToApi({
-          ...trackingFields(),
-          phone: clean,
-          name: name.trim(),
-          city: city.trim(),
-          offer: offer.name,
-          productId: product.id,
-        }).catch(() => {});
-      }
       return;
     }
     setPhoneError('');
@@ -192,7 +180,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
         setFormError('لحظة… كمّل بياناتك ثم اضغط تأكيد الطلب.');
       } else {
         setPhoneError('');
-        setFormError('ما تسجّلش الطلب. عاود المحاولة.');
+        setFormError('تعذر تسجيل الطلب، يرجى التأكد من البيانات والمحاولة مرة أخرى.');
       }
       setLoading(false);
     }

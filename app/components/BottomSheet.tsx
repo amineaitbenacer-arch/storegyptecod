@@ -6,7 +6,6 @@ import { OFFERS } from '../../lib/offers';
 import { CITIES } from '../../lib/cities';
 import { formatSar } from '../../lib/money';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
-import { shouldBanIpForBadPhone } from '../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
@@ -58,16 +57,6 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
         : 'produit-1';
     if (!isValidOrderPhone(clean)) {
       setPhoneError('⚠️ تأكد من رقم الهاتف (10 أرقام)');
-      if (shouldBanIpForBadPhone(clean)) {
-        void submitOrderToApi({
-          ...trackingFields(),
-          phone: clean,
-          name: name.trim(),
-          city,
-          offer: selectedOffer.name,
-          productId,
-        }).catch(() => {});
-      }
       return;
     }
 
@@ -113,7 +102,7 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
       setPhoneError(
         isOrderAlreadyRecordedError(error)
           ? ORDER_ALREADY_RECORDED_MSG
-          : '⚠️ ما تسجّلش الطلب — عاود المحاولة'
+          : '⚠️ تعذر تسجيل الطلب — يرجى التأكد من البيانات والمحاولة مرة أخرى'
       );
       setIsSubmitting(false);
     }

@@ -74,15 +74,9 @@ export async function evaluateOrderGuard(
     return { allow: true };
   }
 
-  // Fake pattern (0512121212…) → wipe actor from the site.
+  // Fake pattern (0512121212…) → soft reject without banning carrier IP.
   if (isSpamPhonePattern(phone)) {
-    await banActor({
-      ip,
-      visitorId,
-      phone,
-      reason: `auto: spam phone pattern ${phone}`,
-    });
-    return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
+    return { allow: false, code: ORDER_ALREADY_RECORDED };
   }
 
   if (await isPhoneBanned(phone)) {
@@ -158,14 +152,7 @@ export async function evaluateOrderGuard(
   const nearHit = recent.find((order) => isNearDuplicatePhone(phone, order.phone));
 
   if (nearHit) {
-    await banActor({
-      ip,
-      visitorId,
-      phone,
-      reason: `auto: near_dup_phone vs ${nearHit.phone}`,
-    });
-    await maybeEscalateIpBan(ip, productId, 'near_dup_phone');
-    return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
+    return { allow: false, code: ORDER_ALREADY_RECORDED };
   }
 
   return { allow: true };

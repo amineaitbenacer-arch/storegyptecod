@@ -62,10 +62,10 @@ export function evaluateAntiBot(input: {
   const now = input.now ?? Date.now();
   const body = input.body || {};
 
-  // 1) Honeypot — bots auto-fill "website"
+  // 1) Honeypot — bots auto-fill "website" (do not hard-ban carrier IP on autofill)
   const honey = String(body[HONEYPOT_FIELD] ?? body._hp ?? '').trim();
   if (honey) {
-    return { ok: false, ban: true, reason: 'honeypot_filled' };
+    return { ok: false, ban: false, reason: 'honeypot_filled' };
   }
 
   // 2) Must come from our JS client
@@ -87,21 +87,20 @@ export function evaluateAntiBot(input: {
     }
   }
 
-  // 5) Fill time
+  // 5) Fill time — human users should not be penalized for clock skew or keeping tabs open
   const started = Number(body[FORM_STARTED_FIELD] || 0);
-  if (!Number.isFinite(started) || started <= 0) {
-    return { ok: false, ban: true, reason: 'missing_form_timer' };
-  }
-  const elapsed = now - started;
-  if (elapsed < 0 || elapsed > 24 * 60 * 60 * 1000) {
-    return { ok: false, ban: true, reason: 'bad_form_timer' };
-  }
-  if (elapsed < INSTANT_BOT_MS) {
-    return { ok: false, ban: true, reason: 'instant_submit' };
-  }
-  if (elapsed < MIN_FILL_MS) {
-    // Soft reject — human can retry in a second; don't ban yet
-    return { ok: false, ban: false, reason: 'too_fast' };
+  if (Number.isFinite(started) && started > 0) {
+    const elapsed = now - started;
+    // Only check if elapsed is positive and reasonable (ignore clock skew or tabs open >24h)
+    if (elapsed >= 0 && elapsed < 24 * 60 * 60 * 1000) {
+      if (elapsed < INSTANT_BOT_MS) {
+        return { ok: false, ban: false, reason: 'instant_submit' };
+      }
+      if (elapsed < MIN_FILL_MS) {
+        // Soft reject — human can retry in a second; don't ban
+        return { ok: false, ban: false, reason: 'too_fast' };
+      }
+    }
   }
 
   // 6) Fake name/city

@@ -20,7 +20,6 @@ import {
 import {
   isValidOrderPhone,
   normalizePhone,
-  shouldBanIpForBadPhone,
 } from '../../../lib/phone';
 import { resolveAttributedSource } from '../../../lib/tracking';
 
@@ -117,16 +116,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!isValidOrderPhone(cleanPhone)) {
-      // Incomplete (≤2 digits after 05) or fake pattern → permanent site ban.
-      if (shouldBanIpForBadPhone(cleanPhone)) {
-        await banActor({
-          ip: clientIp,
-          visitorId: cleanVisitorId,
-          phone: cleanPhone.length >= 10 ? cleanPhone : undefined,
-          reason: `auto: bad phone ${cleanPhone} (≤2 digits after 05 or spam pattern)`,
-        });
-        return jsonWithSiteBan({ error: 'Invalid phone number' }, 400, true);
-      }
       return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
     }
 

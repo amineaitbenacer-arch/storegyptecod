@@ -67,15 +67,10 @@ export function phoneBodyLen(phone: string): number {
 }
 
 /**
- * Troll / incomplete: only 0–2 digits after 05 (of the 8 required),
- * or a full fake pattern like 0512121212 → ban their IP.
+ * Incomplete phone numbers (e.g. user typed 0-2 digits or clicked too early)
+ * should NEVER trigger an IP ban. Mobile IPs are shared across carriers (STC, Zain, Mobily).
  */
-export function shouldBanIpForBadPhone(phone: string): boolean {
-  const p = normalizePhone(phone);
-  if (!p.startsWith('05')) return false;
-  const bodyLen = phoneBodyLen(p);
-  if (bodyLen >= 0 && bodyLen <= 2) return true;
-  if (isSpamPhonePattern(p)) return true;
+export function shouldBanIpForBadPhone(_phone: string): boolean {
   return false;
 }
 

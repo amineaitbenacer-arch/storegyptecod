@@ -5,7 +5,6 @@ import AntichocMarkup from './AntichocMarkup';
 import { formatSar } from '../../lib/money';
 import { SHIPPING_FEE_SAR, orderTotalWithShipping } from '../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
-import { shouldBanIpForBadPhone } from '../../lib/phone';
 import {
   isOrderAlreadyRecordedError,
   isValidOrderPhone,
@@ -200,16 +199,6 @@ export default function ProductShell() {
           phoneError.style.display = 'block';
           phoneError.style.color = '#ef4444';
         }
-        if (shouldBanIpForBadPhone(cleanPhone)) {
-          void submitOrderToApi({
-            ...trackingFields(),
-            phone: cleanPhone,
-            name,
-            city,
-            offer: currentBundle.name,
-            productId,
-          }).catch(() => {});
-        }
         return;
       }
       if (phoneError) phoneError.style.display = 'none';
@@ -270,7 +259,7 @@ export default function ProductShell() {
           if (phoneInput) phoneInput.style.border = '2px solid #34d399';
         } else {
           if (phoneError) {
-            phoneError.textContent = '⚠️ ما تسجّلش الطلب — عاود المحاولة';
+            phoneError.textContent = '⚠️ تعذر تسجيل الطلب — يرجى التأكد من البيانات والمحاولة مرة أخرى';
             phoneError.style.display = 'block';
             phoneError.style.color = '#ef4444';
           }
