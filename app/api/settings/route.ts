@@ -19,8 +19,8 @@ function errorMessage(error: unknown) {
 }
 
 export async function GET(request: NextRequest) {
-  const settings = await readSettings();
   const admin = request.nextUrl.searchParams.get('admin') === 'true';
+  const settings = await readSettings({ fresh: admin });
   if (admin) {
     return NextResponse.json({ success: true, settings });
   }

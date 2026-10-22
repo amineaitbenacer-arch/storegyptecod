@@ -42,6 +42,23 @@ const TYPES = new Set<TrackType>([
 const FILE = path.join(process.cwd(), 'analytics.json');
 const TMP = path.join(process.cwd(), 'analytics.json.tmp');
 
+// Dedupe SELECTs run on every event; without this index each one scans the table.
+let indexReady: Promise<void> | null = null;
+function ensureIndex(sql: NonNullable<ReturnType<typeof getSql>>) {
+  if (!indexReady) {
+    indexReady = sql`
+      CREATE INDEX IF NOT EXISTS idx_analytics_visitor_type
+      ON analytics_events (visitor_id, type, ts DESC)
+    `
+      .then(() => undefined)
+      .catch((error) => {
+        indexReady = null;
+        console.error('[analytics] index create failed', error);
+      });
+  }
+  return indexReady;
+}
+
 type EventRow = {
   visitor_id: string;
   type: string;
@@ -126,6 +143,7 @@ export async function appendEvent(event: StoredEvent) {
     try {
       const sql = getSql();
       if (sql) {
+        await ensureIndex(sql);
         const ts = event.ts;
         const scrollType = String(event.type).startsWith('scroll');
         const purchaseType = event.type === 'purchase';

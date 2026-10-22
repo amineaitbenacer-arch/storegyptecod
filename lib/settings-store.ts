@@ -44,6 +44,10 @@ const TOKEN_KEYS = new Set<SettingsKey>([
 
 let tableReady: Promise<void> | null = null;
 
+// Layout reads settings on every page render; cache to keep Neon compute asleep.
+const SETTINGS_TTL_MS = 5 * 60 * 1000;
+let settingsCache: { value: StoreSettings; at: number } | null = null;
+
 function blank(): StoreSettings {
   return { ...EMPTY };
 }
@@ -110,7 +114,10 @@ async function ensureTable() {
   await tableReady;
 }
 
-export async function readSettings(): Promise<StoreSettings> {
+export async function readSettings(options: { fresh?: boolean } = {}): Promise<StoreSettings> {
+  if (!options.fresh && settingsCache && Date.now() - settingsCache.at < SETTINGS_TTL_MS) {
+    return { ...settingsCache.value };
+  }
   if (hasDatabase()) {
     try {
       const sql = getSql();
@@ -119,8 +126,9 @@ export async function readSettings(): Promise<StoreSettings> {
         const rows = (await sql`
           SELECT data FROM store_settings WHERE id = 1 LIMIT 1
         `) as { data: string }[];
-        if (rows[0]?.data) return normalizeSettings(JSON.parse(rows[0].data));
-        return blank();
+        const value = rows[0]?.data ? normalizeSettings(JSON.parse(rows[0].data)) : blank();
+        settingsCache = { value, at: Date.now() };
+        return { ...value };
       }
     } catch (error) {
       console.error('[settings] neon read failed', error);
@@ -130,7 +138,7 @@ export async function readSettings(): Promise<StoreSettings> {
 }
 
 export async function writeSettings(incoming: unknown): Promise<StoreSettings> {
-  const current = await readSettings();
+  const current = await readSettings({ fresh: true });
   const parsed = normalizeSettings(incoming);
   const next = { ...current };
   for (const key of SETTINGS_KEYS) {
@@ -160,6 +168,7 @@ export async function writeSettings(incoming: unknown): Promise<StoreSettings> {
             : String(error);
       throw new Error(detail || 'Settings could not be saved');
     }
+    settingsCache = { value: { ...next }, at: Date.now() };
     return next;
   }
 
