@@ -17,7 +17,9 @@ function cleanDatabaseUrl(raw: string) {
 }
 
 export function getDatabaseUrl() {
-  const raw = process.env.DATABASE_URL || process.env.POSTGRES_URL || '';
+  // STORE_DATABASE_URL wins: lets us switch DB without touching the Neon-integration-managed DATABASE_URL.
+  const raw =
+    process.env.STORE_DATABASE_URL || process.env.DATABASE_URL || process.env.POSTGRES_URL || '';
   if (!raw) return '';
   return cleanDatabaseUrl(raw.trim().replace(/^"|"$/g, ''));
 }
