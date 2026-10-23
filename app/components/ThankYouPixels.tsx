@@ -27,6 +27,12 @@ function orderPayload(orderId?: string, price?: string | number, offer?: string)
     content_name: String(offer || data.offerName || data.offer || '').trim() || undefined,
     num_items: Number(data.pieces) || 1,
     transaction_id: id && id !== '----' ? id : undefined,
+    customer: {
+      phone: data.phone ? String(data.phone) : undefined,
+      name: data.name ? String(data.name) : undefined,
+      city: data.city ? String(data.city) : undefined,
+      email: data.email ? String(data.email) : undefined,
+    },
   };
 }
 

@@ -287,11 +287,12 @@ export async function insertOrder(order: StoreOrder): Promise<void> {
           ${order.ip || ''}
         )
       `;
+      return;
     } catch (error) {
       if (isUniqueViolation(error)) throw new DuplicateOrderError();
-      throw error;
+      console.error('[orders] neon insert failed, falling back to local file so order is not lost', error);
+      // Fall through to save order locally so customers do not get a failed checkout during DB quota block
     }
-    return;
   }
 
   const orders = await readFileOrders();
@@ -351,8 +352,7 @@ export async function findActiveOrderByPhoneProduct(
       `) as OrderRow[];
       return rows.map(rowToOrder).find((order) => !isCancelledStatus(order.status)) || null;
     } catch (error) {
-      console.error('[orders] findActiveOrderByPhoneProduct failed', error);
-      return null;
+      console.error('[orders] findActiveOrderByPhoneProduct failed, falling back to file', error);
     }
   }
 

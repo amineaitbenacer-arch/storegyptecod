@@ -220,11 +220,23 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <HoneypotField />
-                <input className="form-input" type="text" placeholder="الاسم الكامل" value={name} onChange={(e) => setName(e.target.value)} />
+                <input
+                  className="form-input"
+                  type="text"
+                  name="name"
+                  id="customer_name"
+                  autoComplete="name"
+                  placeholder="الاسم الكامل"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
                 <div>
                   <input
                     className={`form-input ${phoneError && phoneError !== ORDER_ALREADY_RECORDED_MSG ? 'error' : ''}`}
                     type="tel"
+                    name="phone"
+                    id="customer_phone"
+                    autoComplete="tel"
                     inputMode="numeric"
                     placeholder="رقم الجوال (05XXXXXXXX) *"
                     value={phone}
@@ -243,7 +255,14 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
                     </p>
                   )}
                 </div>
-                <select className="form-input" value={city} onChange={(e) => setCity(e.target.value)}>
+                <select
+                  className="form-input"
+                  name="city"
+                  id="customer_city"
+                  autoComplete="address-level2"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                >
                   <option value="">اختر المدينة</option>
                   {CITIES.map((c) => (
                     <option key={c} value={c}>
@@ -254,6 +273,9 @@ export default function BottomSheet({ isOpen, onClose, initialOfferId = 2 }: Bot
                 <input
                   className="form-input"
                   type="text"
+                  name="address"
+                  id="customer_address"
+                  autoComplete="street-address"
                   placeholder="العنوان الكامل"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}

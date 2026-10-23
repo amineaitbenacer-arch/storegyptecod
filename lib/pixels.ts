@@ -4,6 +4,7 @@
  */
 
 import { splitStoredPixelIds } from './pixel-ids';
+import { readLastOrder } from './last-order';
 
 type PixelIds = {
   fb: string[];
@@ -20,6 +21,12 @@ export type CommercePayload = {
   content_type?: string;
   num_items?: number;
   transaction_id?: string;
+  customer?: {
+    phone?: string;
+    name?: string;
+    city?: string;
+    email?: string;
+  };
 };
 
 type QueuedEvent =
@@ -37,6 +44,7 @@ declare global {
       load: (id: string, opts?: Record<string, unknown>) => void;
       page: () => void;
       track: (name: string, payload?: Record<string, unknown>) => void;
+      identify?: (data: Record<string, unknown>) => void;
     };
     snaptr?: ((...args: unknown[]) => void) & {
       handleRequest?: (...args: unknown[]) => void;
@@ -157,18 +165,22 @@ function ensureSnap() {
   injectScript('https://sc-static.net/scevent.min.js');
 }
 
+let cachedPixelIds: PixelIds | null = null;
+
 async function fetchPixelIds(): Promise<PixelIds> {
+  if (cachedPixelIds) return cachedPixelIds;
   const empty: PixelIds = { fb: [], tiktok: [], snap: [] };
   try {
     const res = await fetch('/api/settings');
     const data = await res.json();
     if (!data?.success || !data.settings) return empty;
     const s = data.settings;
-    return {
+    cachedPixelIds = {
       fb: splitStoredPixelIds(String(s.fb_pixel_1 || ''), String(s.fb_pixel_2 || '')),
       tiktok: splitStoredPixelIds(String(s.tiktok_pixel || '')),
       snap: splitStoredPixelIds(String(s.snapchat_pixel || ''), String(s.snapchat_pixel_2 || '')),
     };
+    return cachedPixelIds;
   } catch {
     return empty;
   }
@@ -368,6 +380,83 @@ function markThankYouPurchaseFired(id: string) {
   }
 }
 
+/** Normalize phone number for Meta Advanced Matching (E.164 without plus sign). */
+export function cleanAdvancedMatchingPhone(phone?: string): string | undefined {
+  if (!phone) return undefined;
+  let digits = String(phone).replace(/\D/g, '');
+  if (!digits) return undefined;
+  // Egyptian mobile numbers (010, 011, 012, 015) 11 digits starting with 01
+  if (digits.startsWith('01') && digits.length === 11) {
+    digits = '2' + digits; // 201...
+  } else if (digits.startsWith('05') && digits.length === 10) {
+    // Saudi mobile numbers (05xxxxxxxx) 10 digits starting with 05
+    digits = '966' + digits.slice(1); // 9665...
+  }
+  return digits.length >= 8 ? digits : undefined;
+}
+
+/**
+ * Meta Manual Advanced Matching (fbq('init', id, { ph, fn, ln, ct, em, external_id }))
+ * + TikTok identify + Snapchat advanced matching.
+ */
+export function syncPixelAdvancedMatching(customer?: {
+  phone?: string;
+  name?: string;
+  city?: string;
+  email?: string;
+  orderId?: string;
+}) {
+  if (typeof window === 'undefined') return;
+  const last = (typeof readLastOrder === 'function' ? readLastOrder() : null) || {};
+  const rawPhone = customer?.phone ?? String(last.phone || '');
+  const rawName = customer?.name ?? String(last.name || '');
+  const rawCity = customer?.city ?? String(last.city || '');
+  const rawEmail = customer?.email ?? String(last.email || '');
+  const rawOrderId = customer?.orderId ?? String(last.orderId || last.serverOrderId || '');
+
+  const ph = cleanAdvancedMatchingPhone(rawPhone);
+  const em = rawEmail.trim().toLowerCase().includes('@') ? rawEmail.trim().toLowerCase() : undefined;
+
+  const nameParts = rawName.trim().split(/\s+/).filter(Boolean);
+  const fn = nameParts[0]?.toLowerCase();
+  const ln = nameParts.length > 1 ? nameParts.slice(1).join(' ').toLowerCase() : undefined;
+  const ct = rawCity.trim().toLowerCase() || undefined;
+  const external_id = rawOrderId ? String(rawOrderId).replace(/^#/, '').trim() : undefined;
+
+  const metaData: Record<string, string> = {};
+  if (ph) metaData.ph = ph;
+  if (em) metaData.em = em;
+  if (fn) metaData.fn = fn;
+  if (ln) metaData.ln = ln;
+  if (ct) metaData.ct = ct;
+  if (external_id && external_id !== '----') metaData.external_id = external_id;
+
+  if (Object.keys(metaData).length === 0) return;
+
+  void fetchPixelIds().then((ids) => {
+    // 1. Meta Pixel Manual Advanced Matching
+    if (typeof window.fbq === 'function') {
+      ids.fb.forEach((id) => {
+        window.fbq?.('init', id, metaData);
+      });
+    }
+    // 2. TikTok Identify
+    if (window.ttq?.identify && (metaData.ph || metaData.em || metaData.external_id)) {
+      window.ttq.identify({
+        ...(metaData.ph ? { phone_number: metaData.ph } : {}),
+        ...(metaData.em ? { email: metaData.em } : {}),
+        ...(metaData.external_id ? { external_id: metaData.external_id } : {}),
+      });
+    }
+    // 3. Snapchat Advanced Matching
+    if (window.snaptr && metaData.ph) {
+      ids.snap.forEach((id) => {
+        window.snaptr?.('init', id, { user_phone_number: metaData.ph });
+      });
+    }
+  });
+}
+
 /** PageView + Purchase on the confirmation page, after the pixel helper can see them. */
 export function trackThankYouPixels(payload: CommercePayload, attempt = 0) {
   if (typeof window === 'undefined') return;
@@ -390,6 +479,16 @@ export function trackThankYouPixels(payload: CommercePayload, attempt = 0) {
     }
     if (alreadyFiredThankYouPurchase(id)) return;
     markThankYouPurchaseFired(id);
+
+    // Apply Meta Manual Advanced Matching with customer data
+    syncPixelAdvancedMatching({
+      orderId: id,
+      phone: payload.customer?.phone,
+      name: payload.customer?.name,
+      city: payload.customer?.city,
+      email: payload.customer?.email,
+    });
+
     window.fbq?.('track', 'PageView');
     window.ttq?.page?.();
     window.snaptr?.('track', 'PAGE_VIEW');

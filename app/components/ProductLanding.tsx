@@ -322,9 +322,22 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
             </div>
 
             <HoneypotField />
-            <input className="pl-input" placeholder="الاسم الكامل" value={name} onChange={(e) => setName(e.target.value)} />
+            <input
+              className="pl-input"
+              type="text"
+              name="name"
+              id="pl_name"
+              autoComplete="name"
+              placeholder="الاسم الكامل"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <input
               className={`pl-input${phoneError && phoneError !== ORDER_ALREADY_RECORDED_MSG ? ' error' : ''}`}
+              type="tel"
+              name="phone"
+              id="pl_phone"
+              autoComplete="tel"
               placeholder="رقم الجوال (05XXXXXXXX) *"
               inputMode="numeric"
               value={phone}
@@ -346,7 +359,14 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
                 {phoneError}
               </p>
             )}
-            <select className="pl-input" value={city} onChange={(e) => setCity(e.target.value)}>
+            <select
+              className="pl-input"
+              name="city"
+              id="pl_city"
+              autoComplete="address-level2"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            >
               <option value="">اختر المدينة</option>
               {CITIES.map((c) => (
                 <option key={c} value={c}>
@@ -354,7 +374,16 @@ export default function ProductLanding({ product }: { product: ProductPageConfig
                 </option>
               ))}
             </select>
-            <input className="pl-input" placeholder="العنوان الكامل" value={address} onChange={(e) => setAddress(e.target.value)} />
+            <input
+              className="pl-input"
+              type="text"
+              name="address"
+              id="pl_address"
+              autoComplete="street-address"
+              placeholder="العنوان الكامل"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
 
             <div className="pl-total">
               <span>المجموع عند الاستلام</span>
