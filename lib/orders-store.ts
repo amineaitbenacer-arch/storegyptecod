@@ -237,12 +237,10 @@ export async function listOrders(): Promise<StoreOrder[]> {
           FROM orders
           ORDER BY timestamp DESC
         `) as OrderRow[];
-        // Surface any orders that landed in the local file during a past DB outage.
-        const fileOrders = await readFileOrders();
-        return mergeOrdersById(rows.map(rowToOrder), fileOrders);
+        return rows.map(rowToOrder);
       }
     } catch (error) {
-      console.error('[orders] neon list failed, using file', error);
+      console.error('[orders] neon list failed, using file fallback', error);
     }
   }
   const fileOrders = await readFileOrders();
@@ -661,10 +659,13 @@ export async function updateOrderFields(
 }
 
 export async function deleteOrder(id: string): Promise<boolean> {
+  let dbAttempted = false;
   if (hasDatabase()) {
+    dbAttempted = true;
     try {
       const sql = getSql();
       if (sql) {
+        await ensureOrderSchema();
         const rows = (await sql`
           DELETE FROM orders
           WHERE id = ${id}
@@ -673,13 +674,20 @@ export async function deleteOrder(id: string): Promise<boolean> {
         if (rows.length > 0) return true;
       }
     } catch (error) {
-      console.error('[orders] neon delete failed, using file', error);
+      console.error('[orders] neon delete failed', error);
     }
   }
 
-  const orders = await readFileOrders();
-  const next = orders.filter((order) => String(order.id) !== String(id));
-  if (next.length === orders.length) return false;
-  await writeFileOrders(next);
-  return true;
+  try {
+    const orders = await readFileOrders();
+    const next = orders.filter((order) => String(order.id) !== String(id));
+    if (next.length !== orders.length) {
+      await writeFileOrders(next);
+      return true;
+    }
+  } catch (error) {
+    console.warn('[orders] local file delete failed', error);
+  }
+
+  return dbAttempted;
 }
