@@ -92,17 +92,7 @@ export async function POST(request: NextRequest) {
     if (clientIp) {
       const limit = await recordOrderAttempt(clientIp);
       if (!limit.allowed) {
-        await banActor({
-          ip: clientIp,
-          visitorId: cleanVisitorId,
-          phone: isValidOrderPhone(cleanPhone) ? cleanPhone : undefined,
-          reason: `auto: order attempt flood (${limit.hits}/10min)`,
-        });
-        return jsonWithSiteBan(
-          { success: false, error: ORDER_ALREADY_RECORDED },
-          409,
-          true
-        );
+        return NextResponse.json({ success: false, error: 'TOO_FAST' }, { status: 429 });
       }
     }
 

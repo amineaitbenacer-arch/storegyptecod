@@ -12,6 +12,7 @@ import HoneypotField from '../../components/HoneypotField';
 import {
   PHONE_FAKE_MSG,
   PHONE_INCOMPLETE_MSG,
+  PHONE_TOO_LONG_MSG,
   isSpamPhonePattern,
 } from '../../../lib/phone';
 import {
@@ -121,7 +122,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
   async function submit() {
     const clean = normalizePhone(phone);
     if (phone.length > 10) {
-      setPhoneError('');
+      setPhoneError(PHONE_TOO_LONG_MSG);
       setFormError('');
       return;
     }

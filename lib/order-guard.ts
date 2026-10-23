@@ -80,23 +80,11 @@ export async function evaluateOrderGuard(
   }
 
   if (await isPhoneBanned(phone)) {
-    await banActor({
-      ip,
-      visitorId,
-      phone,
-      reason: `auto: banned phone ${phone}`,
-    });
-    return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
+    return { allow: false, code: ORDER_ALREADY_RECORDED };
   }
 
   if (visitorId && (await isVisitorBanned(visitorId))) {
-    await banActor({
-      ip,
-      visitorId,
-      phone,
-      reason: `auto: banned visitor ${visitorId}`,
-    });
-    return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
+    return { allow: false, code: ORDER_ALREADY_RECORDED };
   }
 
   if (ip && (await isIpBanned(ip))) {
@@ -104,23 +92,16 @@ export async function evaluateOrderGuard(
   }
 
   if (ip && (await isIpProductBlocked(ip, productId))) {
-    await banIp(ip, `auto: escalate ip-product block ${productId}`);
-    return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
+    return { allow: false, code: ORDER_ALREADY_RECORDED };
   }
 
-  // Burst spam from one IP.
+  // Burst protection from one IP (soft limit for bots, never ban carrier IP).
   if (ip) {
     try {
       const sinceIso = new Date(Date.now() - IP_BURST_WINDOW_MS).toISOString();
       const burst = await countRecentOrdersByIp(ip, sinceIso);
-      if (burst >= IP_BURST_MAX) {
-        await banActor({
-          ip,
-          visitorId,
-          phone,
-          reason: `auto: ip burst ${burst} orders/1h`,
-        });
-        return { allow: false, code: ORDER_ALREADY_RECORDED, siteBan: true };
+      if (burst >= 20) {
+        return { allow: false, code: ORDER_ALREADY_RECORDED };
       }
     } catch {
       /* ignore burst lookup failures */

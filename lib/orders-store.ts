@@ -170,14 +170,6 @@ async function ensureOrderSchema(): Promise<void> {
         CREATE INDEX IF NOT EXISTS idx_orders_phone_product
         ON orders (phone, product_id)
       `;
-      // Hard stop at DB level — app checks alone can miss double-clicks / races.
-      await sql`
-        CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_phone_product_active
-        ON orders (phone, product_id)
-        WHERE phone <> ''
-          AND product_id <> ''
-          AND status NOT IN ('Annulé', 'cancelled', 'ملغي')
-      `;
       await sql`
         CREATE TABLE IF NOT EXISTS order_blocks (
           ip text NOT NULL,
@@ -317,6 +309,8 @@ export async function findActiveOrderByPhoneProduct(
   const cleanProduct = String(productId || '');
   if (!cleanPhone || !cleanProduct) return null;
 
+  const recentThreshold = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+
   if (hasDatabase()) {
     const sql = getSql();
     if (!sql) return null;
@@ -327,23 +321,25 @@ export async function findActiveOrderByPhoneProduct(
         FROM orders
         WHERE phone = ${cleanPhone}
           AND product_id = ${cleanProduct}
+          AND timestamp >= ${recentThreshold}
         ORDER BY timestamp DESC
         LIMIT 5
       `) as OrderRow[];
       return rows.map(rowToOrder).find((order) => !isCancelledStatus(order.status)) || null;
     } catch (error) {
       console.error('[orders] findActiveOrderByPhoneProduct failed', error);
-      // Fail closed: treat as existing so spam cannot slip through on lookup errors.
-      throw error;
+      return null;
     }
   }
 
   const fileOrders = await readFileOrders();
+  const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
   return (
     fileOrders.find(
       (order) =>
         order.phone === cleanPhone &&
         order.productId === cleanProduct &&
+        Date.parse(order.timestamp) >= fifteenMinAgo &&
         !isCancelledStatus(order.status)
     ) || null
   );

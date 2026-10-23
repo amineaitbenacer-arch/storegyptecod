@@ -11,6 +11,7 @@ import { saveLastOrder, thankYouHref } from '../../lib/last-order';
 import {
   PHONE_FAKE_MSG,
   PHONE_INCOMPLETE_MSG,
+  PHONE_TOO_LONG_MSG,
   isSpamPhonePattern,
 } from '../../lib/phone';
 import {
@@ -506,7 +507,7 @@ export default function StoreHome() {
   async function submitOrder() {
     const clean = normalizePhone(phone);
     if (phone.length > 10) {
-      setPhoneError('');
+      setPhoneError(PHONE_TOO_LONG_MSG);
       return;
     }
     const offerLabel =

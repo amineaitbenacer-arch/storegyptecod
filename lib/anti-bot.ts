@@ -20,7 +20,7 @@ const INSTANT_BOT_MS = 600;
 
 /** Max order POST attempts (incl. fails) per IP per window before site ban. */
 export const ORDER_ATTEMPT_WINDOW_MS = 10 * 60 * 1000;
-export const ORDER_ATTEMPT_MAX = 6;
+export const ORDER_ATTEMPT_MAX = 40;
 
 const BOT_UA_RE =
   /bot|crawl|spider|slurp|scrapy|curl|wget|python-requests|httpclient|go-http|java\/|libwww|phantom|headless|selenium|puppeteer|playwright|axios\/|postman|insomnia|httpie|node-fetch|okhttp/i;
@@ -70,7 +70,7 @@ export function evaluateAntiBot(input: {
 
   // 2) Must come from our JS client
   if (String(body[JS_TOKEN_FIELD] || '') !== JS_TOKEN_VALUE) {
-    return { ok: false, ban: true, reason: 'missing_js_token' };
+    return { ok: false, ban: false, reason: 'missing_js_token' };
   }
 
   // 3) User-Agent
@@ -81,9 +81,9 @@ export function evaluateAntiBot(input: {
   // 4) Browser fetch metadata (browsers send this; raw scripts often don't)
   const site = String(input.secFetchSite || '').toLowerCase();
   if (site && site !== 'same-origin' && site !== 'same-site' && site !== 'none') {
-    // cross-site POST to /api/orders → block+ban
+    // cross-site POST to /api/orders
     if (site === 'cross-site') {
-      return { ok: false, ban: true, reason: 'cross_site_post' };
+      return { ok: false, ban: false, reason: 'cross_site_post' };
     }
   }
 
@@ -103,11 +103,11 @@ export function evaluateAntiBot(input: {
     }
   }
 
-  // 6) Fake name/city
+  // 6) Fake name/city — reject without banning carrier IP
   const name = String(body.name || '');
   const city = String(body.city || body.address || '');
   if (looksLikeFakeProfile(name, city)) {
-    return { ok: false, ban: true, reason: 'fake_profile' };
+    return { ok: false, ban: false, reason: 'fake_profile' };
   }
 
   return { ok: true };
