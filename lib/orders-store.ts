@@ -165,6 +165,31 @@ async function ensureOrderSchema(): Promise<void> {
   if (!sql) return;
   if (!schemaReady) {
     schemaReady = (async () => {
+      // Fresh Neon projects/branches start empty — create the base table first.
+      await sql`
+        CREATE TABLE IF NOT EXISTS orders (
+          id text PRIMARY KEY,
+          name text NOT NULL DEFAULT '',
+          phone text NOT NULL DEFAULT '',
+          city text NOT NULL DEFAULT '',
+          address text NOT NULL DEFAULT '',
+          offer text NOT NULL DEFAULT '',
+          pieces text,
+          price text,
+          timestamp timestamptz NOT NULL DEFAULT now(),
+          status text NOT NULL DEFAULT 'Nouveau',
+          note text NOT NULL DEFAULT '',
+          source text NOT NULL DEFAULT 'direct',
+          fbclid text NOT NULL DEFAULT '',
+          ttclid text NOT NULL DEFAULT '',
+          sccid text NOT NULL DEFAULT '',
+          utm_source text NOT NULL DEFAULT '',
+          product_id text NOT NULL DEFAULT '',
+          client_order_id text NOT NULL DEFAULT '',
+          visitor_id text NOT NULL DEFAULT '',
+          ip text NOT NULL DEFAULT ''
+        )
+      `;
       await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS ip text NOT NULL DEFAULT ''`;
       await sql`
         CREATE INDEX IF NOT EXISTS idx_orders_phone_product
@@ -206,6 +231,7 @@ export async function listOrders(): Promise<StoreOrder[]> {
     try {
       const sql = getSql();
       if (sql) {
+        await ensureOrderSchema();
         const rows = (await sql`
           SELECT *
           FROM orders

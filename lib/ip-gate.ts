@@ -1,5 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import { SEED_IP_BANS, SITE_BAN_COOKIE } from './ban-seeds';
+import { getDatabaseUrl } from './db';
 
 const CACHE_TTL_MS = 30_000;
 const ipCache = new Map<string, { banned: boolean; at: number }>();
@@ -11,17 +12,9 @@ function envBannedIps(): string[] {
     .filter(Boolean);
 }
 
+// Same resolution as lib/db.ts so middleware reads the DB that bans-store writes to.
 function databaseUrl(): string {
-  const raw = (process.env.DATABASE_URL || process.env.POSTGRES_URL || '').trim();
-  if (!raw) return '';
-  try {
-    const url = new URL(raw.replace(/^"|"$/g, ''));
-    url.searchParams.delete('channel_binding');
-    if (!url.searchParams.has('sslmode')) url.searchParams.set('sslmode', 'require');
-    return url.toString();
-  } catch {
-    return raw.replace(/^"|"$/g, '');
-  }
+  return getDatabaseUrl();
 }
 
 /** Sync: seed + env only (no DB). */

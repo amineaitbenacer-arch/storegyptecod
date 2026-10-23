@@ -46,14 +46,30 @@ const TMP = path.join(process.cwd(), 'analytics.json.tmp');
 let indexReady: Promise<void> | null = null;
 function ensureIndex(sql: NonNullable<ReturnType<typeof getSql>>) {
   if (!indexReady) {
-    indexReady = sql`
-      CREATE INDEX IF NOT EXISTS idx_analytics_visitor_type
-      ON analytics_events (visitor_id, type, ts DESC)
-    `
+    indexReady = (async () => {
+      // Fresh Neon projects/branches start empty — create the table before indexing it.
+      await sql`
+        CREATE TABLE IF NOT EXISTS analytics_events (
+          id bigserial PRIMARY KEY,
+          visitor_id text NOT NULL,
+          type text NOT NULL,
+          source text NOT NULL DEFAULT 'direct',
+          path text NOT NULL DEFAULT '/',
+          product_id text NOT NULL DEFAULT '',
+          order_id text NOT NULL DEFAULT '',
+          ts timestamptz NOT NULL DEFAULT now(),
+          load_ms integer NOT NULL DEFAULT 0
+        )
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_analytics_visitor_type
+        ON analytics_events (visitor_id, type, ts DESC)
+      `;
+    })()
       .then(() => undefined)
       .catch((error) => {
         indexReady = null;
-        console.error('[analytics] index create failed', error);
+        console.error('[analytics] schema/index create failed', error);
       });
   }
   return indexReady;
