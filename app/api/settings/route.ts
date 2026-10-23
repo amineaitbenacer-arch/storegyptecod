@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readSettings, writeSettings } from '../../../lib/settings-store';
+import { hasAdminSession } from '../../../lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -20,6 +21,9 @@ function errorMessage(error: unknown) {
 
 export async function GET(request: NextRequest) {
   const admin = request.nextUrl.searchParams.get('admin') === 'true';
+  if (admin && !(await hasAdminSession())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const settings = await readSettings({ fresh: admin });
   if (admin) {
     return NextResponse.json({ success: true, settings });
@@ -38,6 +42,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!(await hasAdminSession())) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
     const incoming = body.settings || body;
     const settings = await writeSettings(incoming);

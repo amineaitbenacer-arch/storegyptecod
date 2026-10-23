@@ -22,6 +22,7 @@ import {
   normalizePhone,
 } from '../../../lib/phone';
 import { resolveAttributedSource } from '../../../lib/tracking';
+import { hasAdminSession } from '../../../lib/admin-auth';
 
 function jsonWithSiteBan(
   body: Record<string, unknown>,
@@ -217,6 +218,9 @@ const NO_STORE = {
 };
 
 export async function GET() {
+  if (!(await hasAdminSession())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: NO_STORE });
+  }
   try {
     const orders = await listOrders();
     return NextResponse.json(
@@ -246,6 +250,9 @@ const STATUSES = [
 ] as const;
 
 async function updateOrder(request: NextRequest) {
+  if (!(await hasAdminSession())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const body = await request.json();
   const { id, status, note, address } = body as {
     id?: string;
@@ -284,6 +291,9 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    if (!(await hasAdminSession())) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { id } = await request.json();
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
     const ok = await deleteOrder(id);

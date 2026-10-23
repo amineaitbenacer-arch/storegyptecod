@@ -424,7 +424,7 @@
 <body class="p-4 md:p-8" style="font-family: 'Tajawal', sans-serif !important;">
 
     <!-- 🔒 LOGIN SCREEN -->
-    <div id="login-screen" style="display:none">
+    <div id="login-screen">
         <div class="glass-card p-10 max-w-md w-full text-center relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
             
@@ -448,7 +448,7 @@
     </div>
 
     <!-- 📊 DASHBOARD CONTENT -->
-    <div class="max-w-[1400px] mx-auto" id="app-container">
+    <div class="max-w-[1400px] mx-auto" id="app-container" style="display:none">
         
         <!-- Premium Header -->
         <header class="flex flex-col lg:flex-row justify-between items-center mb-10 glass-card p-6 md:p-8 relative overflow-hidden">
@@ -1058,7 +1058,6 @@
 
     <!-- Scripts -->
     <script>
-        const PASS = "storegypte2026";
         function usdFromSar(amount) {
             const usd = (Number(amount) || 0) / 3.75;
             return '$' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1589,28 +1588,49 @@
             }
         }
 
-        function handleLogin(e) {
+        function showLogin() {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app-container').style.display = 'none';
+        }
+
+        async function checkAdminSession() {
+            try {
+                const response = await fetch('/api/admin/session', { cache: 'no-store' });
+                const data = await response.json().catch(() => null);
+                if (response.ok && data?.authenticated) {
+                    await unlockDashboard();
+                    return;
+                }
+            } catch (_) {}
+            showLogin();
+        }
+
+        async function handleLogin(e) {
             e.preventDefault();
             const pass = document.getElementById('admin-pass').value;
-            if (pass === PASS || pass === "antichoc2026") {
-                sessionStorage.setItem('ac_admin_pass', PASS);
+            try {
+                const response = await fetch('/api/admin/session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ password: pass }),
+                });
+                if (!response.ok) throw new Error('login_failed');
                 document.getElementById('login-screen').style.opacity = '0';
-                setTimeout(() => {
-                    unlockDashboard();
-                }, 250);
-            } else {
+                setTimeout(() => { void unlockDashboard(); }, 250);
+            } catch (_) {
                 document.getElementById('login-error').classList.remove('hidden');
             }
         }
 
-        function handleLogout() {
-            sessionStorage.removeItem('ac_admin_pass');
+        async function handleLogout() {
+            await fetch('/api/admin/session', { method: 'DELETE', credentials: 'same-origin' }).catch(() => {});
             sessionStorage.removeItem('pixel_unlocked');
             window.location.reload();
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            unlockDashboard();
+            void checkAdminSession();
         });
 
         /** Load analytics JSON only — no UI apply (atomic commit later). */

@@ -1,19 +1,25 @@
-'use client';
-
-import { useMemo } from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
 import { getProductPage } from '../../../lib/productPages';
+import { productJsonLd, productMetadata, safeJsonLd } from '../../../lib/product-seo';
 import ProductView from './ProductView';
 import '../../antichoc-base.css';
 import '../../antichoc-white.css';
 import '../antichoc/antichoc-page.css';
 import './product-view.css';
 
-export default function ProductPage() {
-  const params = useParams();
-  const id = String(params.id || '');
-  const product = useMemo(() => getProductPage(id), [id]);
+type ProductPageProps = { params: Promise<{ id: string }> };
+
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const product = getProductPage(id);
+  if (!product) return { title: 'Product not found | Dune Market', robots: { index: false, follow: false } };
+  return productMetadata(product, `/product/${id}`);
+}
+
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { id } = await params;
+  const product = getProductPage(id);
 
   if (!product) {
     return (
@@ -28,5 +34,11 @@ export default function ProductPage() {
     );
   }
 
-  return <ProductView key={product.id} product={product} />;
+  const schema = productJsonLd(product, `/product/${id}`);
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }} />
+      <ProductView key={product.id} product={product} />
+    </>
+  );
 }
