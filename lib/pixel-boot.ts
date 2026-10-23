@@ -11,10 +11,32 @@ export function pixelBootScript(settings: StoreSettings): string {
   const lines: string[] = ['window.__sgPixelsBooted=true;'];
 
   if (fb.length) {
+    // The thank-you page already has the submitted order in browser storage.
+    // Build Meta's manual advanced-matching object before the first init/PageView.
+    // This is intentionally evaluated in the browser, not on the server.
+    const metaMatching = `(function(){try{
+      if(window.location.pathname!=='/thankyou') return {};
+      var raw=window.sessionStorage.getItem('sg_last_order')||window.localStorage.getItem('ac_last_order')||window.localStorage.getItem('lastOrder');
+      var data=raw?JSON.parse(raw):{};
+      var out={};
+      var phone=String(data.phone||'').replace(/\\D/g,'');
+      if(/^05\\d{8}$/.test(phone)) phone='966'+phone.slice(1);
+      if(phone.length>=8) out.ph=phone;
+      var email=String(data.email||'').trim().toLowerCase();
+      if(email.indexOf('@')>0) out.em=email;
+      var parts=String(data.name||'').trim().toLowerCase().split(/\\s+/).filter(Boolean);
+      if(parts[0]) out.fn=parts[0];
+      if(parts.length>1) out.ln=parts.slice(1).join(' ');
+      var city=String(data.city||'').trim().toLowerCase();
+      if(city) out.ct=city;
+      var orderId=String(data.orderId||data.serverOrderId||'').replace(/^#/,'').trim();
+      if(orderId&&orderId!=='----') out.external_id=orderId;
+      return out;
+    }catch(e){return {};}})()`;
     lines.push(
       `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');`
     );
-    for (const id of fb) lines.push(`fbq('init',${JSON.stringify(id)});`);
+    for (const id of fb) lines.push(`fbq('init',${JSON.stringify(id)},${metaMatching});`);
     lines.push(`fbq('track','PageView');`);
   }
 

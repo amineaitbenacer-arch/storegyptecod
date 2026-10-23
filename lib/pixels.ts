@@ -292,7 +292,11 @@ export function initAdPixels(): Promise<void> {
     const ids = await fetchPixelIds();
     if (ids.fb.length) {
       ensureMeta();
-      ids.fb.forEach((id) => window.fbq?.('init', id));
+      const metaData = buildMetaAdvancedMatching();
+      ids.fb.forEach((id) => {
+        if (Object.keys(metaData).length) window.fbq?.('init', id, metaData);
+        else window.fbq?.('init', id);
+      });
     }
     if (ids.tiktok.length) ensureTikTok(ids.tiktok);
     if (ids.snap.length) {
@@ -395,18 +399,15 @@ export function cleanAdvancedMatchingPhone(phone?: string): string | undefined {
   return digits.length >= 8 ? digits : undefined;
 }
 
-/**
- * Meta Manual Advanced Matching (fbq('init', id, { ph, fn, ln, ct, em, external_id }))
- * + TikTok identify + Snapchat advanced matching.
- */
-export function syncPixelAdvancedMatching(customer?: {
+type AdvancedMatchingCustomer = {
   phone?: string;
   name?: string;
   city?: string;
   email?: string;
   orderId?: string;
-}) {
-  if (typeof window === 'undefined') return;
+};
+
+function buildMetaAdvancedMatching(customer?: AdvancedMatchingCustomer): Record<string, string> {
   const last = (typeof readLastOrder === 'function' ? readLastOrder() : null) || {};
   const rawPhone = customer?.phone ?? String(last.phone || '');
   const rawName = customer?.name ?? String(last.name || '');
@@ -416,7 +417,6 @@ export function syncPixelAdvancedMatching(customer?: {
 
   const ph = cleanAdvancedMatchingPhone(rawPhone);
   const em = rawEmail.trim().toLowerCase().includes('@') ? rawEmail.trim().toLowerCase() : undefined;
-
   const nameParts = rawName.trim().split(/\s+/).filter(Boolean);
   const fn = nameParts[0]?.toLowerCase();
   const ln = nameParts.length > 1 ? nameParts.slice(1).join(' ').toLowerCase() : undefined;
@@ -430,6 +430,22 @@ export function syncPixelAdvancedMatching(customer?: {
   if (ln) metaData.ln = ln;
   if (ct) metaData.ct = ct;
   if (external_id && external_id !== '----') metaData.external_id = external_id;
+  return metaData;
+}
+
+/**
+ * Meta Manual Advanced Matching (fbq('init', id, { ph, fn, ln, ct, em, external_id }))
+ * + TikTok identify + Snapchat advanced matching.
+ */
+export function syncPixelAdvancedMatching(customer?: {
+  phone?: string;
+  name?: string;
+  city?: string;
+  email?: string;
+  orderId?: string;
+}) {
+  if (typeof window === 'undefined') return;
+  const metaData = buildMetaAdvancedMatching(customer);
 
   if (Object.keys(metaData).length === 0) return;
 
