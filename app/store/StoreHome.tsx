@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { PRODUCTS, type StoreProduct } from '../../lib/products';
+import type { StoreProduct } from '../../lib/products';
 import { formatSar } from '../../lib/money';
 import { orderTotalWithShipping, shippingFeeForOrder } from '../../lib/shipping';
 import { saveLastOrder, thankYouHref } from '../../lib/last-order';
@@ -23,17 +24,21 @@ import {
   submitOrderToApi,
 } from '../../lib/submit-order';
 import { flushTrackingQueue, trackingFields, trackStoreEvent } from '../../lib/tracking';
-import StoreCheckoutSheet from './StoreCheckoutSheet';
 import ReturnPolicyPanel from '../components/ReturnPolicyPanel';
 import './store.css';
+
+const StoreCheckoutSheet = dynamic(() => import('./StoreCheckoutSheet'), {
+  ssr: false,
+  loading: () => null,
+});
 
 const CART_KEY = 'store_cart_v1';
 
 type CartItem = { id: string; name: string; price: number; qty: number; image: string };
 
-function enrichItem(raw: Partial<CartItem>): CartItem | null {
+function enrichItem(raw: Partial<CartItem>, products: StoreProduct[]): CartItem | null {
   if (!raw?.id) return null;
-  const catalog = PRODUCTS.find((p) => p.id === raw.id);
+  const catalog = products.find((p) => p.id === raw.id);
   return {
     id: raw.id,
     name: raw.name || catalog?.name || 'منتج',
@@ -43,13 +48,13 @@ function enrichItem(raw: Partial<CartItem>): CartItem | null {
   };
 }
 
-function readCart(): CartItem[] {
+function readCart(products: StoreProduct[]): CartItem[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(CART_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(parsed)) return [];
-    return parsed.map(enrichItem).filter((i): i is CartItem => !!i);
+    return parsed.map((item) => enrichItem(item, products)).filter((i): i is CartItem => !!i);
   } catch {
     return [];
   }
@@ -298,7 +303,7 @@ const STORIES: StoryItem[] = [
   },
 ];
 
-export default function StoreHome() {
+export default function StoreHome({ products }: { products: StoreProduct[] }) {
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -323,8 +328,8 @@ export default function StoreHome() {
   const cartCount = useMemo(() => cart.reduce((n, i) => n + i.qty, 0), [cart]);
   const cartTotal = useMemo(() => cart.reduce((n, i) => n + i.price * i.qty, 0), [cart]);
   const cartShippingIncluded = useMemo(
-    () => cart.length > 0 && cart.every((i) => PRODUCTS.find((p) => p.id === i.id)?.shippingIncluded),
-    [cart]
+    () => cart.length > 0 && cart.every((i) => products.find((p) => p.id === i.id)?.shippingIncluded),
+    [cart, products]
   );
   const cartShippingFee = shippingFeeForOrder(cartShippingIncluded);
   const activeStory = storyIndex != null ? STORIES[storyIndex] : null;
@@ -345,8 +350,8 @@ export default function StoreHome() {
   useEffect(() => {
     setMounted(true);
     markCheckoutReady();
-    syncCart(readCart());
-  }, []);
+    syncCart(readCart(products));
+  }, [products]);
 
   useEffect(() => {
     const navCart = document.querySelector('.store-cart-btn');
@@ -423,17 +428,17 @@ export default function StoreHome() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return PRODUCTS;
-    return PRODUCTS.filter(
+    if (!q) return products;
+    return products.filter(
       (p) =>
         p.name.includes(query.trim()) ||
         p.type.includes(query.trim()) ||
         p.tags.some((t) => t.toLowerCase().includes(q))
     );
-  }, [query]);
+  }, [query, products]);
 
   function addToCart(product: StoreProduct) {
-    const items = readCart();
+    const items = readCart(products);
     const existing = items.find((i) => i.id === product.id);
     if (existing) existing.qty += 1;
     else
@@ -458,7 +463,7 @@ export default function StoreHome() {
   }
 
   function setQty(id: string, next: number) {
-    const prev = readCart();
+    const prev = readCart(products);
     const before = prev.reduce((n, i) => n + i.qty, 0);
     const items = prev
       .map((i) => (i.id === id ? { ...i, qty: next } : i))
@@ -469,7 +474,7 @@ export default function StoreHome() {
   }
 
   function removeItem(id: string) {
-    const prev = readCart();
+    const prev = readCart(products);
     const removed = prev.find((i) => i.id === id)?.qty || 0;
     const items = prev.filter((i) => i.id !== id);
     const total = items.reduce((n, i) => n + i.qty, 0);
@@ -482,7 +487,7 @@ export default function StoreHome() {
     setMenuOpen(false);
     setStoryIndex(null);
     setCartStep('items');
-    setCart(readCart());
+    setCart(readCart(products));
     setCartOpen(true);
   }
 
@@ -1137,29 +1142,31 @@ export default function StoreHome() {
                 </aside>
               </div>
 
-              <StoreCheckoutSheet
-                open={cartOpen && cartStep === 'checkout'}
-                items={cart.map((i) => ({
-                  ...i,
-                  oldPrice: PRODUCTS.find((p) => p.id === i.id)?.oldPrice,
-                }))}
-                total={cartTotal}
-                shippingFee={cartShippingFee}
-                shippingIncluded={cartShippingIncluded}
-                name={name}
-                phone={phone}
-                city={city}
-                phoneError={phoneError}
-                submitting={submitting}
-                onBack={() => setCartStep('items')}
-                onName={setName}
-                onPhone={(v) => {
-                  setPhone(v);
-                  if (v.length <= 10) setPhoneError('');
-                }}
-                onCity={setCity}
-                onSubmit={submitOrder}
-              />
+              {cartStep === 'checkout' ? (
+                <StoreCheckoutSheet
+                  open={cartOpen}
+                  items={cart.map((i) => ({
+                    ...i,
+                    oldPrice: products.find((p) => p.id === i.id)?.oldPrice,
+                  }))}
+                  total={cartTotal}
+                  shippingFee={cartShippingFee}
+                  shippingIncluded={cartShippingIncluded}
+                  name={name}
+                  phone={phone}
+                  city={city}
+                  phoneError={phoneError}
+                  submitting={submitting}
+                  onBack={() => setCartStep('items')}
+                  onName={setName}
+                  onPhone={(v) => {
+                    setPhone(v);
+                    if (v.length <= 10) setPhoneError('');
+                  }}
+                  onCity={setCity}
+                  onSubmit={submitOrder}
+                />
+              ) : null}
             </>,
             document.body
           )

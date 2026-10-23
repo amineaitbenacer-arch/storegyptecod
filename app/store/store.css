@@ -19,6 +19,17 @@
   padding-bottom: 3.5rem;
 }
 
+/* Keep the long storefront visually identical while deferring paint/layout work
+   for sections that start well below the first viewport. */
+.store-flow,
+.store-policies,
+.store-cvr,
+.store-gold,
+.store-footer {
+  content-visibility: auto;
+  contain-intrinsic-size: 640px;
+}
+
 .store-sky {
   position: absolute;
   inset: 0;

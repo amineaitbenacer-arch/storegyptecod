@@ -265,6 +265,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
                 alt={product.heroTitle}
                 className="sheet-card-thumb"
                 loading="lazy"
+                decoding="async"
               />
               <div className="sheet-offer-card-info">
                 <div className="sheet-active-tag" id="sheet-active-badge">
@@ -495,7 +496,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
           </div>
           <div className="nav-logo-center">
             <Link href="/" className="nav-logo-link" aria-label="المتجر الكامل — كل المنتجات">
-              <img src="/images/logo-mark.png" alt="Dune Market" width={42} height={42} className="nav-logo-mark" />
+              <img src="/images/logo-mark.png" alt="Dune Market" width={42} height={42} className="nav-logo-mark" decoding="async" />
             </Link>
           </div>
           <div className="nav-actions">
@@ -538,7 +539,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
 
           <div className="hero-image-fullbleed">
             <div className="hero-badge-top-right">{product.heroBadge}</div>
-            <img id="hero-main-img" src={heroSrc} alt={product.heroTitle} />
+            <img id="hero-main-img" src={heroSrc} alt={product.heroTitle} fetchPriority="high" decoding="async" />
           </div>
 
           <div className="thumb-gallery">
@@ -548,6 +549,8 @@ export default function ProductView({ product }: { product: ProductPageConfig })
                 src={src}
                 alt=""
                 className={`thumb-img${imgIdx === i ? ' active' : ''}`}
+                loading={i === 0 ? 'eager' : 'lazy'}
+                decoding="async"
                 onClick={() => setImgIdx(i)}
               />
             ))}
@@ -656,6 +659,8 @@ export default function ProductView({ product }: { product: ProductPageConfig })
                     <img
                       src={product.emotionHook.image}
                       alt={product.emotionHook.imageAlt || product.emotionHook.title}
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 </figure>
@@ -715,7 +720,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
                         {frame.image && (
                           <figure className="pv-frame-photo">
                             <div className="pv-square">
-                              <img src={frame.image} alt={frame.title} />
+                              <img src={frame.image} alt={frame.title} loading="lazy" decoding="async" />
                             </div>
                           </figure>
                         )}
@@ -727,7 +732,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
                 {beat.image && (
                   <figure className="pv-beat-photo">
                     <div className="pv-square">
-                      <img src={beat.image} alt={beat.imageTitle || product.heroTitle} />
+                      <img src={beat.image} alt={beat.imageTitle || product.heroTitle} loading="lazy" decoding="async" />
                     </div>
                     {(beat.imageTitle || beat.imageText) && (
                       <figcaption>
@@ -834,7 +839,7 @@ export default function ProductView({ product }: { product: ProductPageConfig })
           <h2 className="section-heading">{product.solutionTitle}</h2>
           <p className="section-subheading">{product.solutionText}</p>
           {product.solutionImage && (
-            <img className="pv-solution-img" src={product.solutionImage} alt={product.solutionTitle} />
+            <img className="pv-solution-img" src={product.solutionImage} alt={product.solutionTitle} loading="lazy" decoding="async" />
           )}
           <h3 className="section-heading pv-steps-title">{product.stepsTitle}</h3>
           <div className="steps-wrapper">
@@ -960,6 +965,8 @@ export default function ProductView({ product }: { product: ProductPageConfig })
             <img
               className="pv-offers-promo"
               src={product.offersPromoImage}
+              loading="lazy"
+              decoding="async"
               alt="اختيار الباقة"
             />
           )}

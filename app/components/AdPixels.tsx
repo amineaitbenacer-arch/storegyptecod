@@ -9,11 +9,6 @@ export default function AdPixels() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (pathname?.startsWith('/admin')) return;
-    void initAdPixels();
-  }, [pathname]);
-
-  useEffect(() => {
     if (!pathname || pathname.startsWith('/admin')) return;
     void initAdPixels().then(() => trackPixelPageView(pathname));
   }, [pathname]);
